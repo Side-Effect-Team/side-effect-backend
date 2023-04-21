@@ -1,9 +1,12 @@
 package sideeffect.project.domain.freeboard;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,6 +14,13 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Table(
+    uniqueConstraints = {
+        @UniqueConstraint(
+            columnNames = "project_url"
+        )
+    }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class FreeBoard {
 
@@ -22,6 +32,7 @@ public class FreeBoard {
 
     private String title;
 
+    @Column(name = "project_url")
     private String projectUrl;
 
     private String content;
@@ -29,7 +40,6 @@ public class FreeBoard {
     private String imgUrl;
 
     private Long userId;
-
 
     @Builder
     public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl, Long userId) {
