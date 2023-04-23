@@ -25,8 +25,7 @@ public class RecruitBoard {
 
     private String contents;
 
-    @Builder.Default
-    private int views = 0;
+    private int views;
 
     @Enumerated(EnumType.STRING)
     private RecruitBoardType recruitBoardType;
@@ -40,23 +39,20 @@ public class RecruitBoard {
     private LocalDateTime deadline;
 
     @OneToMany(mappedBy = "recruitBoard")
-    @Builder.Default
     private List<BoardPosition> boardPositions = new ArrayList<>();
 
     @OneToMany(mappedBy = "recruitBoard")
-    @Builder.Default
     private List<BoardStack> boardStacks = new ArrayList<>();
 
     @Builder
-    public RecruitBoard(Long id, String title, String contents, RecruitBoardType recruitBoardType, ProgressType progressType, String expectedPeriod, LocalDateTime deadline, List<BoardPosition> boardPositions, List<BoardStack> boardStacks) {
+    public RecruitBoard(Long id, String title, String contents, RecruitBoardType recruitBoardType, ProgressType progressType, String expectedPeriod, LocalDateTime deadline) {
         this.id = id;
         this.title = title;
         this.contents = contents;
+        this.views = 0;
         this.recruitBoardType = recruitBoardType;
         this.progressType = progressType;
         this.expectedPeriod = expectedPeriod;
         this.deadline = deadline;
-        this.boardPositions = boardPositions;
-        this.boardStacks = boardStacks;
     }
 }
