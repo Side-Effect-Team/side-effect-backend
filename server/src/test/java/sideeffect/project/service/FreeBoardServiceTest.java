@@ -7,15 +7,23 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.dto.freeboard.FreeBoardRequest;
+import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
+import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
 import sideeffect.project.repository.FreeBoardRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -112,5 +120,62 @@ class FreeBoardServiceTest {
 
         assertThatThrownBy(() -> freeBoardService.deleteBoard(nonOwnerId, 1L))
             .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @DisplayName("게시판을 스크롤 조회한다.")
+    @MethodSource("generateScrollTestAugments")
+    @ParameterizedTest
+    void findBoardByScroll(FreeBoardScrollRequest request, List<FreeBoard> freeBoards, boolean hasNext) {
+        when(freeBoardRepository.findByIdLessThanOrderByIdDesc(any(), any())).thenReturn(freeBoards);
+
+        FreeBoardScrollResponse response = freeBoardService.findBoardByScroll(request);
+
+        assertAll(
+            () -> assertThat(response.getLastId()).isEqualTo(freeBoards.get(freeBoards.size() - 1).getId()),
+            () -> assertThat(response.isHasNext()).isEqualTo(hasNext),
+            () -> verify(freeBoardRepository).findByIdLessThanOrderByIdDesc(any(), any())
+        );
+    }
+
+    @DisplayName("게시판 시작 스크롤을 조회한다.")
+    @MethodSource("generateScrollTestWithoutLastIdAugments")
+    @ParameterizedTest
+    void findBoardByScrollWithoutLastId(FreeBoardScrollRequest request, List<FreeBoard> freeBoards, boolean hasNext) {
+        when(freeBoardRepository.findLastPagingBoards(any())).thenReturn(freeBoards);
+
+        FreeBoardScrollResponse response = freeBoardService.findBoardByScroll(request);
+
+        assertAll(
+            () -> assertThat(response.getLastId()).isEqualTo(freeBoards.get(freeBoards.size() - 1).getId()),
+            () -> assertThat(response.isHasNext()).isEqualTo(hasNext),
+            () -> verify(freeBoardRepository).findLastPagingBoards(any())
+        );
+    }
+
+    private static Stream<Arguments> generateScrollTestAugments() {
+        return Stream.of(
+            Arguments.arguments(FreeBoardScrollRequest.builder().lastId(100L).size(10).build(),
+                generateFreeBoards(91L, 10), true),
+            Arguments.arguments(FreeBoardScrollRequest.builder().lastId(100L).size(10).build(),
+                generateFreeBoards(91L, 5), false)
+        );
+    }
+
+    private static Stream<Arguments> generateScrollTestWithoutLastIdAugments() {
+        return Stream.of(
+            Arguments.arguments(FreeBoardScrollRequest.builder().size(10).build(),
+                generateFreeBoards(100L, 10), true),
+            Arguments.arguments(FreeBoardScrollRequest.builder().size(10).build(),
+                generateFreeBoards(100L, 5), false)
+        );
+    }
+
+    private static List<FreeBoard> generateFreeBoards(Long startId, int size) {
+        List<FreeBoard> freeBoards = new ArrayList<>();
+        for (Long i = startId; i > startId - size; i--) {
+            FreeBoard freeBoard = FreeBoard.builder().id(startId + i).title("게시판" + i).content("게시판" + i).build();
+            freeBoards.add(freeBoard);
+        }
+        return freeBoards;
     }
 }

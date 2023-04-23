@@ -63,15 +63,35 @@ class FreeBoardRepositoryTest {
         assertThat(boards).containsExactly(freeBoard);
     }
 
+    @DisplayName("게시판의 목록 중 마지막 게시판을 조회")
+    @Test
+    void findLastPagingBoards() {
+        int pagingSize = 5;
+        Long lastId = getLastId();
+        List<Long> answerBoardIds =
+            LongStream.rangeClosed(lastId - pagingSize + 1, lastId).sorted().boxed().collect(Collectors.toList());
+        Collections.reverse(answerBoardIds);
+
+        List<FreeBoard> freeBoards = repository
+            .findLastPagingBoards(Pageable.ofSize(pagingSize));
+        List<Long> resultBoardId = freeBoards.stream().map(FreeBoard::getId).collect(Collectors.toList());
+
+        assertAll(
+            () -> assertThat(freeBoards).hasSize(pagingSize),
+            () -> assertThat(resultBoardId).isEqualTo(answerBoardIds)
+        );
+    }
+
     @DisplayName("스크롤 페이징 방식으로 조회")
     @Test
     void findByPaging() {
         Long lastId = getLastId();
         List<Long> answerBoardIds =
-            LongStream.rangeClosed(lastId - 9, lastId).sorted().boxed().collect(Collectors.toList());
+            LongStream.rangeClosed(lastId - 19, lastId - 10).sorted().boxed().collect(Collectors.toList());
         Collections.reverse(answerBoardIds);
 
-        List<FreeBoard> freeBoards = repository.findByIdLessThanOrderByIdDesc(lastId + 1, Pageable.ofSize(10));
+        List<FreeBoard> freeBoards = repository
+            .findByIdLessThanOrderByIdDesc(lastId - 9, Pageable.ofSize(10));
         List<Long> resultBoardId = freeBoards.stream().map(FreeBoard::getId).collect(Collectors.toList());
 
         assertAll(
