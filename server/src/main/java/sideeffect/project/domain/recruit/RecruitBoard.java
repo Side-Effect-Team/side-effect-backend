@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "recruit_board")
+@Table(name = "RECRUIT_BOARD")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RecruitBoard {
@@ -28,9 +28,11 @@ public class RecruitBoard {
     private int views;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "recruit_board_type")
     private RecruitBoardType recruitBoardType;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "progress_type")
     private ProgressType progressType;
 
     @Column(name = "expected_period")

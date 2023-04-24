@@ -9,7 +9,7 @@ import sideeffect.project.domain.position.Position;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "board_position")
+@Table(name = "BOARD_POSITION")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BoardPosition {

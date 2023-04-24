@@ -10,7 +10,7 @@ import sideeffect.project.domain.stack.StackLevelType;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "board_position")
+@Table(name = "BOARD_STACK")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BoardStack {
