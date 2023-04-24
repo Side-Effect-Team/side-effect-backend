@@ -1,30 +1,36 @@
 package sideeffect.project.domain.user;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
+@Table(name = "USERS")
 public class User {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
     @Column(name = "user_name")
     private String name;
+    private String password;
     private String nickname;
     private String email;
-    private String position;
+    @Enumerated(EnumType.STRING)
+    private UserRoleType userRoleType;
+
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
     private LocalDateTime deleteAt;
-    private String provider;
+
+    @Enumerated(EnumType.STRING)
+    private ProviderType providerType;
+
     private String imgUrl;
 
 }
