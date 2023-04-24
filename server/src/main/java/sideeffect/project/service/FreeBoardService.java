@@ -5,8 +5,10 @@ import javax.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.dto.freeboard.FreeBoardRequest;
+import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
 import sideeffect.project.repository.FreeBoardRepository;
@@ -17,32 +19,40 @@ public class FreeBoardService {
 
     private final FreeBoardRepository repository;
 
+    @Transactional
     public FreeBoard register(Long userId, FreeBoardRequest request) {
         FreeBoard freeBoard = request.toFreeBoard();
         freeBoard.setUser(userId);
         return repository.save(freeBoard);
     }
 
+    @Transactional(readOnly = true)
     public FreeBoardScrollResponse findBoardByScroll(FreeBoardScrollRequest request) {
         if (request.getLastId() == null) {
             List<FreeBoard> freeBoards = repository.findLastPagingBoards(Pageable.ofSize(request.getSize()));
-            return FreeBoardScrollResponse.of(freeBoards, hasNextBoards(freeBoards, request.getSize()));
+            return FreeBoardScrollResponse
+                .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
         }
         List<FreeBoard> freeBoards = repository
             .findByIdLessThanOrderByIdDesc(request.getLastId(), Pageable.ofSize(request.getSize()));
-        return FreeBoardScrollResponse.of(freeBoards, hasNextBoards(freeBoards, request.getSize()));
+        return FreeBoardScrollResponse.of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
     }
 
+    @Transactional
     public void updateBoard(Long userId, Long boardId, FreeBoardRequest request) {
         FreeBoard freeBoard = repository.findById(boardId).orElseThrow(EntityNotFoundException::new);
         validateOwner(userId, freeBoard);
         freeBoard.update(request.toFreeBoard());
     }
 
-    public FreeBoard findBoard(Long boardId) {
-        return repository.findById(boardId).orElseThrow(EntityNotFoundException::new);
+    @Transactional
+    public FreeBoardResponse findBoard(Long boardId) {
+        FreeBoard freeBoard = repository.findById(boardId).orElseThrow(EntityNotFoundException::new);
+        freeBoard.increaseViews();
+        return FreeBoardResponse.of(freeBoard);
     }
 
+    @Transactional
     public void deleteBoard(Long userId, Long boardId) {
         FreeBoard freeBoard = repository.findById(boardId).orElseThrow(EntityNotFoundException::new);
         validateOwner(userId, freeBoard);

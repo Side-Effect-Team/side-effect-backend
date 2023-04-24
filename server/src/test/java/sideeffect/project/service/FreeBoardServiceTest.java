@@ -95,11 +95,15 @@ class FreeBoardServiceTest {
     @DisplayName("게시판을 단건 조회한다.")
     @Test
     void findBoard() {
+        int beforeViews = freeBoard.getViews();
         when(freeBoardRepository.findById(any())).thenReturn(Optional.of(freeBoard));
 
         freeBoardService.findBoard(1L);
 
-        verify(freeBoardRepository).findById(any());
+        assertAll(
+            () -> verify(freeBoardRepository).findById(any()),
+            () -> assertThat(freeBoard.getViews()).isEqualTo(beforeViews + 1)
+        );
     }
 
     @DisplayName("게시판을 삭제한다.")
