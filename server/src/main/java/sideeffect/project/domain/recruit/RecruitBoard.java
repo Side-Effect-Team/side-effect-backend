@@ -40,14 +40,16 @@ public class RecruitBoard {
 
     private LocalDateTime deadline;
 
-    @OneToMany(mappedBy = "recruitBoard")
+    private Long userId;
+
+    @OneToMany(mappedBy = "recruitBoard", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<BoardPosition> boardPositions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "recruitBoard")
+    @OneToMany(mappedBy = "recruitBoard", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<BoardStack> boardStacks = new ArrayList<>();
 
     @Builder
-    public RecruitBoard(Long id, String title, String contents, RecruitBoardType recruitBoardType, ProgressType progressType, String expectedPeriod, LocalDateTime deadline) {
+    public RecruitBoard(Long id, String title, String contents, RecruitBoardType recruitBoardType, ProgressType progressType, String expectedPeriod, LocalDateTime deadline, Long userId) {
         this.id = id;
         this.title = title;
         this.contents = contents;
@@ -56,5 +58,54 @@ public class RecruitBoard {
         this.progressType = progressType;
         this.expectedPeriod = expectedPeriod;
         this.deadline = deadline;
+        this.userId = userId;
     }
+
+    public void updateBoardPositions(List<BoardPosition> boardPositions) {
+        this.boardPositions.clear();
+        this.boardPositions.addAll(boardPositions);
+    }
+
+    public void updateBoardStacks(List<BoardStack> boardStacks) {
+        this.boardStacks.clear();
+        this.boardStacks.addAll(boardStacks);
+    }
+
+    public void addBoardPosition(BoardPosition boardPosition) {
+        this.boardPositions.add(boardPosition);
+    }
+
+    public void addBoardStack(BoardStack boardStack) {
+        this.boardStacks.add(boardStack);
+    }
+
+    public void update(RecruitBoard recruitBoard) {
+        if(recruitBoard.getTitle() != null) {
+            this.title = recruitBoard.getTitle();
+        }
+        if(recruitBoard.getContents() != null) {
+            this.contents = recruitBoard.getContents();
+        }
+        if(recruitBoard.getRecruitBoardType() != null) {
+            this.recruitBoardType = recruitBoard.getRecruitBoardType();
+        }
+        if(recruitBoard.getProgressType() != null) {
+            this.progressType = recruitBoard.getProgressType();
+        }
+        if(recruitBoard.getExpectedPeriod() != null) {
+            this.expectedPeriod = recruitBoard.getExpectedPeriod();
+        }
+        if(recruitBoard.getDeadline() != null) {
+            this.deadline = recruitBoard.getDeadline();
+        }
+    }
+
+    public void increaseViews() {
+        this.views++;
+    }
+
+    public void setUser(Long userId) {
+        this.userId = userId;
+    }
+
 }

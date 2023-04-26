@@ -2,6 +2,7 @@ package sideeffect.project.dto.recruit;
 
 import lombok.*;
 import sideeffect.project.domain.recruit.ProgressType;
+import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.recruit.RecruitBoardType;
 
 import java.time.LocalDateTime;
@@ -21,5 +22,16 @@ public class RecruitBoardRequest {
     private String expectedPeriod;
     private List<BoardPositionRequest> positions;
     private List<BoardStackRequest> stacks;
+
+    public RecruitBoard toRecruitBoard() {
+        return RecruitBoard.builder()
+                .title(title)
+                .contents(contents)
+                .recruitBoardType(recruitBoardType)
+                .progressType(progressType)
+                .expectedPeriod(expectedPeriod)
+                .deadline(deadline)
+                .build();
+    }
 
 }
