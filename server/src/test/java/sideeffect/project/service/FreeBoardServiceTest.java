@@ -21,6 +21,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sideeffect.project.domain.freeboard.FreeBoard;
+import sideeffect.project.dto.freeboard.FreeBoardKeyWordRequest;
 import sideeffect.project.dto.freeboard.FreeBoardRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
@@ -153,6 +154,42 @@ class FreeBoardServiceTest {
             () -> assertThat(response.getLastId()).isEqualTo(freeBoards.get(freeBoards.size() - 1).getId()),
             () -> assertThat(response.isHasNext()).isEqualTo(hasNext),
             () -> verify(freeBoardRepository).findLastPagingBoards(any())
+        );
+    }
+
+    @DisplayName("게시판 검색 시작 스크롤을 조회")
+    @Test
+    void findBoardWithKeywordScrollWithoutLastId() {
+        FreeBoard freeBoard1 = FreeBoard.builder().id(95L).content("test").title("게시판").build();
+        FreeBoard freeBoard2 = FreeBoard.builder().id(90L).content("게시판 입니다.").title("test").build();
+        FreeBoardKeyWordRequest request = FreeBoardKeyWordRequest.builder().keyWord("test").size(2).build();
+        when(freeBoardRepository.findFreeBoardWithKeyWord(any(), any())).thenReturn(List.of(freeBoard1, freeBoard2));
+
+        FreeBoardScrollResponse response = freeBoardService.findBoardWithKeywordScroll(request);
+
+        assertAll(
+            () -> assertThat(response.getLastId()).isEqualTo(90L),
+            () -> assertThat(response.isHasNext()).isTrue(),
+            () -> verify(freeBoardRepository).findFreeBoardWithKeyWord(any(), any())
+        );
+    }
+
+    @DisplayName("게시판 검색 스크롤 조회")
+    @Test
+    void findBoardWithKeywordScroll() {
+        FreeBoard freeBoard1 = FreeBoard.builder().id(95L).content("test").title("게시판").build();
+        FreeBoard freeBoard2 = FreeBoard.builder().id(90L).content("게시판 입니다.").title("test").build();
+        FreeBoardKeyWordRequest request = FreeBoardKeyWordRequest
+            .builder().lastId(100L).keyWord("test").size(5).build();
+        when(freeBoardRepository.findFreeBoardScrollWithKeyWord(any(), any(), any()))
+            .thenReturn(List.of(freeBoard1, freeBoard2));
+
+        FreeBoardScrollResponse response = freeBoardService.findBoardWithKeywordScroll(request);
+
+        assertAll(
+            () -> assertThat(response.getLastId()).isEqualTo(90L),
+            () -> assertThat(response.isHasNext()).isFalse(),
+            () -> verify(freeBoardRepository).findFreeBoardScrollWithKeyWord(any(), any(), any())
         );
     }
 

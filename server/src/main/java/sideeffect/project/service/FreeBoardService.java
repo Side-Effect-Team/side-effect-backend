@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sideeffect.project.domain.freeboard.FreeBoard;
+import sideeffect.project.dto.freeboard.FreeBoardKeyWordRequest;
 import sideeffect.project.dto.freeboard.FreeBoardRequest;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
@@ -35,7 +36,23 @@ public class FreeBoardService {
         }
         List<FreeBoard> freeBoards = repository
             .findByIdLessThanOrderByIdDesc(request.getLastId(), Pageable.ofSize(request.getSize()));
-        return FreeBoardScrollResponse.of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
+        return FreeBoardScrollResponse
+            .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
+    }
+
+    @Transactional(readOnly = true)
+    public FreeBoardScrollResponse findBoardWithKeywordScroll(FreeBoardKeyWordRequest request) {
+        if (request.getLastId() == null) {
+            List<FreeBoard> freeBoards = repository.findFreeBoardWithKeyWord(request.getKeyWord(),
+                Pageable.ofSize(request.getSize()));
+            return FreeBoardScrollResponse
+                .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
+        }
+        List<FreeBoard> freeBoards = repository
+            .findFreeBoardScrollWithKeyWord(request.getKeyWord(), request.getLastId(),
+                Pageable.ofSize(request.getSize()));
+        return FreeBoardScrollResponse
+            .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
     }
 
     @Transactional
