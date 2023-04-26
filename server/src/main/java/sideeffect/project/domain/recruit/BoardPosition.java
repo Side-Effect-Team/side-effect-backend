@@ -35,9 +35,9 @@ public class BoardPosition {
     private RecruitBoard recruitBoard;
 
     @Builder
-    public BoardPosition(int targetNumber, int currentNumber, Position position, RecruitBoard recruitBoard) {
+    public BoardPosition(int targetNumber, Position position, RecruitBoard recruitBoard) {
         this.targetNumber = targetNumber;
-        this.currentNumber = currentNumber;
+        this.currentNumber = 0;
         this.position = position;
         this.recruitBoard = recruitBoard;
     }
