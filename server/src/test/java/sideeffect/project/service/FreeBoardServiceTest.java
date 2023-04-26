@@ -132,7 +132,7 @@ class FreeBoardServiceTest {
     void findBoardByScroll(FreeBoardScrollRequest request, List<FreeBoard> freeBoards, boolean hasNext) {
         when(freeBoardRepository.findByIdLessThanOrderByIdDesc(any(), any())).thenReturn(freeBoards);
 
-        FreeBoardScrollResponse response = freeBoardService.findBoardByScroll(request);
+        FreeBoardScrollResponse response = freeBoardService.findBoardScroll(request);
 
         assertAll(
             () -> assertThat(response.getLastId()).isEqualTo(freeBoards.get(freeBoards.size() - 1).getId()),
@@ -147,7 +147,7 @@ class FreeBoardServiceTest {
     void findBoardByScrollWithoutLastId(FreeBoardScrollRequest request, List<FreeBoard> freeBoards, boolean hasNext) {
         when(freeBoardRepository.findLastPagingBoards(any())).thenReturn(freeBoards);
 
-        FreeBoardScrollResponse response = freeBoardService.findBoardByScroll(request);
+        FreeBoardScrollResponse response = freeBoardService.findBoardScroll(request);
 
         assertAll(
             () -> assertThat(response.getLastId()).isEqualTo(freeBoards.get(freeBoards.size() - 1).getId()),

@@ -73,7 +73,7 @@ class FreeBoardControllerTest {
         FreeBoard board2 = FreeBoard.builder().id(99L).userId(1L).content("게시판2입니다.").title("게시판2").build();
         List<FreeBoardResponse> responses = FreeBoardResponse.listOf(List.of(board1, board2));
         FreeBoardScrollResponse scrollResponse = FreeBoardScrollResponse.of(responses, false);
-        when(freeBoardService.findBoardByScroll(any())).thenReturn(scrollResponse);
+        when(freeBoardService.findBoardScroll(any())).thenReturn(scrollResponse);
 
         mvc.perform(get("/api/free-board/scroll")
                 .contentType(MediaType.APPLICATION_JSON)

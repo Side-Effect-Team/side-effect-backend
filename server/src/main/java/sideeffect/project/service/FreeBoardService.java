@@ -27,7 +27,7 @@ public class FreeBoardService {
     }
 
     @Transactional(readOnly = true)
-    public FreeBoardScrollResponse findBoardByScroll(FreeBoardScrollRequest request) {
+    public FreeBoardScrollResponse findBoardScroll(FreeBoardScrollRequest request) {
         if (request.getLastId() == null) {
             List<FreeBoard> freeBoards = repository.findLastPagingBoards(Pageable.ofSize(request.getSize()));
             return FreeBoardScrollResponse
