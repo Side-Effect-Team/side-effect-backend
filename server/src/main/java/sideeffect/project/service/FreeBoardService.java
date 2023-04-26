@@ -32,31 +32,19 @@ public class FreeBoardService {
     }
 
     @Transactional(readOnly = true)
-    public FreeBoardScrollResponse findBoardScroll(FreeBoardScrollRequest request) {
+    public FreeBoardScrollResponse findScroll(FreeBoardScrollRequest request) {
         if (request.getLastId() == null) {
-            List<FreeBoard> freeBoards = repository.findLastPagingBoards(Pageable.ofSize(request.getSize()));
-            return FreeBoardScrollResponse
-                .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
+            return findStartScrollOfBoards(request);
         }
-        List<FreeBoard> freeBoards = repository
-            .findByIdLessThanOrderByIdDesc(request.getLastId(), Pageable.ofSize(request.getSize()));
-        return FreeBoardScrollResponse
-            .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
+        return findBoards(request);
     }
 
     @Transactional(readOnly = true)
-    public FreeBoardScrollResponse findBoardWithKeywordScroll(FreeBoardKeyWordRequest request) {
+    public FreeBoardScrollResponse findScrollWithKeyword(FreeBoardKeyWordRequest request) {
         if (request.getLastId() == null) {
-            List<FreeBoard> freeBoards = repository.findFreeBoardWithKeyWord(request.getKeyWord(),
-                Pageable.ofSize(request.getSize()));
-            return FreeBoardScrollResponse
-                .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
+            return findStartScrollBoardWithKeyword(request);
         }
-        List<FreeBoard> freeBoards = repository
-            .findFreeBoardScrollWithKeyWord(request.getKeyWord(), request.getLastId(),
-                Pageable.ofSize(request.getSize()));
-        return FreeBoardScrollResponse
-            .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
+        return findScrollBoardWithKeyword(request);
     }
 
     @Transactional
@@ -78,6 +66,34 @@ public class FreeBoardService {
         FreeBoard freeBoard = repository.findById(boardId).orElseThrow(EntityNotFoundException::new);
         validateOwner(userId, freeBoard);
         repository.delete(freeBoard);
+    }
+
+    private FreeBoardScrollResponse findBoards(FreeBoardScrollRequest request) {
+        List<FreeBoard> freeBoards = repository
+            .findByIdLessThanOrderByIdDesc(request.getLastId(), Pageable.ofSize(request.getSize()));
+        return FreeBoardScrollResponse
+            .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
+    }
+
+    private FreeBoardScrollResponse findStartScrollOfBoards(FreeBoardScrollRequest request) {
+        List<FreeBoard> freeBoards = repository.findStartScrollOfBoard(Pageable.ofSize(request.getSize()));
+        return FreeBoardScrollResponse
+            .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
+    }
+
+    private FreeBoardScrollResponse findScrollBoardWithKeyword(FreeBoardKeyWordRequest request) {
+        List<FreeBoard> freeBoards = repository
+            .findScrollOfBoardsWithKeyWord(request.getKeyWord(), request.getLastId(),
+                Pageable.ofSize(request.getSize()));
+        return FreeBoardScrollResponse
+            .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
+    }
+
+    private FreeBoardScrollResponse findStartScrollBoardWithKeyword(FreeBoardKeyWordRequest request) {
+        List<FreeBoard> freeBoards = repository
+            .findStartScrollOfBoardsWithKeyWord(request.getKeyWord(), Pageable.ofSize(request.getSize()));
+        return FreeBoardScrollResponse
+            .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
     }
 
     private void validateOwner(Long userId, FreeBoard freeBoard) {

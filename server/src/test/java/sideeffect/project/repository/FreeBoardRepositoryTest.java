@@ -45,7 +45,7 @@ class FreeBoardRepositoryTest {
         repository.save(freeBoard);
         repository.save(FreeBoard.builder().title("다른 게시판").content("1234").build());
 
-        List<FreeBoard> boards = repository.findFreeBoardWithKeyWord(content, Pageable.ofSize(5));
+        List<FreeBoard> boards = repository.findStartScrollOfBoardsWithKeyWord(content, Pageable.ofSize(5));
 
         assertThat(boards).containsExactly(freeBoard);
     }
@@ -58,7 +58,7 @@ class FreeBoardRepositoryTest {
         repository.save(freeBoard);
         repository.save(FreeBoard.builder().title("다른 게시판").content("1234").build());
 
-        List<FreeBoard> boards = repository.findFreeBoardWithKeyWord(title, Pageable.ofSize(5));
+        List<FreeBoard> boards = repository.findStartScrollOfBoardsWithKeyWord(title, Pageable.ofSize(5));
 
         assertThat(boards).containsExactly(freeBoard);
     }
@@ -73,7 +73,7 @@ class FreeBoardRepositoryTest {
         Collections.reverse(answerBoardIds);
 
         List<FreeBoard> freeBoards = repository
-            .findLastPagingBoards(Pageable.ofSize(pagingSize));
+            .findStartScrollOfBoard(Pageable.ofSize(pagingSize));
         List<Long> resultBoardId = freeBoards.stream().map(FreeBoard::getId).collect(Collectors.toList());
 
         assertAll(
@@ -112,7 +112,7 @@ class FreeBoardRepositoryTest {
         repository.save(freeBoard3);
 
         List<FreeBoard> boards = repository
-            .findFreeBoardScrollWithKeyWord(title, freeBoard2.getId() + 1, Pageable.ofSize(5));
+            .findScrollOfBoardsWithKeyWord(title, freeBoard2.getId() + 1, Pageable.ofSize(5));
 
         assertThat(boards).containsExactly(freeBoard2, freeBoard1);
     }

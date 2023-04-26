@@ -25,6 +25,6 @@ public class FreeBoardController {
 
     @GetMapping("/scroll")
     public FreeBoardScrollResponse scrollBoard(@ModelAttribute FreeBoardScrollRequest request) {
-        return freeBoardService.findBoardScroll(request);
+        return freeBoardService.findScroll(request);
     }
 }

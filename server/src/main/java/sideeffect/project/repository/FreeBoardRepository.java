@@ -11,15 +11,15 @@ public interface FreeBoardRepository extends JpaRepository<FreeBoard, Long> {
 
     @Query("SELECT b from FreeBoard b where b.content like %:keyword% or b.title like %:keyword% "
     + "order by b.id desc")
-    List<FreeBoard> findFreeBoardWithKeyWord(@Param("keyword") String keyWord, Pageable pageable);
+    List<FreeBoard> findStartScrollOfBoardsWithKeyWord(@Param("keyword") String keyWord, Pageable pageable);
 
     @Query("SELECT b from FreeBoard b where b.id < :id and (b.content like %:keyword% or b.title like %:keyword%) "
         + "order by b.id desc")
-    List<FreeBoard> findFreeBoardScrollWithKeyWord(@Param("keyword") String keyWord, @Param("id") Long id,
+    List<FreeBoard> findScrollOfBoardsWithKeyWord(@Param("keyword") String keyWord, @Param("id") Long id,
         Pageable pageable);
 
     @Query("SELECT b from FreeBoard b order by b.id desc")
-    List<FreeBoard> findLastPagingBoards(Pageable pageable);
+    List<FreeBoard> findStartScrollOfBoard(Pageable pageable);
 
     List<FreeBoard> findByIdLessThanOrderByIdDesc(Long boardId, Pageable pageable);
 }
