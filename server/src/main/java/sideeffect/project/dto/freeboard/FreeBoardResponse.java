@@ -34,7 +34,7 @@ public class FreeBoardResponse {
             .id(freeBoard.getId())
             .views(freeBoard.getViews())
             .title(freeBoard.getTitle())
-            .userId(freeBoard.getUserId())
+            .userId(freeBoard.getUser().getId())
             .content(freeBoard.getContent())
             .projectUrl(freeBoard.getProjectUrl())
             .imgUrl(freeBoard.getImgUrl())

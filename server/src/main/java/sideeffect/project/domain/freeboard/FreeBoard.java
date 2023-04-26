@@ -5,12 +5,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import sideeffect.project.domain.user.User;
 
 @Entity
 @Getter
@@ -39,7 +42,10 @@ public class FreeBoard {
 
     private String imgUrl;
 
-    private Long userId;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Builder
     public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl, Long userId) {
@@ -49,7 +55,6 @@ public class FreeBoard {
         this.projectUrl = projectUrl;
         this.content = content;
         this.imgUrl = imgUrl;
-        this.userId = userId;
     }
 
     public void update(FreeBoard freeBoard) {
@@ -76,7 +81,11 @@ public class FreeBoard {
         this.imgUrl = null;
     }
 
-    public void setUser(Long userId) {
-        this.userId = userId;
+    public void associateUser(User user) {
+        if (this.user != null) {
+            this.user.deleteFreeBoard(this);
+        }
+        user.addFreeBoard(this);
+        this.user = user;
     }
 }

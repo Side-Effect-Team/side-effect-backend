@@ -7,23 +7,27 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sideeffect.project.domain.freeboard.FreeBoard;
+import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.freeboard.FreeBoardKeyWordRequest;
 import sideeffect.project.dto.freeboard.FreeBoardRequest;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
 import sideeffect.project.repository.FreeBoardRepository;
+import sideeffect.project.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class FreeBoardService {
 
     private final FreeBoardRepository repository;
+    private final UserRepository userRepository;
 
     @Transactional
     public FreeBoard register(Long userId, FreeBoardRequest request) {
+        User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
         FreeBoard freeBoard = request.toFreeBoard();
-        freeBoard.setUser(userId);
+        freeBoard.associateUser(user);
         return repository.save(freeBoard);
     }
 
@@ -77,7 +81,7 @@ public class FreeBoardService {
     }
 
     private void validateOwner(Long userId, FreeBoard freeBoard) {
-        if (!userId.equals(freeBoard.getUserId())) {
+        if (!userId.equals(freeBoard.getUser().getId())) {
             throw new IllegalArgumentException("게시글의 주인이 아닙니다.");
         }
     }
