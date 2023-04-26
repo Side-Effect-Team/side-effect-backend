@@ -9,6 +9,14 @@ import javax.persistence.*;
 
 @Entity
 @Getter
+@Table(
+        name = "STACKS",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = "stack_name"
+                )
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Stack {
 
@@ -19,13 +27,14 @@ public class Stack {
 
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "stack_name", unique = true)
+    @Column(name = "stack_name")
     private StackType stackType;
 
     private String url;
 
     @Builder
-    public Stack(StackType stackType, String url) {
+    public Stack(Long id, StackType stackType, String url) {
+        this.id = id;
         this.stackType = stackType;
         this.url = url;
     }
