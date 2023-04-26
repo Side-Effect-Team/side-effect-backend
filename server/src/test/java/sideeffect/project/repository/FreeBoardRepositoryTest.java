@@ -45,7 +45,7 @@ class FreeBoardRepositoryTest {
         repository.save(freeBoard);
         repository.save(FreeBoard.builder().title("다른 게시판").content("1234").build());
 
-        List<FreeBoard> boards = repository.findAllByContentContainingOrTitleContaining(content, null);
+        List<FreeBoard> boards = repository.findFreeBoardWithKeyWord(content, Pageable.ofSize(5));
 
         assertThat(boards).containsExactly(freeBoard);
     }
@@ -58,7 +58,7 @@ class FreeBoardRepositoryTest {
         repository.save(freeBoard);
         repository.save(FreeBoard.builder().title("다른 게시판").content("1234").build());
 
-        List<FreeBoard> boards = repository.findAllByContentContainingOrTitleContaining(null, title);
+        List<FreeBoard> boards = repository.findFreeBoardWithKeyWord(title, Pageable.ofSize(5));
 
         assertThat(boards).containsExactly(freeBoard);
     }
@@ -98,6 +98,23 @@ class FreeBoardRepositoryTest {
             () -> assertThat(freeBoards).hasSize(10),
             () -> assertThat(resultBoardId).isEqualTo(answerBoardIds)
         );
+    }
+
+    @DisplayName("검색 결과를 페이징 방식으로 조회")
+    @Test
+    void findFreeBoardScrollWithKeyWord() {
+        String title = "검색할 제목";
+        FreeBoard freeBoard1 = FreeBoard.builder().title("게시판" + title).content("내용").build();
+        FreeBoard freeBoard2 = FreeBoard.builder().title("게시판" + title).content("내용").build();
+        FreeBoard freeBoard3 = FreeBoard.builder().title("게시판" + title).content("내용").build();
+        repository.save(freeBoard1);
+        repository.save(freeBoard2);
+        repository.save(freeBoard3);
+
+        List<FreeBoard> boards = repository
+            .findFreeBoardScrollWithKeyWord(title, freeBoard2.getId() + 1, Pageable.ofSize(5));
+
+        assertThat(boards).containsExactly(freeBoard2, freeBoard1);
     }
 
     private Long getLastId() {
