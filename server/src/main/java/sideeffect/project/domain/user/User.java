@@ -6,6 +6,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
 
 @Entity
@@ -48,11 +49,24 @@ public class User {
     @OrderBy("id desc")
     private List<FreeBoard> freeBoards = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    @OrderBy("id desc")
+    private List<Comment> comments = new ArrayList<>();
+
     public void addFreeBoard(FreeBoard freeBoard) {
         this.freeBoards.add(freeBoard);
     }
 
     public void deleteFreeBoard(FreeBoard freeBoard) {
         this.freeBoards.remove(freeBoard);
+    }
+
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
+    }
+
+    public void deleteComment(Comment comment) {
+        this.comments.remove(comment);
     }
 }

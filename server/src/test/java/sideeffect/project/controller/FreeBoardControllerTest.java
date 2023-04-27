@@ -78,8 +78,8 @@ class FreeBoardControllerTest {
 
     @Test
     void scrollBoard() throws Exception {
-        FreeBoard board1 = FreeBoard.builder().id(100L).userId(1L).content("게시판1입니다.").title("게시판1").build();
-        FreeBoard board2 = FreeBoard.builder().id(99L).userId(1L).content("게시판2입니다.").title("게시판2").build();
+        FreeBoard board1 = FreeBoard.builder().id(100L).content("게시판1입니다.").title("게시판1").build();
+        FreeBoard board2 = FreeBoard.builder().id(99L).content("게시판2입니다.").title("게시판2").build();
         board1.associateUser(user);
         board2.associateUser(user);
         List<FreeBoardResponse> responses = FreeBoardResponse.listOf(List.of(board1, board2));
