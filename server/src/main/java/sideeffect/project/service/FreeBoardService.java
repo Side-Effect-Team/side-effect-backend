@@ -7,35 +7,44 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sideeffect.project.domain.freeboard.FreeBoard;
+import sideeffect.project.domain.user.User;
+import sideeffect.project.dto.freeboard.FreeBoardKeyWordRequest;
 import sideeffect.project.dto.freeboard.FreeBoardRequest;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
 import sideeffect.project.repository.FreeBoardRepository;
+import sideeffect.project.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class FreeBoardService {
 
     private final FreeBoardRepository repository;
+    private final UserRepository userRepository;
 
     @Transactional
     public FreeBoard register(Long userId, FreeBoardRequest request) {
+        User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
         FreeBoard freeBoard = request.toFreeBoard();
-        freeBoard.setUser(userId);
+        freeBoard.associateUser(user);
         return repository.save(freeBoard);
     }
 
     @Transactional(readOnly = true)
-    public FreeBoardScrollResponse findBoardByScroll(FreeBoardScrollRequest request) {
+    public FreeBoardScrollResponse findScroll(FreeBoardScrollRequest request) {
         if (request.getLastId() == null) {
-            List<FreeBoard> freeBoards = repository.findLastPagingBoards(Pageable.ofSize(request.getSize()));
-            return FreeBoardScrollResponse
-                .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
+            return findStartScrollOfBoards(request);
         }
-        List<FreeBoard> freeBoards = repository
-            .findByIdLessThanOrderByIdDesc(request.getLastId(), Pageable.ofSize(request.getSize()));
-        return FreeBoardScrollResponse.of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
+        return findBoards(request);
+    }
+
+    @Transactional(readOnly = true)
+    public FreeBoardScrollResponse findScrollWithKeyword(FreeBoardKeyWordRequest request) {
+        if (request.getLastId() == null) {
+            return findStartScrollBoardWithKeyword(request);
+        }
+        return findScrollBoardWithKeyword(request);
     }
 
     @Transactional
@@ -59,8 +68,36 @@ public class FreeBoardService {
         repository.delete(freeBoard);
     }
 
+    private FreeBoardScrollResponse findBoards(FreeBoardScrollRequest request) {
+        List<FreeBoard> freeBoards = repository
+            .findByIdLessThanOrderByIdDesc(request.getLastId(), Pageable.ofSize(request.getSize()));
+        return FreeBoardScrollResponse
+            .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
+    }
+
+    private FreeBoardScrollResponse findStartScrollOfBoards(FreeBoardScrollRequest request) {
+        List<FreeBoard> freeBoards = repository.findStartScrollOfBoard(Pageable.ofSize(request.getSize()));
+        return FreeBoardScrollResponse
+            .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
+    }
+
+    private FreeBoardScrollResponse findScrollBoardWithKeyword(FreeBoardKeyWordRequest request) {
+        List<FreeBoard> freeBoards = repository
+            .findScrollOfBoardsWithKeyWord(request.getKeyWord(), request.getLastId(),
+                Pageable.ofSize(request.getSize()));
+        return FreeBoardScrollResponse
+            .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
+    }
+
+    private FreeBoardScrollResponse findStartScrollBoardWithKeyword(FreeBoardKeyWordRequest request) {
+        List<FreeBoard> freeBoards = repository
+            .findStartScrollOfBoardsWithKeyWord(request.getKeyWord(), Pageable.ofSize(request.getSize()));
+        return FreeBoardScrollResponse
+            .of(FreeBoardResponse.listOf(freeBoards), hasNextBoards(freeBoards, request.getSize()));
+    }
+
     private void validateOwner(Long userId, FreeBoard freeBoard) {
-        if (!userId.equals(freeBoard.getUserId())) {
+        if (!userId.equals(freeBoard.getUser().getId())) {
             throw new IllegalArgumentException("게시글의 주인이 아닙니다.");
         }
     }

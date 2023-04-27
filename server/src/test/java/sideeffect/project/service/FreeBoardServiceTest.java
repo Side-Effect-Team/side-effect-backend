@@ -21,10 +21,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sideeffect.project.domain.freeboard.FreeBoard;
+import sideeffect.project.domain.user.User;
+import sideeffect.project.domain.user.UserRoleType;
+import sideeffect.project.dto.freeboard.FreeBoardKeyWordRequest;
 import sideeffect.project.dto.freeboard.FreeBoardRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
 import sideeffect.project.repository.FreeBoardRepository;
+import sideeffect.project.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class FreeBoardServiceTest {
@@ -34,11 +38,25 @@ class FreeBoardServiceTest {
     @Mock
     private FreeBoardRepository freeBoardRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
     private FreeBoard freeBoard;
+    private User user;
 
     @BeforeEach
     void setUp() {
-        freeBoardService = new FreeBoardService(freeBoardRepository);
+        freeBoardService = new FreeBoardService(freeBoardRepository, userRepository);
+
+        user = User.builder()
+            .id(1L)
+            .name("hello")
+            .nickname("tester")
+            .password("1234")
+            .userRoleType(UserRoleType.ROLE_USER)
+            .email("test@naver.com")
+            .build();
+
         freeBoard = FreeBoard.builder()
             .id(1L)
             .title("자랑 게시판")
@@ -46,6 +64,7 @@ class FreeBoardServiceTest {
             .projectUrl("url")
             .userId(1L)
             .build();
+        freeBoard.associateUser(user);
     }
 
     @DisplayName("게시판을 저장한다.")
@@ -54,6 +73,7 @@ class FreeBoardServiceTest {
         FreeBoardRequest request = FreeBoardRequest.builder()
             .title("자랑 게시판").content("제가 만든 겁니다.").projectUrl("url").build();
         Long userId = 1L;
+        when(userRepository.findById(any())).thenReturn(Optional.of(user));
 
         freeBoardService.register(userId, request);
 
@@ -132,7 +152,7 @@ class FreeBoardServiceTest {
     void findBoardByScroll(FreeBoardScrollRequest request, List<FreeBoard> freeBoards, boolean hasNext) {
         when(freeBoardRepository.findByIdLessThanOrderByIdDesc(any(), any())).thenReturn(freeBoards);
 
-        FreeBoardScrollResponse response = freeBoardService.findBoardByScroll(request);
+        FreeBoardScrollResponse response = freeBoardService.findScroll(request);
 
         assertAll(
             () -> assertThat(response.getLastId()).isEqualTo(freeBoards.get(freeBoards.size() - 1).getId()),
@@ -145,14 +165,54 @@ class FreeBoardServiceTest {
     @MethodSource("generateScrollTestWithoutLastIdAugments")
     @ParameterizedTest
     void findBoardByScrollWithoutLastId(FreeBoardScrollRequest request, List<FreeBoard> freeBoards, boolean hasNext) {
-        when(freeBoardRepository.findLastPagingBoards(any())).thenReturn(freeBoards);
+        when(freeBoardRepository.findStartScrollOfBoard(any())).thenReturn(freeBoards);
 
-        FreeBoardScrollResponse response = freeBoardService.findBoardByScroll(request);
+        FreeBoardScrollResponse response = freeBoardService.findScroll(request);
 
         assertAll(
             () -> assertThat(response.getLastId()).isEqualTo(freeBoards.get(freeBoards.size() - 1).getId()),
             () -> assertThat(response.isHasNext()).isEqualTo(hasNext),
-            () -> verify(freeBoardRepository).findLastPagingBoards(any())
+            () -> verify(freeBoardRepository).findStartScrollOfBoard(any())
+        );
+    }
+
+    @DisplayName("게시판 검색 시작 스크롤을 조회")
+    @Test
+    void findBoardWithKeywordScrollWithoutLastId() {
+        FreeBoard freeBoard1 = FreeBoard.builder().id(95L).content("test").title("게시판").build();
+        FreeBoard freeBoard2 = FreeBoard.builder().id(90L).content("게시판 입니다.").title("test").build();
+        freeBoard1.associateUser(user);
+        freeBoard2.associateUser(user);
+        FreeBoardKeyWordRequest request = FreeBoardKeyWordRequest.builder().keyWord("test").size(2).build();
+        when(freeBoardRepository.findStartScrollOfBoardsWithKeyWord(any(), any())).thenReturn(List.of(freeBoard1, freeBoard2));
+
+        FreeBoardScrollResponse response = freeBoardService.findScrollWithKeyword(request);
+
+        assertAll(
+            () -> assertThat(response.getLastId()).isEqualTo(90L),
+            () -> assertThat(response.isHasNext()).isTrue(),
+            () -> verify(freeBoardRepository).findStartScrollOfBoardsWithKeyWord(any(), any())
+        );
+    }
+
+    @DisplayName("게시판 검색 스크롤 조회")
+    @Test
+    void findBoardWithKeywordScroll() {
+        FreeBoard freeBoard1 = FreeBoard.builder().id(95L).content("test").title("게시판").build();
+        FreeBoard freeBoard2 = FreeBoard.builder().id(90L).content("게시판 입니다.").title("test").build();
+        freeBoard1.associateUser(user);
+        freeBoard2.associateUser(user);
+        FreeBoardKeyWordRequest request = FreeBoardKeyWordRequest
+            .builder().lastId(100L).keyWord("test").size(5).build();
+        when(freeBoardRepository.findScrollOfBoardsWithKeyWord(any(), any(), any()))
+            .thenReturn(List.of(freeBoard1, freeBoard2));
+
+        FreeBoardScrollResponse response = freeBoardService.findScrollWithKeyword(request);
+
+        assertAll(
+            () -> assertThat(response.getLastId()).isEqualTo(90L),
+            () -> assertThat(response.isHasNext()).isFalse(),
+            () -> verify(freeBoardRepository).findScrollOfBoardsWithKeyWord(any(), any(), any())
         );
     }
 
@@ -175,9 +235,11 @@ class FreeBoardServiceTest {
     }
 
     private static List<FreeBoard> generateFreeBoards(Long startId, int size) {
+        User owner = User.builder().id(3L).name("owner").password("1234").build();
         List<FreeBoard> freeBoards = new ArrayList<>();
         for (Long i = startId; i > startId - size; i--) {
             FreeBoard freeBoard = FreeBoard.builder().id(startId + i).title("게시판" + i).content("게시판" + i).build();
+            freeBoard.associateUser(owner);
             freeBoards.add(freeBoard);
         }
         return freeBoards;

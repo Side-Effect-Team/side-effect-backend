@@ -10,10 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import sideeffect.project.domain.user.User;
+import sideeffect.project.domain.user.UserRoleType;
 
 class FreeBoardTest {
 
     private FreeBoard freeBoard;
+    private User user;
 
     @BeforeEach
     void setUp() {
@@ -23,6 +26,15 @@ class FreeBoardTest {
             .imgUrl("/test.jpg")
             .projectUrl("http://test.url")
             .content("게시판 입니다.")
+            .build();
+
+        user = User.builder()
+            .id(1L)
+            .name("hello")
+            .nickname("tester")
+            .password("1234")
+            .userRoleType(UserRoleType.ROLE_USER)
+            .email("test@naver.com")
             .build();
     }
 
@@ -80,13 +92,34 @@ class FreeBoardTest {
 
     @DisplayName("유저를 설정한다.")
     @Test
-    void setUser() {
-        Long userId = 1L;
+    void associateUser() {
+        freeBoard.associateUser(user);
 
-        freeBoard.setUser(userId);
-
-        assertThat(freeBoard.getUserId()).isEqualTo(userId);
+        assertAll(
+            () -> assertThat(freeBoard.getUser()).isEqualTo(user),
+            () -> assertThat(user.getFreeBoards()).contains(freeBoard)
+        );
     }
+
+    @DisplayName("유저를 재설정 한다.")
+    @Test
+    void updateUser() {
+        User newUser = User.builder()
+            .id(2L)
+            .name("new")
+            .password("1234")
+            .nickname("newUser")
+            .build();
+        freeBoard.associateUser(user);
+        freeBoard.associateUser(newUser);
+
+        assertAll(
+            () -> assertThat(freeBoard.getUser()).isEqualTo(newUser),
+            () -> assertThat(newUser.getFreeBoards()).contains(freeBoard),
+            () -> assertThat(user.getFreeBoards()).doesNotContain(freeBoard)
+        );
+    }
+
 
     private static Stream<Arguments> generateUpdateBoards() {
         return Stream.of(
