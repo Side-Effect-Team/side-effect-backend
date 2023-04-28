@@ -9,7 +9,7 @@ public class BaseException extends RuntimeException {
         this.errorCode = errorCode;
     }
 
-    public String getErrorCode() {
-        return errorCode.getCode();
+    public ErrorCode getErrorCode() {
+        return errorCode;
     }
 }
