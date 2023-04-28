@@ -15,10 +15,13 @@ import sideeffect.project.domain.recruit.RecruitBoardType;
 import sideeffect.project.domain.stack.Stack;
 import sideeffect.project.domain.stack.StackLevelType;
 import sideeffect.project.domain.stack.StackType;
+import sideeffect.project.domain.user.User;
+import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.dto.recruit.BoardPositionRequest;
 import sideeffect.project.dto.recruit.BoardStackRequest;
 import sideeffect.project.dto.recruit.RecruitBoardRequest;
 import sideeffect.project.repository.RecruitBoardRepository;
+import sideeffect.project.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,20 +42,32 @@ class RecruitBoardServiceTest {
     private RecruitBoardRepository recruitBoardRepository;
 
     @Mock
+    private UserRepository userRepository;
+
+    @Mock
     private PositionService positionService;
 
     @Mock
     private StackService stackService;
 
+    private User user;
     private RecruitBoard recruitBoard;
     private Position position;
     private Stack stack;
 
     @BeforeEach
     void setUp() {
+        user = User.builder()
+                .id(1L)
+                .name("testName")
+                .nickname("test")
+                .password("1234")
+                .userRoleType(UserRoleType.ROLE_USER)
+                .email("test@naver.com")
+                .build();
+
         recruitBoard = RecruitBoard.builder()
                 .id(1L)
-                .userId(1L)
                 .title("모집 게시판")
                 .contents("모집합니다.")
                 .recruitBoardType(RecruitBoardType.PROJECT)
@@ -60,6 +75,8 @@ class RecruitBoardServiceTest {
                 .deadline(LocalDateTime.now())
                 .expectedPeriod("3개월")
                 .build();
+
+        recruitBoard.associateUser(user);
 
         position = Position.builder()
                 .id(1L)
@@ -89,6 +106,7 @@ class RecruitBoardServiceTest {
         Long userId = 1L;
 
         when(recruitBoardRepository.save(any())).thenReturn(recruitBoard);
+        when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(positionService.findByPositionType(any())).thenReturn(position);
         when(stackService.findByStackType(any())).thenReturn(stack);
 

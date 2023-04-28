@@ -8,11 +8,13 @@ import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.BoardStack;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.stack.Stack;
+import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.recruit.BoardPositionRequest;
 import sideeffect.project.dto.recruit.BoardStackRequest;
 import sideeffect.project.dto.recruit.RecruitBoardRequest;
 import sideeffect.project.dto.recruit.RecruitBoardResponse;
 import sideeffect.project.repository.RecruitBoardRepository;
+import sideeffect.project.repository.UserRepository;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.Collections;
@@ -24,20 +26,22 @@ import java.util.stream.Collectors;
 public class RecruitBoardService {
 
     private final RecruitBoardRepository recruitBoardRepository;
+    private final UserRepository userRepository;
     private final PositionService positionService;
     private final StackService stackService;
 
     @Transactional
     public RecruitBoardResponse register(Long userId, RecruitBoardRequest request) {
+        User findUser = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
         RecruitBoard recruitBoard = request.toRecruitBoard();
-        recruitBoard.setUser(userId);
+        recruitBoard.associateUser(findUser);
         recruitBoard.updateBoardPositions(getBoardPositions(recruitBoard, request.getPositions()));
         recruitBoard.updateBoardStacks(getBoardStacks(recruitBoard, request.getStacks()));
 
         return RecruitBoardResponse.of(recruitBoardRepository.save(recruitBoard));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public RecruitBoardResponse findRecruitBoard(Long boardId) {
         RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId).orElseThrow(EntityNotFoundException::new);
         findRecruitBoard.increaseViews();
@@ -97,7 +101,7 @@ public class RecruitBoardService {
     }
 
     private void validateOwner(Long userId, RecruitBoard recruitBoard) {
-        if (!userId.equals(recruitBoard.getUserId())) {
+        if (!userId.equals(recruitBoard.getUser().getId())) {
             throw new IllegalArgumentException("모집 게시글의 주인이 아닙니다.");
         }
     }
