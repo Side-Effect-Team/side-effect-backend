@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import sideeffect.project.common.domain.BaseTimeEntity;
 import sideeffect.project.domain.user.User;
 
 @Entity
@@ -25,7 +26,7 @@ import sideeffect.project.domain.user.User;
     }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class FreeBoard {
+public class FreeBoard extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
