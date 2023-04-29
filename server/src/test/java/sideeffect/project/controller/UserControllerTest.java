@@ -18,7 +18,6 @@ import org.springframework.web.context.WebApplicationContext;
 import sideeffect.project.controller.UserController;
 import sideeffect.project.dto.user.TokenInfo;
 import sideeffect.project.dto.user.UserJoinRequest;
-import sideeffect.project.dto.user.UserLoginRequest;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,12 +36,12 @@ class UserControllerTest {
     @MockBean
     UserService userService;
 
-    @Autowired
     ObjectMapper objectMapper;
 
     UserJoinRequest userJoinRequest;
     @BeforeEach
     void beforeEach(WebApplicationContext context){
+        objectMapper = new ObjectMapper();
         mockMvc = MockMvcBuilders.webAppContextSetup(context)
                 .build();
 

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import sideeffect.project.dto.user.TokenInfo;
 import sideeffect.project.dto.user.UserJoinRequest;
-import sideeffect.project.dto.user.UserLoginRequest;
 import sideeffect.project.service.UserService;
 
 @Slf4j
