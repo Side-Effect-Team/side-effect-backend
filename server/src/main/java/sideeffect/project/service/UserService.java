@@ -28,13 +28,17 @@ public class UserService {
 
     public void join(UserJoinRequest request){
 
-        //중복체크
-        userRepository.findByEmail(request.getEmail()).ifPresent(user -> {
-            throw new RuntimeException(request.getEmail() + "는 이미 있습니다");
-        });
+        validateDuplicateUser(request.getEmail());
         User user = request.toUser();
         user.setPassword(encoder.encode(user.getPassword()));
         user.setUserRoleType(UserRoleType.ROLE_USER);
         userRepository.save(user);
     }
+
+    public void validateDuplicateUser(String email) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            throw new RuntimeException(email + "는 이미 있습니다");
+        });
+    }
+
 }
