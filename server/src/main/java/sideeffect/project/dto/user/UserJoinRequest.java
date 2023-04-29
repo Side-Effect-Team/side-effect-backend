@@ -1,11 +1,7 @@
 package sideeffect.project.dto.user;
 
 import lombok.*;
-import sideeffect.project.domain.user.Url;
 import sideeffect.project.domain.user.User;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
