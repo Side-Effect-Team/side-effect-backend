@@ -8,7 +8,14 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "positions")
+@Table(
+        name = "POSITIONS",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = "position_name"
+                )
+        }
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Position {
@@ -19,11 +26,12 @@ public class Position {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "position_name", unique = true)
+    @Column(name = "position_name")
     private PositionType positionType;
 
     @Builder
-    public Position(PositionType positionType) {
+    public Position(Long id, PositionType positionType) {
+        this.id = id;
         this.positionType = positionType;
     }
 }
