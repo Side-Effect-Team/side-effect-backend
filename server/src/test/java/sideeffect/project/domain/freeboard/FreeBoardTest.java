@@ -1,9 +1,5 @@
 package sideeffect.project.domain.freeboard;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
-import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,6 +8,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
+
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class FreeBoardTest {
 
@@ -30,7 +31,6 @@ class FreeBoardTest {
 
         user = User.builder()
             .id(1L)
-            .name("hello")
             .nickname("tester")
             .password("1234")
             .userRoleType(UserRoleType.ROLE_USER)
@@ -106,7 +106,6 @@ class FreeBoardTest {
     void updateUser() {
         User newUser = User.builder()
             .id(2L)
-            .name("new")
             .password("1234")
             .nickname("newUser")
             .build();
