@@ -27,7 +27,6 @@ class RecruitBoardTest {
     void setUp() {
         user = User.builder()
                 .id(1L)
-                .name("testName")
                 .nickname("test")
                 .password("1234")
                 .userRoleType(UserRoleType.ROLE_USER)
