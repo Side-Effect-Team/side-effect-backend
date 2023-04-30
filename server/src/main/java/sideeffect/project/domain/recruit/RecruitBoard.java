@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import sideeffect.project.common.domain.BaseTimeEntity;
 import sideeffect.project.domain.user.User;
 
 import javax.persistence.*;
@@ -15,7 +16,7 @@ import java.util.List;
 @Table(name = "RECRUIT_BOARD")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class RecruitBoard {
+public class RecruitBoard extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -75,10 +76,12 @@ public class RecruitBoard {
 
     public void addBoardPosition(BoardPosition boardPosition) {
         this.boardPositions.add(boardPosition);
+        boardPosition.addRecruitBoard(this);
     }
 
     public void addBoardStack(BoardStack boardStack) {
         this.boardStacks.add(boardStack);
+        boardStack.addRecruitBoard(this);
     }
 
     public void update(RecruitBoard recruitBoard) {

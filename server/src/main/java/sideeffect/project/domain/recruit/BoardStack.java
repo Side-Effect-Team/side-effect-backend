@@ -38,4 +38,9 @@ public class BoardStack {
         this.stack = stack;
         this.recruitBoard = recruitBoard;
     }
+
+    public void addRecruitBoard(RecruitBoard recruitBoard) {
+        this.recruitBoard = recruitBoard;
+    }
+
 }
