@@ -14,21 +14,25 @@ import sideeffect.project.domain.freeboard.FreeBoard;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Table(name = "USERS")
+@Table(
+        name = "USERS",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = {"email"}
+                )
+        }
+)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "user_name")
-    private String name;
+    private String email;
 
     private String password;
 
     private String nickname;
-
-    private String email;
 
     @Enumerated(EnumType.STRING)
     private UserRoleType userRoleType;

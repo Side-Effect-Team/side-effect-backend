@@ -32,7 +32,7 @@ import sideeffect.project.domain.user.User;
     }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class FreeBoard {
+public class FreeBoard extends BaseTimeEntity {
 
     @Id
     @Column(name = "free_board_id")
@@ -50,6 +50,7 @@ public class FreeBoard {
 
     private String imgUrl;
 
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -58,7 +59,7 @@ public class FreeBoard {
     private List<Comment> comments = new ArrayList<>();
 
     @Builder
-    public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl) {
+    public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl, Long userId) {
         this.id = id;
         this.views = 0;
         this.title = title;
