@@ -2,7 +2,7 @@ package sideeffect.project.common.exception;
 
 public enum ErrorCode {
 
-    USER_MOT_FOUND(400, "U_001", "유저를 찾을 수 없습니다."),
+    USER_NOT_FOUND(400, "U_001", "유저를 찾을 수 없습니다."),
 
     FREE_BOARD_NOT_FOUND(400, "FB_001", "해당 게시판을 찾을 수 없습니다."),
 

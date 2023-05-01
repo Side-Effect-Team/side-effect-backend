@@ -26,7 +26,7 @@ public class CommentService {
 
     public CommentResponse registerComment(CommentRequest request) {
         User user = userRepository.findById(request.getUserId())
-            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_MOT_FOUND));
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
         FreeBoard freeBoard = freeBoardRepository.findById(request.getFreeBoardId())
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.FREE_BOARD_NOT_FOUND));
         Comment comment = request.toComment();
