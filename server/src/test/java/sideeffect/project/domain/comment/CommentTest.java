@@ -20,7 +20,6 @@ class CommentTest {
     void setUp() {
         user = User.builder()
             .id(1L)
-            .name("hello")
             .nickname("tester")
             .password("1234")
             .userRoleType(UserRoleType.ROLE_USER)

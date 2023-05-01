@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.user.User;
@@ -48,7 +49,8 @@ class CommentServiceTest {
 
         user = User.builder()
             .id(1L)
-            .name("test")
+            .email("test@naver.com")
+            .nickname("tester")
             .password("1234")
             .build();
 
@@ -61,6 +63,7 @@ class CommentServiceTest {
             .build();
 
         comment = new Comment("hello");
+        comment.setId(1L);
         comment.associate(user, freeBoard);
     }
 
@@ -71,6 +74,7 @@ class CommentServiceTest {
             .userId(user.getId()).freeBoardId(freeBoard.getId()).comment("hello").build();
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(freeBoardRepository.findById(any())).thenReturn(Optional.of(freeBoard));
+        when(commentRepository.save(any())).thenReturn(comment);
 
         commentService.registerComment(request);
 
@@ -104,7 +108,7 @@ class CommentServiceTest {
         when(commentRepository.findById(any())).thenReturn(Optional.of(comment));
 
         assertThatThrownBy(() -> commentService.update(nonOwnerId, commentId, request))
-            .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(AuthException.class);
     }
 
     @DisplayName("게시판 댓글을 조회한다.")
@@ -145,6 +149,6 @@ class CommentServiceTest {
         when(commentRepository.findById(any())).thenReturn(Optional.of(comment));
 
         assertThatThrownBy(() -> commentService.delete(nonOwnerId, boardId))
-            .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(AuthException.class);
     }
 }

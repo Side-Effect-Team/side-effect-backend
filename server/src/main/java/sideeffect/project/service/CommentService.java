@@ -1,9 +1,11 @@
 package sideeffect.project.service;
 
 import java.util.Objects;
-import javax.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import sideeffect.project.common.exception.AuthException;
+import sideeffect.project.common.exception.EntityNotFoundException;
+import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.user.User;
@@ -23,9 +25,10 @@ public class CommentService {
     private final FreeBoardRepository freeBoardRepository;
 
     public CommentResponse registerComment(CommentRequest request) {
-        User user = userRepository.findById(request.getUserId()).orElseThrow(EntityNotFoundException::new);
+        User user = userRepository.findById(request.getUserId())
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_MOT_FOUND));
         FreeBoard freeBoard = freeBoardRepository.findById(request.getFreeBoardId())
-            .orElseThrow(EntityNotFoundException::new);
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.FREE_BOARD_NOT_FOUND));
         Comment comment = request.toComment();
         comment.associate(user, freeBoard);
         return CommentResponse.of(commentRepository.save(comment));
@@ -37,20 +40,22 @@ public class CommentService {
     }
 
     public void update(Long userId, Long commentId, CommentRequest request) {
-        Comment comment = commentRepository.findById(commentId).orElseThrow(EntityNotFoundException::new);
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.COMMENT_NOT_FOUND));
         validateOwner(userId, comment.getUser().getId());
         comment.update(request.toComment().getContent());
     }
 
     public void delete(Long userId, Long commentId) {
-        Comment comment = commentRepository.findById(commentId).orElseThrow(EntityNotFoundException::new);
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.COMMENT_NOT_FOUND));
         validateOwner(userId, comment.getUser().getId());
         commentRepository.delete(comment);
     }
 
     private void validateOwner(Long userId, Long ownerId) {
         if (!Objects.equals(userId, ownerId)) {
-            throw new IllegalArgumentException("댓글 작성자가 아닙니다.");
+            throw new AuthException(ErrorCode.COMMENT_UNAUTHORIZED);
         }
     }
 }
