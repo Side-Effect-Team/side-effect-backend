@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sideeffect.project.domain.freeboard.FreeBoard;
+import sideeffect.project.dto.comment.CommentResponse;
 
 @Getter
 @Builder
@@ -22,6 +23,7 @@ public class FreeBoardResponse {
     private String content;
     private String projectUrl;
     private String imgUrl;
+    private List<CommentResponse> comments;
 
     public static List<FreeBoardResponse> listOf(List<FreeBoard> freeBoards) {
         return freeBoards.stream()
@@ -38,6 +40,7 @@ public class FreeBoardResponse {
             .content(freeBoard.getContent())
             .projectUrl(freeBoard.getProjectUrl())
             .imgUrl(freeBoard.getImgUrl())
+            .comments(CommentResponse.listOf(freeBoard.getComments()))
             .build();
     }
 }
