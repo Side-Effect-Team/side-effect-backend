@@ -60,7 +60,7 @@ public class FreeBoard extends BaseTimeEntity {
     private List<Comment> comments = new ArrayList<>();
 
     @Builder
-    public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl, Long userId) {
+    public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl) {
         this.id = id;
         this.views = 0;
         this.title = title;
