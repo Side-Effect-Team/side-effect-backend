@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.ProgressType;
@@ -192,7 +193,7 @@ class RecruitBoardServiceTest {
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
 
         assertThatThrownBy(() -> recruitBoardService.updateRecruitBoard(nonOwnerId, boardId, request))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(AuthException.class);
     }
 
     @DisplayName("모집 게시판을 삭제한다.")
@@ -214,7 +215,7 @@ class RecruitBoardServiceTest {
         Long boardId = 1L;
 
         assertThatThrownBy(() -> recruitBoardService.deleteRecruitBoard(nonOwnerId, boardId))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(AuthException.class);
     }
 
     @DisplayName("모집 게시판 목록을 스크롤 조회한다.")

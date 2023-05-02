@@ -4,16 +4,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sideeffect.project.common.exception.AuthException;
+import sideeffect.project.common.exception.EntityNotFoundException;
+import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.BoardStack;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.stack.Stack;
+import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.recruit.*;
 import sideeffect.project.repository.RecruitBoardRepository;
 import sideeffect.project.repository.UserRepository;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,9 +32,10 @@ public class RecruitBoardService {
 
     @Transactional
     public RecruitBoardResponse register(Long userId, RecruitBoardRequest request) {
-//        User findUser = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+        User findUser = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
         RecruitBoard recruitBoard = request.toRecruitBoard();
-//        recruitBoard.associateUser(findUser);
+        recruitBoard.associateUser(findUser);
         recruitBoard.updateBoardPositions(getBoardPositions(recruitBoard, request.getPositions()));
         recruitBoard.updateBoardStacks(getBoardStacks(recruitBoard, request.getStacks()));
 
@@ -40,7 +44,8 @@ public class RecruitBoardService {
 
     @Transactional
     public RecruitBoardResponse findRecruitBoard(Long boardId) {
-        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId).orElseThrow(EntityNotFoundException::new);
+        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
         findRecruitBoard.increaseViews();
 
         return RecruitBoardResponse.of(findRecruitBoard);
@@ -55,7 +60,8 @@ public class RecruitBoardService {
 
     @Transactional
     public void updateRecruitBoard(Long userId, Long boardId, RecruitBoardRequest request) {
-        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId).orElseThrow(EntityNotFoundException::new);
+        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
         validateOwner(userId, findRecruitBoard);
         findRecruitBoard.updateBoardPositions(getBoardPositions(findRecruitBoard, request.getPositions()));
         findRecruitBoard.updateBoardStacks(getBoardStacks(findRecruitBoard, request.getStacks()));
@@ -65,7 +71,8 @@ public class RecruitBoardService {
 
     @Transactional
     public void deleteRecruitBoard(Long userId, Long boardId) {
-        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId).orElseThrow(EntityNotFoundException::new);
+        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
         validateOwner(userId, findRecruitBoard);
         recruitBoardRepository.delete(findRecruitBoard);
     }
@@ -106,7 +113,7 @@ public class RecruitBoardService {
 
     private void validateOwner(Long userId, RecruitBoard recruitBoard) {
         if (!userId.equals(recruitBoard.getUser().getId())) {
-            throw new IllegalArgumentException("모집 게시글의 주인이 아닙니다.");
+            throw new AuthException(ErrorCode.RECRUIT_BOARD_UNAUTHORIZED);
         }
     }
 
