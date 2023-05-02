@@ -11,12 +11,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.ProgressType;
+import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.recruit.RecruitBoardType;
 import sideeffect.project.domain.stack.StackLevelType;
 import sideeffect.project.domain.stack.StackType;
+import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.recruit.BoardPositionResponse;
 import sideeffect.project.dto.recruit.BoardStackResponse;
 import sideeffect.project.dto.recruit.RecruitBoardResponse;
+import sideeffect.project.dto.recruit.RecruitBoardScrollResponse;
 import sideeffect.project.service.RecruitBoardService;
 
 import java.time.LocalDateTime;
@@ -37,10 +40,17 @@ class RecruitBoardControllerTest {
     private RecruitBoardService recruitBoardService;
 
     private MockMvc mvc;
+    private User user;
 
     @BeforeEach
     void setUp(WebApplicationContext context) {
         mvc = MockMvcBuilders.webAppContextSetup(context)
+                .build();
+
+        user = User.builder()
+                .id(1L)
+                .email("test@naver.com")
+                .password("qwer1234!")
                 .build();
     }
 
@@ -76,6 +86,31 @@ class RecruitBoardControllerTest {
                 .andDo(print());
 
         verify(recruitBoardService).findRecruitBoard(any());
+    }
+
+    @DisplayName("모집게시글 목록을 조회한다.")
+    @Test
+    void findScrollRecruitBoard() throws Exception {
+        RecruitBoard recruitBoard1 = RecruitBoard.builder().id(10L).title("모집 게시판1").contents("모집합니다1.").build();
+        RecruitBoard recruitBoard2 = RecruitBoard.builder().id(5L).title("모집 게시판2").contents("모집합니다2.").build();
+        recruitBoard1.associateUser(user);
+        recruitBoard2.associateUser(user);
+        List<RecruitBoardResponse> recruitBoardResponses = RecruitBoardResponse.listOf(List.of(recruitBoard1, recruitBoard2));
+        RecruitBoardScrollResponse scrollResponse = RecruitBoardScrollResponse.of(recruitBoardResponses, false);
+
+        given(recruitBoardService.findRecruitBoards(any())).willReturn(scrollResponse);
+
+        mvc.perform(get("/api/recruit-board/scroll")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("lastId", "11")
+                .param("size", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.recruitBoards.length()").value(2))
+                .andExpect(jsonPath("$.lastId").value(5L))
+                .andExpect(jsonPath("$.hasNext").value(false))
+                .andDo(print());
+
+        verify(recruitBoardService).findRecruitBoards(any());
     }
 
 }
