@@ -1,6 +1,7 @@
 package sideeffect.project.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sideeffect.project.domain.position.Position;
@@ -8,11 +9,7 @@ import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.BoardStack;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.stack.Stack;
-import sideeffect.project.domain.user.User;
-import sideeffect.project.dto.recruit.BoardPositionRequest;
-import sideeffect.project.dto.recruit.BoardStackRequest;
-import sideeffect.project.dto.recruit.RecruitBoardRequest;
-import sideeffect.project.dto.recruit.RecruitBoardResponse;
+import sideeffect.project.dto.recruit.*;
 import sideeffect.project.repository.RecruitBoardRepository;
 import sideeffect.project.repository.UserRepository;
 
@@ -32,9 +29,9 @@ public class RecruitBoardService {
 
     @Transactional
     public RecruitBoardResponse register(Long userId, RecruitBoardRequest request) {
-        User findUser = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+//        User findUser = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
         RecruitBoard recruitBoard = request.toRecruitBoard();
-        recruitBoard.associateUser(findUser);
+//        recruitBoard.associateUser(findUser);
         recruitBoard.updateBoardPositions(getBoardPositions(recruitBoard, request.getPositions()));
         recruitBoard.updateBoardStacks(getBoardStacks(recruitBoard, request.getStacks()));
 
@@ -47,6 +44,13 @@ public class RecruitBoardService {
         findRecruitBoard.increaseViews();
 
         return RecruitBoardResponse.of(findRecruitBoard);
+    }
+
+    @Transactional(readOnly = true)
+    public RecruitBoardScrollResponse findRecruitBoards(RecruitBoardScrollRequest request) {
+        List<RecruitBoard> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(request.getLastId(), request.getKeyword(), request.getStackTypes(), Pageable.ofSize(request.getSize() + 1));
+        boolean hasNext = hasNextRecruitBoards(findRecruitBoards, request.getSize());
+        return RecruitBoardScrollResponse.of(RecruitBoardResponse.listOf(findRecruitBoards), hasNext);
     }
 
     @Transactional
@@ -104,6 +108,17 @@ public class RecruitBoardService {
         if (!userId.equals(recruitBoard.getUser().getId())) {
             throw new IllegalArgumentException("모집 게시글의 주인이 아닙니다.");
         }
+    }
+
+    private boolean hasNextRecruitBoards(List<RecruitBoard> recruitBoards, int requestSize) {
+        boolean hasNext = false;
+
+        if(recruitBoards.size() > requestSize) {
+            hasNext = true;
+            recruitBoards.remove(requestSize);
+        }
+
+        return hasNext;
     }
 
 }

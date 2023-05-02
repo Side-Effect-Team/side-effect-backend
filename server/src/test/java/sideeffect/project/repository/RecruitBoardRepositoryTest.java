@@ -1,19 +1,17 @@
 package sideeffect.project.repository;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Pageable;
 import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.position.PositionType;
-import sideeffect.project.domain.recruit.*;
+import sideeffect.project.domain.recruit.BoardStack;
+import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.stack.Stack;
 import sideeffect.project.domain.stack.StackType;
 
 import javax.persistence.EntityManager;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -54,28 +52,14 @@ class RecruitBoardRepositoryTest {
         stackRepository.save(javascriptStack);
         stackRepository.save(javaStack);
 
-        List<RecruitBoard> recruitBoards = new ArrayList<>();
-
-        for(int i = 1; i <= 40; i++) {
-            RecruitBoard recruitBoard = RecruitBoard.builder()
-                    .title("모집 게시판")
-                    .contents("내용입니다.")
-                    .recruitBoardType(RecruitBoardType.PROJECT)
-                    .progressType(ProgressType.ONLINE)
-                    .deadline(LocalDateTime.now())
-                    .expectedPeriod("3개월")
-                    .build();
-
-            recruitBoards.add(recruitBoard);
-        }
-
-        recruitBoardRepository.saveAll(recruitBoards);
         em.clear();
     }
 
     @DisplayName("게시판 스크롤 페이징 조회")
     @Test
     void findRecruitBoardPaging() {
+        List<RecruitBoard> recruitBoards = generateRecruitBoards(1L, 40);
+        recruitBoardRepository.saveAll(recruitBoards);
         Long lastId = getLastId();
         List<Long> answerBoardIds = LongStream.rangeClosed(lastId - 29, lastId - 20).sorted().boxed().collect(Collectors.toList());
         Collections.reverse(answerBoardIds);
@@ -123,6 +107,24 @@ class RecruitBoardRepositoryTest {
         );
     }
 
+    @DisplayName("게시판 키워드와 lastId로 검색")
+    @Test
+    void findRecruitBoardByKeywordWithLastId() {
+        String searchContents = "검색할 키워드";
+        RecruitBoard recruitBoard1 = RecruitBoard.builder().title("모집 게시판").contents("!@#$%" + searchContents).build();
+        RecruitBoard recruitBoard2 = RecruitBoard.builder().title("모집 게시판" + searchContents).contents("!@#$%").build();
+        recruitBoardRepository.save(recruitBoard1);
+        recruitBoardRepository.save(recruitBoard2);
+
+        List<RecruitBoard> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(recruitBoard2.getId(), searchContents, null, Pageable.ofSize(5));
+
+        assertAll(
+                () -> assertThat(findRecruitBoards).containsExactly(recruitBoard1),
+                () -> assertThat(findRecruitBoards).doesNotContain(recruitBoard2),
+                () -> assertThat(findRecruitBoards).hasSize(1)
+        );
+    }
+
     @DisplayName("게시판 기술스택으로 검색")
     @Test
     void findRecruitBoardByStacks() {
@@ -152,6 +154,33 @@ class RecruitBoardRepositoryTest {
         );
     }
 
+    @DisplayName("게시판 기술스택과 lastId로 검색")
+    @Test
+    void findRecruitBoardByStacksWithLastId() {
+        BoardStack boardJavaStack = BoardStack.builder().stack(javaStack).build();
+        RecruitBoard recruitBoardInJavaStack = RecruitBoard.builder().title("모집 게시판").contents("내용").build();
+        recruitBoardInJavaStack.addBoardStack(boardJavaStack);
+
+        BoardStack boardJavaInScriptStack = BoardStack.builder().stack(javascriptStack).build();
+        RecruitBoard recruitBoardInJavaScriptStack = RecruitBoard.builder().title("모집 게시판").contents("내용").build();
+        recruitBoardInJavaScriptStack.addBoardStack(boardJavaInScriptStack);
+
+        recruitBoardRepository.save(recruitBoardInJavaStack);
+        recruitBoardRepository.save(recruitBoardInJavaScriptStack);
+
+        List<StackType> searchStacks = new ArrayList<>();
+        searchStacks.add(StackType.JAVA);
+        searchStacks.add(StackType.JAVASCRIPT);
+
+        List<RecruitBoard> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(recruitBoardInJavaScriptStack.getId(), "", searchStacks, Pageable.ofSize(5));
+
+        assertAll(
+                () -> assertThat(findRecruitBoards).containsExactly(recruitBoardInJavaStack),
+                () -> assertThat(findRecruitBoards).doesNotContain(recruitBoardInJavaScriptStack),
+                () -> assertThat(findRecruitBoards).hasSize(1)
+        );
+    }
+
     @DisplayName("게시판 키워드와 기술스택으로 검색")
     @Test
     void findRecruitBoardByKeywordWithStacks() {
@@ -165,8 +194,8 @@ class RecruitBoardRepositoryTest {
         boardInKeywordWithStacks.addBoardStack(boardStackJavaScript);
 
         RecruitBoard boardInKeyword = RecruitBoard.builder().title("모집 게시판" + searchKeyword).contents("내용").build();
-        BoardStack boardStackJava2 = BoardStack.builder().stack(javaStack).build();
 
+        BoardStack boardStackJava2 = BoardStack.builder().stack(javaStack).build();
         RecruitBoard boardInStacks = RecruitBoard.builder().title("모집 게시판").contents("내용").build();
         boardInStacks.addBoardStack(boardStackJava2);
 
@@ -192,9 +221,47 @@ class RecruitBoardRepositoryTest {
         );
     }
 
+    @DisplayName("게시판 키워드와 기술스택과 lastId로 검색")
+    @Test
+    void findRecruitBoardByKeywordWithStacksAndLastId() {
+        String searchKeyword = "검색할 키워드";
+        BoardStack boardStackJava1 = BoardStack.builder().stack(javaStack).build();
+        RecruitBoard boardInKeywordWithStacks1 = RecruitBoard.builder().title("모집 게시판" + searchKeyword).contents("내용").build();
+        boardInKeywordWithStacks1.addBoardStack(boardStackJava1);
+
+        BoardStack boardStackJava2 = BoardStack.builder().stack(javaStack).build();
+        RecruitBoard boardInKeywordWithStacks2 = RecruitBoard.builder().title("모집 게시판" + searchKeyword).contents("내용").build();
+        boardInKeywordWithStacks2.addBoardStack(boardStackJava2);
+
+
+        recruitBoardRepository.save(boardInKeywordWithStacks1);
+        recruitBoardRepository.save(boardInKeywordWithStacks2);
+
+
+        List<StackType> searchStacks = new ArrayList<>();
+        searchStacks.add(StackType.JAVA);
+
+        List<RecruitBoard> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(boardInKeywordWithStacks2.getId(), searchKeyword, searchStacks, Pageable.ofSize(5));
+
+        assertAll(
+                () -> assertThat(findRecruitBoards).containsExactly(boardInKeywordWithStacks1),
+                () -> assertThat(findRecruitBoards).doesNotContain(boardInKeywordWithStacks2),
+                () -> assertThat(findRecruitBoards).hasSize(1)
+        );
+    }
+
     private Long getLastId() {
         List<RecruitBoard> recruitBoards = recruitBoardRepository.findAll();
         return recruitBoards.get(recruitBoards.size() - 1).getId();
+    }
+
+    private static List<RecruitBoard> generateRecruitBoards(Long startId, int size) {
+        List<RecruitBoard> recruitBoards = new ArrayList<>();
+        for (Long i = startId; i < startId + size; i++) {
+            RecruitBoard recruitBoard = RecruitBoard.builder().title("모집 게시판" + i).contents("모집합니다." + i).build();
+            recruitBoards.add(recruitBoard);
+        }
+        return recruitBoards;
     }
 
 }
