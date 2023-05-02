@@ -76,12 +76,12 @@ public class RecruitBoard extends BaseTimeEntity {
 
     public void addBoardPosition(BoardPosition boardPosition) {
         this.boardPositions.add(boardPosition);
-        boardPosition.addRecruitBoard(this);
+        boardPosition.setRecruitBoard(this);
     }
 
     public void addBoardStack(BoardStack boardStack) {
         this.boardStacks.add(boardStack);
-        boardStack.addRecruitBoard(this);
+        boardStack.setRecruitBoard(this);
     }
 
     public void update(RecruitBoard recruitBoard) {

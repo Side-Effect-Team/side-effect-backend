@@ -42,7 +42,7 @@ public class BoardPosition {
         this.recruitBoard = recruitBoard;
     }
 
-    public void addRecruitBoard(RecruitBoard recruitBoard) {
+    public void setRecruitBoard(RecruitBoard recruitBoard) {
         this.recruitBoard = recruitBoard;
     }
 
