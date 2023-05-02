@@ -1,13 +1,14 @@
 package sideeffect.project.domain.user;
 
-import java.util.ArrayList;
-import java.util.List;
 import lombok.*;
+import sideeffect.project.domain.comment.Comment;
+import sideeffect.project.domain.freeboard.FreeBoard;
+import sideeffect.project.domain.recruit.RecruitBoard;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import sideeffect.project.domain.comment.Comment;
-import sideeffect.project.domain.freeboard.FreeBoard;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -58,12 +59,26 @@ public class User {
     @OrderBy("id desc")
     private List<Comment> comments = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    @OrderBy("id desc")
+    private List<RecruitBoard> recruitBoards = new ArrayList<>();
+
+
     public void addFreeBoard(FreeBoard freeBoard) {
         this.freeBoards.add(freeBoard);
     }
 
     public void deleteFreeBoard(FreeBoard freeBoard) {
         this.freeBoards.remove(freeBoard);
+    }
+
+    public void addRecruitBoard(RecruitBoard recruitBoard) {
+        this.recruitBoards.add(recruitBoard);
+    }
+
+    public void deleteRecruitBoard(RecruitBoard recruitBoard) {
+        this.recruitBoards.remove(recruitBoard);
     }
 
     public void addComment(Comment comment) {
