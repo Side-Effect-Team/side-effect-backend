@@ -32,4 +32,21 @@ public class Recommend extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "free_board_id")
     private FreeBoard freeBoard;
+
+    public static Recommend recommend(User user, FreeBoard freeBoard) {
+        Recommend recommend = new Recommend();
+        recommend.setUser(user);
+        recommend.setFreeBoard(freeBoard);
+        return recommend;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+        user.addRecommend(this);
+    }
+
+    public void setFreeBoard(FreeBoard freeBoard) {
+        this.freeBoard = freeBoard;
+        freeBoard.addRecommend(this);
+    }
 }

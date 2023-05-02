@@ -8,6 +8,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
+import sideeffect.project.domain.recommend.Recommend;
 
 @Entity
 @Getter @Setter
@@ -58,6 +59,10 @@ public class User {
     @OrderBy("id desc")
     private List<Comment> comments = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<Recommend> recommends = new ArrayList<>();
+
     public void addFreeBoard(FreeBoard freeBoard) {
         this.freeBoards.add(freeBoard);
     }
@@ -72,5 +77,13 @@ public class User {
 
     public void deleteComment(Comment comment) {
         this.comments.remove(comment);
+    }
+
+    public void addRecommend(Recommend recommend) {
+        this.recommends.add(recommend);
+    }
+
+    public void deleteRecommend(Recommend recommend) {
+        this.recommends.remove(recommend);
     }
 }
