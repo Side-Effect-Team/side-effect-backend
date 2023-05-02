@@ -2,6 +2,7 @@ package sideeffect.project.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -59,5 +60,24 @@ class RecommendRepositoryTest {
     void notExistsRecommend() {
         boolean result = recommendRepository.existsByUserIdAndFreeBoardId(user.getId(), freeBoard.getId());
         assertThat(result).isFalse();
+    }
+
+    @DisplayName("게시판과 연관관계가 끊기면 자동으로 삭제된다.")
+    @Test
+    void deleteRecommend() {
+        Recommend recommend = Recommend.recommend(user, freeBoard);
+        recommendRepository.saveAndFlush(recommend);
+        em.clear();
+
+        deleteRecommend(recommend.getId());
+        em.flush();
+        em.clear();
+
+        assertThat(recommendRepository.findById(recommend.getId())).isEmpty();
+    }
+
+    private void deleteRecommend(Long id) {
+        Recommend recommend = recommendRepository.findById(id).orElseThrow(EntityExistsException::new);
+        recommend.getFreeBoard().deleteRecommend(recommend);
     }
 }
