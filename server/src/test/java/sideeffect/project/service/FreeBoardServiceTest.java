@@ -62,7 +62,6 @@ class FreeBoardServiceTest {
             .title("자랑 게시판")
             .content("제가 만든 겁니다.")
             .projectUrl("url")
-            .userId(1L)
             .build();
         freeBoard.associateUser(user);
     }
