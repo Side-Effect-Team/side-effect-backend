@@ -11,11 +11,7 @@ import sideeffect.project.domain.recruit.RecruitBoard;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import sideeffect.project.domain.comment.Comment;
-import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.recommend.Recommend;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter @Setter
