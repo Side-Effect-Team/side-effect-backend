@@ -1,7 +1,9 @@
 package sideeffect.project.domain.freeboard;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -58,11 +60,11 @@ public class FreeBoard extends BaseTimeEntity {
     private User user;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "freeBoard")
-    private List<Comment> comments = new ArrayList<>();
+    private List<Comment> comments;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "freeBoard", orphanRemoval = true,
         cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<Recommend> recommends = new ArrayList<>();
+    private Set<Recommend> recommends;
 
     @Builder
     public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl) {
@@ -73,7 +75,7 @@ public class FreeBoard extends BaseTimeEntity {
         this.content = content;
         this.imgUrl = imgUrl;
         this.comments = new ArrayList<>();
-        this.recommends = new ArrayList<>();
+        this.recommends = new HashSet<>();
     }
 
     public void update(FreeBoard freeBoard) {
