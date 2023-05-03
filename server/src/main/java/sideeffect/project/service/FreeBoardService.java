@@ -20,6 +20,8 @@ import sideeffect.project.repository.UserRepository;
 @RequiredArgsConstructor
 public class FreeBoardService {
 
+    private static final int RANK_NUMBER = 6;
+
     private final FreeBoardRepository repository;
     private final UserRepository userRepository;
 
@@ -45,6 +47,11 @@ public class FreeBoardService {
             return findStartScrollBoardWithKeyword(request);
         }
         return findScrollBoardWithKeyword(request);
+    }
+
+    @Transactional(readOnly = true)
+    public List<FreeBoardResponse> findRankFreeBoards() {
+        return FreeBoardResponse.listOf(repository.findRankFreeBoard(Pageable.ofSize(RANK_NUMBER)));
     }
 
     @Transactional
