@@ -7,6 +7,7 @@ import sideeffect.project.domain.recruit.RecruitBoardType;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Builder
@@ -38,6 +39,12 @@ public class RecruitBoardResponse {
                 .positions(BoardPositionResponse.listOf(recruitBoard.getBoardPositions()))
                 .stacks(BoardStackResponse.listOf(recruitBoard.getBoardStacks()))
                 .build();
+    }
+
+    public static List<RecruitBoardResponse> listOf(List<RecruitBoard> recruitBoards) {
+        return recruitBoards.stream()
+                .map(RecruitBoardResponse::of)
+                .collect(Collectors.toList());
     }
 
 }

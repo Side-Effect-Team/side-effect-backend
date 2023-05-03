@@ -5,12 +5,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.*;
+import sideeffect.project.domain.comment.Comment;
+import sideeffect.project.domain.freeboard.FreeBoard;
+import sideeffect.project.domain.recruit.RecruitBoard;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.recommend.Recommend;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -62,6 +67,12 @@ public class User {
     private List<Comment> comments = new ArrayList<>();
 
     @Builder.Default
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    @OrderBy("id desc")
+    private List<RecruitBoard> recruitBoards = new ArrayList<>();
+
+
+    @Builder.Default
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE},
         mappedBy = "user")
     private Set<Recommend> recommends = new HashSet<>();
@@ -72,6 +83,14 @@ public class User {
 
     public void deleteFreeBoard(FreeBoard freeBoard) {
         this.freeBoards.remove(freeBoard);
+    }
+
+    public void addRecruitBoard(RecruitBoard recruitBoard) {
+        this.recruitBoards.add(recruitBoard);
+    }
+
+    public void deleteRecruitBoard(RecruitBoard recruitBoard) {
+        this.recruitBoards.remove(recruitBoard);
     }
 
     public void addComment(Comment comment) {
