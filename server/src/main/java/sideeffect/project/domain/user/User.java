@@ -1,7 +1,9 @@
 package sideeffect.project.domain.user;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.*;
 
 import javax.persistence.*;
@@ -60,8 +62,9 @@ public class User {
     private List<Comment> comments = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<Recommend> recommends = new ArrayList<>();
+    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+        mappedBy = "user")
+    private Set<Recommend> recommends = new HashSet<>();
 
     public void addFreeBoard(FreeBoard freeBoard) {
         this.freeBoards.add(freeBoard);
