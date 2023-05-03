@@ -3,6 +3,7 @@ package sideeffect.project.controller;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -12,6 +13,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
+import sideeffect.project.domain.recommend.Recommend;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
@@ -36,7 +38,6 @@ class FreeBoardControllerTest {
 
     private MockMvc mvc;
 
-    private FreeBoardResponse response;
     private FreeBoard freeBoard;
     private User user;
 
@@ -58,30 +59,35 @@ class FreeBoardControllerTest {
             .content("test")
             .build();
         freeBoard.associateUser(user);
-        response = FreeBoardResponse.of(freeBoard);
     }
 
+    @DisplayName("특정 id의 게시판을 조회한다.")
     @Test
     void findBoard() throws Exception {
-        given(freeBoardService.findBoard(any())).willReturn(response);
+        int recommendNumber = 20;
         List<Comment> freeBoards = generateComments(1L, 10L);
         freeBoards.forEach(comment -> comment.associate(user, freeBoard));
+        recommend(recommendNumber, freeBoard);
+        FreeBoardResponse response = FreeBoardResponse.of(freeBoard);
+        given(freeBoardService.findBoard(any())).willReturn(response);
 
         mvc.perform(get("/api/free-board/1")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.title", response.getTitle()).exists())
-            .andExpect(jsonPath("$.views", response.getViews()).exists())
-            .andExpect(jsonPath("$.userId", response.getUserId()).exists())
-            .andExpect(jsonPath("$.title", response.getTitle()).exists())
-            .andExpect(jsonPath("$.content", response.getContent()).exists())
-            .andExpect(jsonPath("$.projectUrl", response.getProjectUrl()).exists())
-            .andExpect(jsonPath("$.imgUrl", response.getImgUrl()).exists())
-            .andExpect(jsonPath("$.comments.size()", 10).exists())
+            .andExpect(jsonPath("$.title").value(response.getTitle()))
+            .andExpect(jsonPath("$.views").value(response.getViews()))
+            .andExpect(jsonPath("$.userId").value(response.getUserId()))
+            .andExpect(jsonPath("$.title").value(response.getTitle()))
+            .andExpect(jsonPath("$.content").value(response.getContent()))
+            .andExpect(jsonPath("$.projectUrl").value(response.getProjectUrl()))
+            .andExpect(jsonPath("$.imgUrl").value(response.getImgUrl()))
+            .andExpect(jsonPath("$.comments.size()").value(10))
+            .andExpect(jsonPath("$.recommends").value(recommendNumber))
             .andDo(print());
         verify(freeBoardService).findBoard(any());
     }
 
+    @DisplayName("게시판을 스크롤 한다.")
     @Test
     void scrollBoard() throws Exception {
         List<FreeBoard> freeBoards = generateFreeBoards(91L, 100L);
@@ -95,7 +101,9 @@ class FreeBoardControllerTest {
                 .param("lastId", "101")
                 .param("size", "10"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()", 10).exists())
+            .andExpect(jsonPath("$.freeBoards.length()").value(10))
+            .andExpect(jsonPath("$.hasNext").value(true))
+            .andExpect(jsonPath("$.lastId").value(91))
             .andDo(print());
     }
 
@@ -106,6 +114,13 @@ class FreeBoardControllerTest {
             User owner = User.builder().id((long) i).nickname("유저" + i).build();
             comments.subList(commentPerFreeBoard * i, commentPerFreeBoard * (i + 1))
                 .forEach(comment -> comment.associate(owner, board));
+        }
+    }
+
+    private void recommend(int recommendNumber, FreeBoard freeBoard) {
+        for (int i = 0; i < recommendNumber; i++) {
+            User recommendUser = User.builder().id((long) i).nickname("유저" + i).build();
+            Recommend.recommend(recommendUser, freeBoard);
         }
     }
 
