@@ -16,6 +16,10 @@ public class UserDetailsImpl implements UserDetails {
 
     private User user;
 
+    public User getUser() {
+        return user;
+    }
+
     public static UserDetailsImpl of(User user){
         return new UserDetailsImpl(user);
     }

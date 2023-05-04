@@ -9,19 +9,20 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
-@Component
+@Service
 public class JwtTokenProvider {
 
     @Value("${jwt.secret}")
     private String secretKey;
-    private Long expired = 1000 * 60 * 60L;
+    @Value("${jwt.expired}")
+    private String expired;
 
     private final UserDetailsServiceImpl userDetailsService;
 
