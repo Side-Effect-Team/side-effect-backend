@@ -41,4 +41,9 @@ public class BoardPosition {
         this.position = position;
         this.recruitBoard = recruitBoard;
     }
+
+    public void setRecruitBoard(RecruitBoard recruitBoard) {
+        this.recruitBoard = recruitBoard;
+    }
+
 }

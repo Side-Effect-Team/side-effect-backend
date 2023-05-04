@@ -22,4 +22,7 @@ public interface FreeBoardRepository extends JpaRepository<FreeBoard, Long> {
     List<FreeBoard> findStartScrollOfBoard(Pageable pageable);
 
     List<FreeBoard> findByIdLessThanOrderByIdDesc(Long boardId, Pageable pageable);
+
+    @Query("SELECT b from FreeBoard b order by b.recommends.size desc")
+    List<FreeBoard> findRankFreeBoard(Pageable pageable);
 }

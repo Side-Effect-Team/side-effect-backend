@@ -2,20 +2,13 @@ package sideeffect.project.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
-import sideeffect.project.dto.user.TokenInfo;
 import sideeffect.project.dto.user.UserJoinRequest;
-import sideeffect.project.repository.UrlRepository;
 import sideeffect.project.repository.UserRepository;
-import sideeffect.project.security.JwtTokenProvider;
 
 @Slf4j
 @Service
@@ -35,9 +28,10 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void validateDuplicateUser(String email){
+    public void validateDuplicateUser(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
             throw new RuntimeException(email + "는 이미 있습니다");
         });
     }
+
 }

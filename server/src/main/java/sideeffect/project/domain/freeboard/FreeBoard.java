@@ -1,33 +1,46 @@
 package sideeffect.project.domain.freeboard;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import sideeffect.project.common.domain.BaseTimeEntity;
+import sideeffect.project.domain.comment.Comment;
+import sideeffect.project.domain.recommend.Recommend;
 import sideeffect.project.domain.user.User;
 
 @Entity
 @Getter
 @Table(
+    name = "free_boards",
     uniqueConstraints = {
         @UniqueConstraint(
+            name = "unique_project_url",
             columnNames = "project_url"
         )
     }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class FreeBoard {
+public class FreeBoard extends BaseTimeEntity {
 
     @Id
+    @Column(name = "free_board_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -42,19 +55,27 @@ public class FreeBoard {
 
     private String imgUrl;
 
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "freeBoard")
+    private List<Comment> comments;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "freeBoard", orphanRemoval = true,
+        cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<Recommend> recommends;
+
     @Builder
-    public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl, Long userId) {
+    public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl) {
         this.id = id;
         this.views = 0;
         this.title = title;
         this.projectUrl = projectUrl;
         this.content = content;
         this.imgUrl = imgUrl;
+        this.comments = new ArrayList<>();
+        this.recommends = new HashSet<>();
     }
 
     public void update(FreeBoard freeBoard) {
@@ -87,5 +108,21 @@ public class FreeBoard {
         }
         user.addFreeBoard(this);
         this.user = user;
+    }
+
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
+    }
+
+    public void deleteComment(Comment comment) {
+        this.comments.remove(comment);
+    }
+
+    public void addRecommend(Recommend recommend) {
+        this.recommends.add(recommend);
+    }
+
+    public void deleteRecommend(Recommend recommend) {
+        this.recommends.remove(recommend);
     }
 }

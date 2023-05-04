@@ -1,16 +1,5 @@
 package sideeffect.project.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,6 +18,18 @@ import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
 import sideeffect.project.repository.FreeBoardRepository;
 import sideeffect.project.repository.UserRepository;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class FreeBoardServiceTest {
@@ -50,7 +51,6 @@ class FreeBoardServiceTest {
 
         user = User.builder()
             .id(1L)
-            .name("hello")
             .nickname("tester")
             .password("1234")
             .userRoleType(UserRoleType.ROLE_USER)
@@ -62,7 +62,6 @@ class FreeBoardServiceTest {
             .title("자랑 게시판")
             .content("제가 만든 겁니다.")
             .projectUrl("url")
-            .userId(1L)
             .build();
         freeBoard.associateUser(user);
     }
@@ -216,6 +215,14 @@ class FreeBoardServiceTest {
         );
     }
 
+    @DisplayName("랭킹 게시판 조회")
+    @Test
+    void findRankFreeBoards() {
+        freeBoardService.findRankFreeBoards();
+
+        verify(freeBoardRepository).findRankFreeBoard(any());
+    }
+
     private static Stream<Arguments> generateScrollTestAugments() {
         return Stream.of(
             Arguments.arguments(FreeBoardScrollRequest.builder().lastId(100L).size(10).build(),
@@ -235,7 +242,7 @@ class FreeBoardServiceTest {
     }
 
     private static List<FreeBoard> generateFreeBoards(Long startId, int size) {
-        User owner = User.builder().id(3L).name("owner").password("1234").build();
+        User owner = User.builder().id(3L).password("1234").build();
         List<FreeBoard> freeBoards = new ArrayList<>();
         for (Long i = startId; i > startId - size; i--) {
             FreeBoard freeBoard = FreeBoard.builder().id(startId + i).title("게시판" + i).content("게시판" + i).build();

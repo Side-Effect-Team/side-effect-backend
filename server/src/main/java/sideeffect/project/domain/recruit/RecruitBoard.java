@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import sideeffect.project.common.domain.BaseTimeEntity;
+import sideeffect.project.domain.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -14,7 +16,7 @@ import java.util.List;
 @Table(name = "RECRUIT_BOARD")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class RecruitBoard {
+public class RecruitBoard extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,7 +42,9 @@ public class RecruitBoard {
 
     private LocalDateTime deadline;
 
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @OneToMany(mappedBy = "recruitBoard", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<BoardPosition> boardPositions = new ArrayList<>();
@@ -49,7 +53,7 @@ public class RecruitBoard {
     private List<BoardStack> boardStacks = new ArrayList<>();
 
     @Builder
-    public RecruitBoard(Long id, String title, String contents, RecruitBoardType recruitBoardType, ProgressType progressType, String expectedPeriod, LocalDateTime deadline, Long userId) {
+    public RecruitBoard(Long id, String title, String contents, RecruitBoardType recruitBoardType, ProgressType progressType, String expectedPeriod, LocalDateTime deadline) {
         this.id = id;
         this.title = title;
         this.contents = contents;
@@ -58,7 +62,6 @@ public class RecruitBoard {
         this.progressType = progressType;
         this.expectedPeriod = expectedPeriod;
         this.deadline = deadline;
-        this.userId = userId;
     }
 
     public void updateBoardPositions(List<BoardPosition> boardPositions) {
@@ -73,10 +76,12 @@ public class RecruitBoard {
 
     public void addBoardPosition(BoardPosition boardPosition) {
         this.boardPositions.add(boardPosition);
+        boardPosition.setRecruitBoard(this);
     }
 
     public void addBoardStack(BoardStack boardStack) {
         this.boardStacks.add(boardStack);
+        boardStack.setRecruitBoard(this);
     }
 
     public void update(RecruitBoard recruitBoard) {
@@ -104,8 +109,12 @@ public class RecruitBoard {
         this.views++;
     }
 
-    public void setUser(Long userId) {
-        this.userId = userId;
+    public void associateUser(User user) {
+        if (this.user != null) {
+            this.user.deleteRecruitBoard(this);
+        }
+        user.addRecruitBoard(this);
+        this.user = user;
     }
 
 }

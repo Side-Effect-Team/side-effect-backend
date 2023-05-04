@@ -4,9 +4,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.ProgressType;
@@ -15,14 +19,17 @@ import sideeffect.project.domain.recruit.RecruitBoardType;
 import sideeffect.project.domain.stack.Stack;
 import sideeffect.project.domain.stack.StackLevelType;
 import sideeffect.project.domain.stack.StackType;
-import sideeffect.project.dto.recruit.BoardPositionRequest;
-import sideeffect.project.dto.recruit.BoardStackRequest;
-import sideeffect.project.dto.recruit.RecruitBoardRequest;
+import sideeffect.project.domain.user.User;
+import sideeffect.project.domain.user.UserRoleType;
+import sideeffect.project.dto.recruit.*;
 import sideeffect.project.repository.RecruitBoardRepository;
+import sideeffect.project.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -39,20 +46,31 @@ class RecruitBoardServiceTest {
     private RecruitBoardRepository recruitBoardRepository;
 
     @Mock
+    private UserRepository userRepository;
+
+    @Mock
     private PositionService positionService;
 
     @Mock
     private StackService stackService;
 
+    private User user;
     private RecruitBoard recruitBoard;
     private Position position;
     private Stack stack;
 
     @BeforeEach
     void setUp() {
+        user = User.builder()
+                .id(1L)
+                .nickname("test")
+                .password("1234")
+                .userRoleType(UserRoleType.ROLE_USER)
+                .email("test@naver.com")
+                .build();
+
         recruitBoard = RecruitBoard.builder()
                 .id(1L)
-                .userId(1L)
                 .title("모집 게시판")
                 .contents("모집합니다.")
                 .recruitBoardType(RecruitBoardType.PROJECT)
@@ -60,6 +78,8 @@ class RecruitBoardServiceTest {
                 .deadline(LocalDateTime.now())
                 .expectedPeriod("3개월")
                 .build();
+
+        recruitBoard.associateUser(user);
 
         position = Position.builder()
                 .id(1L)
@@ -89,6 +109,7 @@ class RecruitBoardServiceTest {
         Long userId = 1L;
 
         when(recruitBoardRepository.save(any())).thenReturn(recruitBoard);
+        when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(positionService.findByPositionType(any())).thenReturn(position);
         when(stackService.findByStackType(any())).thenReturn(stack);
 
@@ -172,7 +193,7 @@ class RecruitBoardServiceTest {
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
 
         assertThatThrownBy(() -> recruitBoardService.updateRecruitBoard(nonOwnerId, boardId, request))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(AuthException.class);
     }
 
     @DisplayName("모집 게시판을 삭제한다.")
@@ -194,7 +215,73 @@ class RecruitBoardServiceTest {
         Long boardId = 1L;
 
         assertThatThrownBy(() -> recruitBoardService.deleteRecruitBoard(nonOwnerId, boardId))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(AuthException.class);
     }
 
+    @DisplayName("모집 게시판 목록을 스크롤 조회한다.")
+    @MethodSource("generateScrollTestAugments")
+    @ParameterizedTest
+    void findBoardsWithLastId(RecruitBoardScrollRequest request, List<RecruitBoard> recruitBoards, boolean hasNext) {
+        when(recruitBoardRepository.findWithSearchConditions(any(), any(), any(), any())).thenReturn(recruitBoards);
+
+        RecruitBoardScrollResponse scrollResponse = recruitBoardService.findRecruitBoards(request);
+
+        assertAll(
+                () -> verify(recruitBoardRepository).findWithSearchConditions(any(), any(), any(), any()),
+                () -> assertThat(scrollResponse.getLastId()).isEqualTo(recruitBoards.get(recruitBoards.size() - 1).getId()),
+                () -> assertThat(scrollResponse.isHasNext()).isEqualTo(hasNext)
+        );
+    }
+
+    @DisplayName("모집 게시판 목록을 키워드로 검색한다.")
+    @Test
+    void findBoardWithKeyword() {
+        String searchContents = "검색할 컨텐츠";
+        RecruitBoard recruitBoard1 = RecruitBoard.builder().id(10L).title("모집 게시판" + searchContents).contents("!@#$%").build();
+        RecruitBoard recruitBoard2 = RecruitBoard.builder().id(1L).title("모집 게시판").contents("!@#$%" + searchContents).build();
+        recruitBoard1.associateUser(user);
+        recruitBoard2.associateUser(user);
+        RecruitBoardScrollRequest request = RecruitBoardScrollRequest.builder().keyword(searchContents).size(2).build();
+
+        when(recruitBoardRepository.findWithSearchConditions(any(), any(), any(), any())).thenReturn(List.of(recruitBoard1, recruitBoard2));
+
+        RecruitBoardScrollResponse scrollResponse = recruitBoardService.findRecruitBoards(request);
+
+        assertAll(
+                () -> verify(recruitBoardRepository).findWithSearchConditions(any(), any(), any(), any()),
+                () -> assertThat(scrollResponse.getLastId()).isEqualTo(1L),
+                () -> assertThat(scrollResponse.isHasNext()).isFalse()
+        );
+
+    }
+
+    private static Stream<Arguments> generateScrollTestAugments() {
+        return Stream.of(
+                Arguments.arguments(RecruitBoardScrollRequest.builder().lastId(100L).size(10).build(),
+                        generateRecruitBoards(1L, 11), true),
+                Arguments.arguments(RecruitBoardScrollRequest.builder().lastId(100L).size(11).build(),
+                        generateRecruitBoards(1L, 11), false),
+                Arguments.arguments(RecruitBoardScrollRequest.builder().lastId(5L).size(1).build(),
+                        generateRecruitBoards(1L, 10), true),
+                Arguments.arguments(RecruitBoardScrollRequest.builder().lastId(1L).size(10).build(),
+                        generateRecruitBoards(1L, 10), false),
+                Arguments.arguments(RecruitBoardScrollRequest.builder().size(10).build(),
+                        generateRecruitBoards(1L, 11), true),
+                Arguments.arguments(RecruitBoardScrollRequest.builder().size(10).build(),
+                        generateRecruitBoards(1L, 10), false),
+                Arguments.arguments(RecruitBoardScrollRequest.builder().size(1).build(),
+                        generateRecruitBoards(1L, 10), true)
+        );
+    }
+
+    private static List<RecruitBoard> generateRecruitBoards(Long startId, int size) {
+        User owner = User.builder().id(1L).email("test1234@naver.com").password("qwer1234!").build();
+        List<RecruitBoard> recruitBoards = new ArrayList<>();
+        for (Long i = startId; i < startId + size; i++) {
+            RecruitBoard recruitBoard = RecruitBoard.builder().id(i).title("모집 게시판" + i).contents("모집합니다." + i).build();
+            recruitBoard.associateUser(owner);
+            recruitBoards.add(recruitBoard);
+        }
+        return recruitBoards;
+    }
 }
