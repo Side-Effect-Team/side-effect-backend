@@ -10,7 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import sideeffect.project.dto.user.UserJoinRequest;
+import sideeffect.project.dto.user.UserRequest;
 import sideeffect.project.service.UserService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -28,14 +28,14 @@ class UserControllerTest {
 
     ObjectMapper objectMapper;
 
-    UserJoinRequest userJoinRequest;
+    UserRequest userJoinRequest;
     @BeforeEach
     void beforeEach(WebApplicationContext context){
         objectMapper = new ObjectMapper();
         mockMvc = MockMvcBuilders.webAppContextSetup(context)
                 .build();
 
-        userJoinRequest = UserJoinRequest.builder()
+        userJoinRequest = UserRequest.builder()
                 .email("1111@gmail.com")
                 .password("1234")
                 .nickname("ABC")
