@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import javax.persistence.EntityManager;
@@ -16,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Pageable;
 import sideeffect.project.domain.freeboard.FreeBoard;
+import sideeffect.project.domain.recommend.Recommend;
+import sideeffect.project.domain.user.User;
 
 @DataJpaTest
 class FreeBoardRepositoryTest {
@@ -115,6 +118,43 @@ class FreeBoardRepositoryTest {
             .findScrollOfBoardsWithKeyWord(title, freeBoard2.getId() + 1, Pageable.ofSize(5));
 
         assertThat(boards).containsExactly(freeBoard2, freeBoard1);
+    }
+
+    @DisplayName("추천수가 많은 순으로 게시판이 조회된다.")
+    @Test
+    void findRankFreeBoard() {
+        int rankSize = 6;
+        int boardsSize = 10;
+        List<Integer> recommendNumbers = List.of(11, 9, 11, 23, 21, 8, 6, 7, 2, 0);
+        saveFreeBoardsAndRecommend(boardsSize, recommendNumbers);
+        em.flush();
+        em.clear();
+
+        List<Integer> result = repository.findRankFreeBoard(Pageable.ofSize(rankSize))
+            .stream().map(FreeBoard::getRecommends).map(Set::size).collect(Collectors.toList());
+        System.out.println("result = " + result);
+        System.out.println(repository.findRankFreeBoard(Pageable.ofSize(rankSize)));
+        assertThat(result).isEqualTo(List.of(23, 21, 11, 11, 9, 8));
+    }
+
+    private void saveFreeBoardsAndRecommend(int boardSize, List<Integer> recommendNumbers) {
+        for (int i = 0; i < boardSize; i++) {
+            User user = User.builder().nickname("유저" + i).build();
+            em.persist(user);
+            FreeBoard freeBoard = FreeBoard.builder().title("게시판" + i).build();
+            freeBoard.associateUser(user);
+            repository.save(freeBoard);
+            recommend(freeBoard, recommendNumbers.get(i));
+        }
+    }
+
+    private void recommend(FreeBoard freeBoard, Integer recommendNumber) {
+        for (int i = 0; i < recommendNumber; i++) {
+            User user = User.builder().nickname("추천한 유저" + i).build();
+            em.persist(user);
+            Recommend recommend = Recommend.recommend(user, freeBoard);
+            em.persist(recommend);
+        }
     }
 
     private Long getLastId() {

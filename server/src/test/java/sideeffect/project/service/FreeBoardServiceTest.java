@@ -215,6 +215,14 @@ class FreeBoardServiceTest {
         );
     }
 
+    @DisplayName("랭킹 게시판 조회")
+    @Test
+    void findRankFreeBoards() {
+        freeBoardService.findRankFreeBoards();
+
+        verify(freeBoardRepository).findRankFreeBoard(any());
+    }
+
     private static Stream<Arguments> generateScrollTestAugments() {
         return Stream.of(
             Arguments.arguments(FreeBoardScrollRequest.builder().lastId(100L).size(10).build(),

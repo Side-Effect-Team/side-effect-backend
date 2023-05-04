@@ -1,7 +1,10 @@
 package sideeffect.project.domain.freeboard;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -19,6 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sideeffect.project.common.domain.BaseTimeEntity;
 import sideeffect.project.domain.comment.Comment;
+import sideeffect.project.domain.recommend.Recommend;
 import sideeffect.project.domain.user.User;
 
 @Entity
@@ -51,13 +55,16 @@ public class FreeBoard extends BaseTimeEntity {
 
     private String imgUrl;
 
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "freeBoard")
-    private List<Comment> comments = new ArrayList<>();
+    private List<Comment> comments;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "freeBoard", orphanRemoval = true,
+        cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<Recommend> recommends;
 
     @Builder
     public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl) {
@@ -68,6 +75,7 @@ public class FreeBoard extends BaseTimeEntity {
         this.content = content;
         this.imgUrl = imgUrl;
         this.comments = new ArrayList<>();
+        this.recommends = new HashSet<>();
     }
 
     public void update(FreeBoard freeBoard) {
@@ -108,5 +116,13 @@ public class FreeBoard extends BaseTimeEntity {
 
     public void deleteComment(Comment comment) {
         this.comments.remove(comment);
+    }
+
+    public void addRecommend(Recommend recommend) {
+        this.recommends.add(recommend);
+    }
+
+    public void deleteRecommend(Recommend recommend) {
+        this.recommends.remove(recommend);
     }
 }

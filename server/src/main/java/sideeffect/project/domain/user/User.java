@@ -1,5 +1,9 @@
 package sideeffect.project.domain.user;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import lombok.*;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
@@ -7,8 +11,7 @@ import sideeffect.project.domain.recruit.RecruitBoard;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import sideeffect.project.domain.recommend.Recommend;
 
 @Entity
 @Getter @Setter
@@ -65,6 +68,11 @@ public class User {
     private List<RecruitBoard> recruitBoards = new ArrayList<>();
 
 
+    @Builder.Default
+    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+        mappedBy = "user")
+    private Set<Recommend> recommends = new HashSet<>();
+
     public void addFreeBoard(FreeBoard freeBoard) {
         this.freeBoards.add(freeBoard);
     }
@@ -87,5 +95,13 @@ public class User {
 
     public void deleteComment(Comment comment) {
         this.comments.remove(comment);
+    }
+
+    public void addRecommend(Recommend recommend) {
+        this.recommends.add(recommend);
+    }
+
+    public void deleteRecommend(Recommend recommend) {
+        this.recommends.remove(recommend);
     }
 }
