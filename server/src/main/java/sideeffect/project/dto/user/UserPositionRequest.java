@@ -8,7 +8,7 @@ import sideeffect.project.domain.user.UserPosition;
 
 @Getter
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public class UserPositionRequest {
     private PositionType positionType;

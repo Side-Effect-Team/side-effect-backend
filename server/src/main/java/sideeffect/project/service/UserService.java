@@ -5,6 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sideeffect.project.common.exception.AuthException;
+import sideeffect.project.common.exception.ErrorCode;
+import sideeffect.project.common.exception.IllegalStateException;
 import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.stack.Stack;
 import sideeffect.project.domain.user.User;
@@ -17,7 +20,6 @@ import sideeffect.project.dto.user.UserResponse;
 import sideeffect.project.dto.user.UserStackRequest;
 import sideeffect.project.repository.UserRepository;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -78,33 +80,23 @@ public class UserService {
     }
 
     public UserResponse findOne(User user, Long id){
-        User finduser = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        validateOwner(user.getId(), finduser);
+        if(user.getId()!=id) throw new AuthException(ErrorCode.USER_UNAUTHORIZED);
         return UserResponse.of(user);
     }
     public void update(User user, Long id, UserRequest request){
-        User finduser = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        validateOwner(user.getId(), finduser);
+        if(user.getId()!=id) throw new AuthException(ErrorCode.USER_UNAUTHORIZED);
         user.update(request.toUser());
-
     }
 
     public void delete(User user, Long id){
-        User finduser = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        validateOwner(user.getId(), finduser);
+        if(user.getId()!=id) throw new AuthException(ErrorCode.USER_UNAUTHORIZED);
         userRepository.deleteById(id);
     }
 
     public void validateDuplicateUser(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
-            throw new RuntimeException(email + "는 이미 있습니다");
+            throw new IllegalStateException(ErrorCode.USER_ALREADY_EXIST);
         });
-    }
-
-    private void validateOwner(Long id, User user) {
-        if (!id.equals(user.getId())) {
-            throw new IllegalArgumentException("접근하려는 계정의 주인이 아닙니다.");
-        }
     }
 
 }
