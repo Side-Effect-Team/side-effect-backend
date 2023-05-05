@@ -70,10 +70,11 @@ public class User extends BaseTimeEntity {
         mappedBy = "user")
     private Set<Recommend> recommends = new HashSet<>();
 
-
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
     private List<UserPosition> userPositions = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
     private List<UserStack> userStacks = new ArrayList<>();
 
