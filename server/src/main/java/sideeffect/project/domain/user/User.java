@@ -1,6 +1,7 @@
 package sideeffect.project.domain.user;
 
 import lombok.*;
+import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.recruit.RecruitBoard;
@@ -64,6 +65,10 @@ public class User {
     @OrderBy("id desc")
     private List<RecruitBoard> recruitBoards = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    @OrderBy("id desc")
+    private List<Applicant> applicants = new ArrayList<>();
 
     public void addFreeBoard(FreeBoard freeBoard) {
         this.freeBoards.add(freeBoard);
@@ -87,5 +92,13 @@ public class User {
 
     public void deleteComment(Comment comment) {
         this.comments.remove(comment);
+    }
+
+    public void addApplicant(Applicant applicant) {
+        this.applicants.add(applicant);
+    }
+
+    public void deleteApplicant(Applicant applicant) {
+        this.applicants.remove(applicant);
     }
 }

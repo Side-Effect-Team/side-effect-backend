@@ -42,7 +42,7 @@ public class RecruitBoard extends BaseTimeEntity {
 
     private LocalDateTime deadline;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
