@@ -106,7 +106,7 @@ class UserServiceTest {
     void findOne(){
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
 
-        userService.findOne(1L);
+        userService.findOne(user, 1L);
 
         verify(userRepository).findById(any());
     }
@@ -122,7 +122,7 @@ class UserServiceTest {
 
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
 
-        userService.update(1L, request);
+        userService.update(user, 1L, request);
 
         assertAll(
             () -> verify(userRepository).findById(any()),
@@ -137,7 +137,7 @@ class UserServiceTest {
     @Test
     void delete(){
 
-        userService.delete(1L);
+        userService.delete(user, 1L);
 
         verify(userRepository).deleteById(any());
     }
