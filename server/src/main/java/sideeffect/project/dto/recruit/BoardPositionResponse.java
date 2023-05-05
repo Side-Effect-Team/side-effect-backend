@@ -13,12 +13,14 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class BoardPositionResponse {
 
+    private Long id;
     private PositionType positionType;
     private int targetNumber;
     private int currentNumber;
 
     public static BoardPositionResponse of(BoardPosition boardPosition) {
         return BoardPositionResponse.builder()
+                .id(boardPosition.getId())
                 .positionType(boardPosition.getPosition().getPositionType())
                 .targetNumber(boardPosition.getTargetNumber())
                 .currentNumber(boardPosition.getCurrentNumber())
