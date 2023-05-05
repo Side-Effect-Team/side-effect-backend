@@ -12,6 +12,12 @@ public enum ErrorCode {
     RECRUIT_BOARD_NOT_FOUND(400, "RB_001", "해당 모집 게시판을 찾을 수 없습니다."),
     RECRUIT_BOARD_UNAUTHORIZED(403, "RB_002", "해당 모집 게시판에 대한 권한이 없습니다."),
 
+    BOARD_POSITION_NOT_FOUND(400, "BP_001", "해당 게시판이 모집하는 포지션을 찾을 수 없습니다."),
+
+    APPLICANT_NOT_FOUND(400, "AC_001", "지원자를 찾을 수 없습니다."),
+    APPLICANT_SELF_UNAUTHORIZED(403, "AC_002", "본인의 게시물에는 지원할 수 없습니다."),
+    APPLICANT_DUPLICATED(403, "AC_003", "하나의 게시물에는 한 번만 지원할 수 있습니다."),
+
     POSITION_NOT_FOUND(400, "PS_001", "해당 포지션을 찾을 수 없습니다."),
 
     STACK_NOT_FOUND(400, "ST_001", "해당 기술스택을 찾을 수 없습니다.");
