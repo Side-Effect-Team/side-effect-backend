@@ -1,5 +1,6 @@
 package sideeffect.project.dto.comment;
 
+import javax.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +15,8 @@ import sideeffect.project.domain.comment.Comment;
 public class CommentRequest {
 
     private Long freeBoardId;
+
+    @NotBlank
     private String comment;
 
     public Comment toComment() {
