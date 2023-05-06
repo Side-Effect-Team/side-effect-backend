@@ -13,7 +13,6 @@ import sideeffect.project.domain.comment.Comment;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommentRequest {
 
-    private Long userId;
     private Long freeBoardId;
     private String comment;
 
