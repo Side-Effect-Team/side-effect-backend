@@ -35,7 +35,7 @@ public class UserService {
     private final StackService stackService;
     private final BCryptPasswordEncoder encoder;
 
-    public void join(UserRequest request){
+    public Long join(UserRequest request){
 
         validateDuplicateUser(request.getEmail());
         User user = request.toUser();
@@ -43,7 +43,7 @@ public class UserService {
         user.setUserRoleType(UserRoleType.ROLE_USER);
         user.updateUserPosition(getUserPositions(user, request.getPositions()));
         user.updateUserStack(getUserStacks(user, request.getStacks()));
-        userRepository.save(user);
+        return userRepository.save(user).getId();
     }
 
     private List<UserStack> getUserStacks(User user, List<UserStackRequest> stacks) {
