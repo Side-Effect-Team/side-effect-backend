@@ -8,15 +8,22 @@ import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.EntityNotFoundException;
 import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.domain.applicant.Applicant;
+import sideeffect.project.domain.applicant.ApplicantStatus;
+import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.user.User;
+import sideeffect.project.dto.applicant.ApplicantListResponse;
+import sideeffect.project.dto.applicant.ApplicantPositionResponse;
 import sideeffect.project.dto.applicant.ApplicantRequest;
 import sideeffect.project.dto.applicant.ApplicantResponse;
 import sideeffect.project.repository.ApplicantRepository;
 import sideeffect.project.repository.BoardPositionRepository;
 import sideeffect.project.repository.RecruitBoardRepository;
 import sideeffect.project.repository.UserRepository;
+
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -46,6 +53,17 @@ public class ApplicantService {
         return ApplicantResponse.of(applicantRepository.save(applicant));
     }
 
+    @Transactional(readOnly = true)
+    public Map<PositionType, ApplicantPositionResponse> findApplicants(Long userId, Long boardId, ApplicantStatus status) {
+        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
+
+        validateOwner(findRecruitBoard, userId);
+
+        List<ApplicantListResponse> applicantListResponses = recruitBoardRepository.getApplicantsByPosition(boardId, status);
+        return ApplicantPositionResponse.mapOf(applicantListResponses);
+    }
+
     private void isDuplicateApplicant(Long recruitBoardId, Long userId) {
         if(recruitBoardRepository.existsApplicantByRecruitBoard(recruitBoardId, userId)) {
             throw new AuthException(ErrorCode.APPLICANT_DUPLICATED);
@@ -55,6 +73,12 @@ public class ApplicantService {
     private void isOwnedByUser(RecruitBoard recruitBoard, Long userId) {
         if(userId.equals(recruitBoard.getUser().getId())) {
             throw new AuthException(ErrorCode.APPLICANT_SELF_UNAUTHORIZED);
+        }
+    }
+
+    private void validateOwner(RecruitBoard recruitBoard, Long userId) {
+        if (!userId.equals(recruitBoard.getUser().getId())) {
+            throw new AuthException(ErrorCode.APPLICANT_UNAUTHORIZED);
         }
     }
 

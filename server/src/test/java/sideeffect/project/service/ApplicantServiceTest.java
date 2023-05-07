@@ -4,17 +4,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.domain.applicant.Applicant;
+import sideeffect.project.domain.applicant.ApplicantStatus;
+import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.ProgressType;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.recruit.RecruitBoardType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
+import sideeffect.project.dto.applicant.ApplicantListResponse;
+import sideeffect.project.dto.applicant.ApplicantPositionResponse;
 import sideeffect.project.dto.applicant.ApplicantRequest;
 import sideeffect.project.repository.ApplicantRepository;
 import sideeffect.project.repository.BoardPositionRepository;
@@ -22,9 +29,14 @@ import sideeffect.project.repository.RecruitBoardRepository;
 import sideeffect.project.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.*;
 
@@ -131,6 +143,59 @@ class ApplicantServiceTest {
 
         assertThatThrownBy(() -> applicantService.register(otherUser.getId(), request))
                 .isInstanceOf(AuthException.class);
+    }
+
+    @DisplayName("모집 게시판의 지원자 리스트를 조회한다.")
+    @MethodSource("generateApplicantListTestAugments")
+    @ParameterizedTest
+    void findApplicants(List<ApplicantListResponse> applicantListResponses, int boardPositionSize) {
+        when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
+        when(recruitBoardRepository.getApplicantsByPosition(any(), any())).thenReturn(applicantListResponses);
+
+        Map<PositionType, ApplicantPositionResponse> applicants = applicantService.findApplicants(user.getId(), recruitBoard.getId(), ApplicantStatus.PENDING);
+        AtomicInteger count = new AtomicInteger();
+        applicants.forEach((key, value) -> count.addAndGet(value.getSize()));
+
+        assertAll(
+                () -> verify(recruitBoardRepository).findById(any()),
+                () -> verify(recruitBoardRepository).getApplicantsByPosition(any(), any()),
+                () -> assertThat(applicants.size()).isEqualTo(boardPositionSize),
+                () -> assertThat(applicantListResponses.size()).isEqualTo(count.intValue())
+
+        );
+    }
+
+    @DisplayName("모집 게시판의 지원자 리스트는 글 작성자가 아니라면 조회가 불가능하다.")
+    @Test
+    void findApplicantsByNonOwner() {
+        when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
+
+        Long nonOwner = 2L;
+
+        assertThatThrownBy(() -> applicantService.findApplicants(nonOwner, recruitBoard.getId(), ApplicantStatus.PENDING))
+                .isInstanceOf(AuthException.class);
+    }
+
+    private static Stream<Arguments> generateApplicantListTestAugments() {
+        return Stream.of(
+                Arguments.arguments(generateApplicantListResponse(List.of(PositionType.FRONTEND, PositionType.BACKEND), 3), 2),
+                Arguments.arguments(generateApplicantListResponse(List.of(PositionType.FRONTEND, PositionType.BACKEND, PositionType.DESIGNER), 3), 3),
+                Arguments.arguments(generateApplicantListResponse(List.of(PositionType.FRONTEND, PositionType.BACKEND, PositionType.DESIGNER, PositionType.PM), 3), 4),
+                Arguments.arguments(generateApplicantListResponse(List.of(PositionType.FRONTEND, PositionType.BACKEND, PositionType.BACKEND), 3), 2),
+                Arguments.arguments(generateApplicantListResponse(List.of(PositionType.BACKEND, PositionType.BACKEND, PositionType.BACKEND), 3), 1)
+        );
+    }
+    private static List<ApplicantListResponse> generateApplicantListResponse(List<PositionType> positionTypes, int size) {
+        List<ApplicantListResponse> applicantListResponses = new ArrayList<>();
+        Long id = 1L;
+        for (PositionType positionType : positionTypes) {
+            for(int i = 0; i < size; i++) {
+                ApplicantListResponse response = ApplicantListResponse.builder().userId(id).applicantId(id).nickName("test" + id).positionType(positionType).build();
+                applicantListResponses.add(response);
+                id++;
+            }
+        }
+        return applicantListResponses;
     }
 
 }
