@@ -55,6 +55,7 @@ public class WebSecurityConfig{
                 .authorizeRequests()
                     .antMatchers("/join").permitAll()
                     .antMatchers(HttpMethod.POST, "/**").authenticated()
+                    .antMatchers(HttpMethod.GET, "/api/free-boards/**").permitAll()
                     .and()
                 .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

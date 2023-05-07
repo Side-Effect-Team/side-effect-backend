@@ -1,5 +1,20 @@
 package sideeffect.project.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -9,30 +24,37 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import sideeffect.project.common.exception.AuthException;
+import sideeffect.project.common.exception.ErrorCode;
+import sideeffect.project.common.security.WithCustomUser;
+import sideeffect.project.config.WebSecurityConfig;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.recommend.Recommend;
 import sideeffect.project.domain.user.User;
+import sideeffect.project.domain.user.UserRoleType;
+import sideeffect.project.dto.freeboard.FreeBoardRequest;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
+import sideeffect.project.security.UserDetailsServiceImpl;
 import sideeffect.project.service.FreeBoardService;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+@Import(WebSecurityConfig.class)
+@ComponentScan(basePackages = "sideeffect.project.security")
 @WebMvcTest(FreeBoardController.class)
 class FreeBoardControllerTest {
+
+    @MockBean
+    private UserDetailsServiceImpl userDetailsService;
 
     @MockBean
     private FreeBoardService freeBoardService;
@@ -41,15 +63,20 @@ class FreeBoardControllerTest {
 
     private FreeBoard freeBoard;
     private User user;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp(WebApplicationContext context) {
         mvc = MockMvcBuilders.webAppContextSetup(context)
+            .apply(springSecurity())
             .build();
 
         user = User.builder()
             .id(1L)
+            .email("tester@naver.com")
             .password("1234")
+            .nickname("hello")
+            .userRoleType(UserRoleType.ROLE_USER)
             .build();
 
         freeBoard = FreeBoard.builder()
@@ -60,6 +87,8 @@ class FreeBoardControllerTest {
             .content("test")
             .build();
         freeBoard.associateUser(user);
+
+        objectMapper = new ObjectMapper();
     }
 
     @DisplayName("특정 id의 게시판을 조회한다.")
@@ -109,6 +138,7 @@ class FreeBoardControllerTest {
     }
 
     @DisplayName("랭킹 게시판을 가져온다.")
+    @WithAnonymousUser
     @Test
     void getRankBoard() throws Exception {
         List<FreeBoard> freeBoards = generateRecommendBoards();
@@ -119,6 +149,66 @@ class FreeBoardControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.size()").value(6))
             .andDo(print());
+    }
+
+    @DisplayName("게시판을 등록한다.")
+    @WithCustomUser
+    @Test
+    void registerBoard() throws Exception {
+        FreeBoardRequest request = FreeBoardRequest.builder().content("test").build();
+        given(freeBoardService.register(any(), any())).willReturn(freeBoard);
+        mvc.perform(post("/api/free-boards")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andDo(print());
+    }
+
+    @DisplayName("게시판을 업데이트한다.")
+    @WithCustomUser
+    @Test
+    void updateBoard() throws Exception {
+        FreeBoardRequest request = FreeBoardRequest.builder().content("update").build();
+        mvc.perform(patch("/api/free-boards/1")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk());
+    }
+
+    @DisplayName("잘못된 유저가 게시판을 업데이트 한다.")
+    @WithCustomUser
+    @Test
+    void updateBoardByNotOwner() throws Exception {
+        FreeBoardRequest request = FreeBoardRequest.builder().content("update").build();
+        doThrow(new AuthException(ErrorCode.FREE_BOARD_UNAUTHORIZED))
+            .when(freeBoardService).updateBoard(any(), any(), any());
+        mvc.perform(patch("/api/free-boards/1")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isForbidden());
+    }
+
+    @DisplayName("게시판을 삭제한다.")
+    @WithCustomUser
+    @Test
+    void deleteBoard() throws Exception {
+        mvc.perform(delete("/api/free-boards/1")
+                .with(csrf()))
+            .andExpect(status().isOk());
+    }
+
+    @DisplayName("게시판 주인이 아닌 사람이 삭제")
+    @WithCustomUser
+    @Test
+    void deleteBoardByNotOwner() throws Exception {
+        doThrow(new AuthException(ErrorCode.FREE_BOARD_UNAUTHORIZED))
+            .when(freeBoardService).deleteBoard(any(), any());
+        mvc.perform(delete("/api/free-boards/1")
+                .with(csrf()))
+            .andExpect(status().isForbidden());
     }
 
     private List<FreeBoard> generateRecommendBoards() {
