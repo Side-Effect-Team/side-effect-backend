@@ -1,11 +1,13 @@
 package sideeffect.project.service;
 
 import java.util.List;
-import javax.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sideeffect.project.common.exception.AuthException;
+import sideeffect.project.common.exception.EntityNotFoundException;
+import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.freeboard.FreeBoardKeyWordRequest;
@@ -14,7 +16,6 @@ import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
 import sideeffect.project.repository.FreeBoardRepository;
-import sideeffect.project.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -23,11 +24,9 @@ public class FreeBoardService {
     private static final int RANK_NUMBER = 6;
 
     private final FreeBoardRepository repository;
-    private final UserRepository userRepository;
 
     @Transactional
-    public FreeBoard register(Long userId, FreeBoardRequest request) {
-        User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
+    public FreeBoard register(User user, FreeBoardRequest request) {
         FreeBoard freeBoard = request.toFreeBoard();
         freeBoard.associateUser(user);
         return repository.save(freeBoard);
@@ -54,25 +53,30 @@ public class FreeBoardService {
         return FreeBoardResponse.listOf(repository.findRankFreeBoard(Pageable.ofSize(RANK_NUMBER)));
     }
 
-    @Transactional
-    public void updateBoard(Long userId, Long boardId, FreeBoardRequest request) {
-        FreeBoard freeBoard = repository.findById(boardId).orElseThrow(EntityNotFoundException::new);
-        validateOwner(userId, freeBoard);
-        freeBoard.update(request.toFreeBoard());
-    }
-
-    @Transactional
+    @Transactional(readOnly = true)
     public FreeBoardResponse findBoard(Long boardId) {
-        FreeBoard freeBoard = repository.findById(boardId).orElseThrow(EntityNotFoundException::new);
+        FreeBoard freeBoard = findFreeBoard(boardId);
         freeBoard.increaseViews();
         return FreeBoardResponse.of(freeBoard);
     }
 
     @Transactional
+    public void updateBoard(Long userId, Long boardId, FreeBoardRequest request) {
+        FreeBoard freeBoard = findFreeBoard(boardId);
+        validateOwner(userId, freeBoard);
+        freeBoard.update(request.toFreeBoard());
+    }
+
+    @Transactional
     public void deleteBoard(Long userId, Long boardId) {
-        FreeBoard freeBoard = repository.findById(boardId).orElseThrow(EntityNotFoundException::new);
+        FreeBoard freeBoard = findFreeBoard(boardId);
         validateOwner(userId, freeBoard);
         repository.delete(freeBoard);
+    }
+
+    private FreeBoard findFreeBoard(Long boardId) {
+        return repository.findById(boardId)
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.FREE_BOARD_NOT_FOUND));
     }
 
     private FreeBoardScrollResponse findBoards(FreeBoardScrollRequest request) {
@@ -105,7 +109,7 @@ public class FreeBoardService {
 
     private void validateOwner(Long userId, FreeBoard freeBoard) {
         if (!userId.equals(freeBoard.getUser().getId())) {
-            throw new IllegalArgumentException("게시글의 주인이 아닙니다.");
+            throw new AuthException(ErrorCode.FREE_BOARD_UNAUTHORIZED);
         }
     }
 

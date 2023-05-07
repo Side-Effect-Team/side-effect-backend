@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
@@ -17,7 +18,7 @@ import sideeffect.project.dto.freeboard.FreeBoardRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
 import sideeffect.project.repository.FreeBoardRepository;
-import sideeffect.project.repository.UserRepository;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,15 +40,12 @@ class FreeBoardServiceTest {
     @Mock
     private FreeBoardRepository freeBoardRepository;
 
-    @Mock
-    private UserRepository userRepository;
-
     private FreeBoard freeBoard;
     private User user;
 
     @BeforeEach
     void setUp() {
-        freeBoardService = new FreeBoardService(freeBoardRepository, userRepository);
+        freeBoardService = new FreeBoardService(freeBoardRepository);
 
         user = User.builder()
             .id(1L)
@@ -71,10 +69,8 @@ class FreeBoardServiceTest {
     void register() {
         FreeBoardRequest request = FreeBoardRequest.builder()
             .title("자랑 게시판").content("제가 만든 겁니다.").projectUrl("url").build();
-        Long userId = 1L;
-        when(userRepository.findById(any())).thenReturn(Optional.of(user));
 
-        freeBoardService.register(userId, request);
+        freeBoardService.register(user, request);
 
         verify(freeBoardRepository).save(any());
     }
@@ -108,7 +104,7 @@ class FreeBoardServiceTest {
         when(freeBoardRepository.findById(any())).thenReturn(Optional.of(freeBoard));
 
         assertThatThrownBy(() -> freeBoardService.updateBoard(nonOwnerId, boardId, request))
-            .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(AuthException.class);
     }
 
     @DisplayName("게시판을 단건 조회한다.")
@@ -142,7 +138,7 @@ class FreeBoardServiceTest {
         when(freeBoardRepository.findById(any())).thenReturn(Optional.of(freeBoard));
 
         assertThatThrownBy(() -> freeBoardService.deleteBoard(nonOwnerId, 1L))
-            .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(AuthException.class);
     }
 
     @DisplayName("게시판을 스크롤 조회한다.")
