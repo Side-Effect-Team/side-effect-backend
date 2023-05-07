@@ -12,6 +12,7 @@ import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.freeboard.FreeBoardKeyWordRequest;
 import sideeffect.project.dto.freeboard.FreeBoardRequest;
+import sideeffect.project.dto.freeboard.DetailedFreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
@@ -54,10 +55,10 @@ public class FreeBoardService {
     }
 
     @Transactional(readOnly = true)
-    public FreeBoardResponse findBoard(Long boardId) {
+    public DetailedFreeBoardResponse findBoard(Long boardId) {
         FreeBoard freeBoard = findFreeBoard(boardId);
         freeBoard.increaseViews();
-        return FreeBoardResponse.of(freeBoard);
+        return DetailedFreeBoardResponse.of(freeBoard);
     }
 
     @Transactional

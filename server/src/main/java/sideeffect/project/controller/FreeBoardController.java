@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.freeboard.FreeBoardKeyWordRequest;
 import sideeffect.project.dto.freeboard.FreeBoardRequest;
+import sideeffect.project.dto.freeboard.DetailedFreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
@@ -29,7 +30,7 @@ public class FreeBoardController {
     private final FreeBoardService freeBoardService;
 
     @GetMapping("/{id}")
-    public FreeBoardResponse findBoard(@PathVariable Long id) {
+    public DetailedFreeBoardResponse findBoard(@PathVariable Long id) {
         return freeBoardService.findBoard(id);
     }
 

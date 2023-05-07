@@ -41,6 +41,7 @@ import sideeffect.project.domain.recommend.Recommend;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.dto.freeboard.FreeBoardRequest;
+import sideeffect.project.dto.freeboard.DetailedFreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
 import sideeffect.project.security.UserDetailsServiceImpl;
@@ -98,7 +99,7 @@ class FreeBoardControllerTest {
         List<Comment> freeBoards = generateComments(1L, 10L);
         freeBoards.forEach(comment -> comment.associate(user, freeBoard));
         recommend(recommendNumber, freeBoard);
-        FreeBoardResponse response = FreeBoardResponse.of(freeBoard);
+        DetailedFreeBoardResponse response = DetailedFreeBoardResponse.of(freeBoard);
         given(freeBoardService.findBoard(any())).willReturn(response);
 
         mvc.perform(get("/api/free-boards/1")
