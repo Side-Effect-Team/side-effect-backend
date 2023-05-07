@@ -17,10 +17,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/join")
-    public String join(@RequestBody UserRequest request){
-        System.out.println(request.toString());
-        userService.join(request);
-        return "join success";
+    public Long join(@RequestBody UserRequest request){
+        return userService.join(request);
     }
 
     @GetMapping("/user/{id}")
