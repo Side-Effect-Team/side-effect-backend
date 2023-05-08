@@ -18,7 +18,6 @@ import sideeffect.project.dto.applicant.*;
 import sideeffect.project.repository.ApplicantRepository;
 import sideeffect.project.repository.BoardPositionRepository;
 import sideeffect.project.repository.RecruitBoardRepository;
-import sideeffect.project.repository.UserRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -31,22 +30,19 @@ public class ApplicantService {
     private final ApplicantRepository applicantRepository;
     private final RecruitBoardRepository recruitBoardRepository;
     private final BoardPositionRepository boardPositionRepository;
-    private final UserRepository userRepository;
 
     @Transactional
-    public ApplicantResponse register(Long userId, ApplicantRequest request) {
-        User findUser = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+    public ApplicantResponse register(User user, ApplicantRequest request) {
         RecruitBoard findRecruitBoard = recruitBoardRepository.findById(request.getRecruitBoardId())
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
         BoardPosition findBoardPosition = boardPositionRepository.findById(request.getBoardPositionId())
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOARD_POSITION_NOT_FOUND));
 
-        isOwnedByUser(findRecruitBoard, userId);
-        isDuplicateApplicant(request.getRecruitBoardId(), userId);
+        isOwnedByUser(findRecruitBoard, user.getId());
+        isDuplicateApplicant(request.getRecruitBoardId(), user.getId());
 
         Applicant applicant = request.toApplicant();
-        applicant.associate(findUser, findBoardPosition);
+        applicant.associate(user, findBoardPosition);
 
         return ApplicantResponse.of(applicantRepository.save(applicant));
     }

@@ -26,7 +26,6 @@ import sideeffect.project.dto.applicant.*;
 import sideeffect.project.repository.ApplicantRepository;
 import sideeffect.project.repository.BoardPositionRepository;
 import sideeffect.project.repository.RecruitBoardRepository;
-import sideeffect.project.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,7 +35,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.*;
 
@@ -45,9 +45,6 @@ class ApplicantServiceTest {
 
     @InjectMocks
     private ApplicantService applicantService;
-
-    @Mock
-    private UserRepository userRepository;
 
     @Mock
     private RecruitBoardRepository recruitBoardRepository;
@@ -101,16 +98,14 @@ class ApplicantServiceTest {
         ApplicantRequest request = ApplicantRequest.builder().recruitBoardId(recruitBoard.getId()).boardPositionId(boardPosition.getId()).build();
         User otherUser = User.builder().id(2L).nickname("test2").email("test2@naver.com").build();
 
-        when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
         when(boardPositionRepository.findById(any())).thenReturn(Optional.of(boardPosition));
         when(recruitBoardRepository.existsApplicantByRecruitBoard(any(), any())).thenReturn(false);
         when(applicantRepository.save(any())).thenReturn(applicant);
 
-        applicantService.register(otherUser.getId(), request);
+        applicantService.register(otherUser, request);
 
         assertAll(
-                () -> verify(userRepository).findById(any()),
                 () -> verify(boardPositionRepository).findById(any()),
                 () -> verify(applicantRepository).save(any())
         );
@@ -121,11 +116,10 @@ class ApplicantServiceTest {
     void registerIsOwnedByUser() {
         ApplicantRequest request = ApplicantRequest.builder().recruitBoardId(recruitBoard.getId()).boardPositionId(boardPosition.getId()).build();
 
-        when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
         when(boardPositionRepository.findById(any())).thenReturn(Optional.of(boardPosition));
 
-        assertThatThrownBy(() -> applicantService.register(recruitBoard.getUser().getId(), request))
+        assertThatThrownBy(() -> applicantService.register(recruitBoard.getUser(), request))
                 .isInstanceOf(AuthException.class);
     }
 
@@ -136,12 +130,11 @@ class ApplicantServiceTest {
         ApplicantRequest request = ApplicantRequest.builder().recruitBoardId(recruitBoard.getId()).boardPositionId(boardPosition.getId()).build();
         User otherUser = User.builder().id(2L).nickname("test2").email("test2@naver.com").build();
 
-        when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
         when(boardPositionRepository.findById(any())).thenReturn(Optional.of(boardPosition));
         when(recruitBoardRepository.existsApplicantByRecruitBoard(any(), any())).thenReturn(true);
 
-        assertThatThrownBy(() -> applicantService.register(otherUser.getId(), request))
+        assertThatThrownBy(() -> applicantService.register(otherUser, request))
                 .isInstanceOf(AuthException.class);
     }
 
