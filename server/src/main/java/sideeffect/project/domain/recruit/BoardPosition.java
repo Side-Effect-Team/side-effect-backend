@@ -4,9 +4,12 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.domain.position.Position;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "BOARD_POSITION")
@@ -34,16 +37,37 @@ public class BoardPosition {
     @JoinColumn(name = "recruit_board_id")
     private RecruitBoard recruitBoard;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "boardPosition")
+    private List<Applicant> applicants;
+
     @Builder
-    public BoardPosition(int targetNumber, Position position, RecruitBoard recruitBoard) {
+    public BoardPosition(Long id, int targetNumber, Position position, RecruitBoard recruitBoard) {
+        this.id = id;
         this.targetNumber = targetNumber;
         this.currentNumber = 0;
         this.position = position;
         this.recruitBoard = recruitBoard;
+        this.applicants = new ArrayList<>();
     }
 
     public void setRecruitBoard(RecruitBoard recruitBoard) {
         this.recruitBoard = recruitBoard;
+    }
+
+    public void addApplicant(Applicant applicant) {
+        this.applicants.add(applicant);
+    }
+
+    public void increaseCurrentNumber() {
+        if(this.currentNumber < this.targetNumber) {
+            this.currentNumber++;
+        }
+    }
+
+    public void decreaseCurrentNumber() {
+        if(this.currentNumber > 0) {
+            this.currentNumber--;
+        }
     }
 
 }

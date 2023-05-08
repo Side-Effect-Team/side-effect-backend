@@ -66,7 +66,7 @@ class RecruitBoardControllerTest {
                 .progressType(ProgressType.ONLINE)
                 .deadline(LocalDateTime.now())
                 .expectedPeriod("3개월")
-                .positions(List.of(new BoardPositionResponse(PositionType.BACKEND, 3, 0)))
+                .positions(List.of(new BoardPositionResponse(1L, PositionType.BACKEND, 3, 0)))
                 .stacks(List.of(new BoardStackResponse(StackType.SPRING, StackLevelType.LOW, "url")))
                 .build();
 

@@ -1,6 +1,7 @@
 package sideeffect.project.domain.user;
 
 import lombok.*;
+import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.common.domain.BaseTimeEntity;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
@@ -64,6 +65,9 @@ public class User extends BaseTimeEntity {
     @OrderBy("id desc")
     private List<RecruitBoard> recruitBoards = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    private List<Applicant> applicants = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE},
@@ -113,6 +117,14 @@ public class User extends BaseTimeEntity {
 
     public void deleteComment(Comment comment) {
         this.comments.remove(comment);
+    }
+
+    public void addApplicant(Applicant applicant) {
+        this.applicants.add(applicant);
+    }
+
+    public void deleteApplicant(Applicant applicant) {
+        this.applicants.remove(applicant);
     }
 
     public void addRecommend(Recommend recommend) {
