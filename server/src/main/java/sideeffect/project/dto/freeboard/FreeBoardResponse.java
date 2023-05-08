@@ -25,9 +25,8 @@ public class FreeBoardResponse {
     private String userNickname;
     private String title;
     private String content;
-    private String projectUrl;
     private String headerImage;
-    private int recommendations;
+    private int recommendNumber;
     private int commentNumber;
     private boolean recommend;
 
@@ -48,9 +47,8 @@ public class FreeBoardResponse {
             .title(freeBoard.getTitle())
             .userNickname(freeBoard.getUser().getNickname())
             .content(freeBoard.getContent())
-            .projectUrl(freeBoard.getProjectUrl())
             .headerImage(freeBoard.getImgUrl())
-            .recommendations(freeBoard.getRecommends().size())
+            .recommendNumber(freeBoard.getRecommends().size())
             .commentNumber(freeBoard.getComments().size())
             .createAt(freeBoard.getCreateAt())
             .build();

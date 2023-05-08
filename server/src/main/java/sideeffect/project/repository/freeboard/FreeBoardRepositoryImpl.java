@@ -51,7 +51,6 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
             freeBoard.user.nickname,
             freeBoard.title,
             freeBoard.content,
-            freeBoard.projectUrl,
             freeBoard.imgUrl,
             freeBoard.recommends.size(),
             freeBoard.comments.size(),
