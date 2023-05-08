@@ -24,7 +24,7 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<FreeBoardResponse> searchScroll(Long lastId, Long userId, int size) {
+    public List<FreeBoardResponse> searchScroll(Long lastId, Long userId, Integer size) {
         return jpaQueryFactory.select(getResponseConstructor(userId))
             .from(freeBoard)
             .where(boardIdLt(lastId))
@@ -34,7 +34,7 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
     }
 
     @Override
-    public List<FreeBoardResponse> searchScrollWithKeyword(Long lastId, Long userId, String keyword, int size) {
+    public List<FreeBoardResponse> searchScrollWithKeyword(Long lastId, Long userId, String keyword, Integer size) {
         return jpaQueryFactory.select(getResponseConstructor(userId))
             .from(freeBoard)
             .where(boardIdLt(lastId),
