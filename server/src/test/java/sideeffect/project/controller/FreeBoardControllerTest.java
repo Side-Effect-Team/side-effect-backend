@@ -132,7 +132,7 @@ class FreeBoardControllerTest {
                 .param("lastId", "101")
                 .param("size", "10"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.freeBoards.length()").value(10))
+            .andExpect(jsonPath("$.projects.length()").value(10))
             .andExpect(jsonPath("$.hasNext").value(true))
             .andExpect(jsonPath("$.lastId").value(91))
             .andDo(print());
