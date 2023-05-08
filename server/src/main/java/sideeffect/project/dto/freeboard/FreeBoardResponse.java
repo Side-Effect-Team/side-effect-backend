@@ -1,5 +1,7 @@
 package sideeffect.project.dto.freeboard;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,10 +10,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import sideeffect.project.domain.freeboard.FreeBoard;
 
 @Getter
 @Builder
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FreeBoardResponse {
@@ -24,8 +28,10 @@ public class FreeBoardResponse {
     private String projectUrl;
     private String headerImage;
     private int recommendations;
-    private boolean recommend;
     private int commentNumber;
+    private boolean recommend;
+
+    @JsonFormat(shape = Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
     private LocalDateTime createAt;
 
 
