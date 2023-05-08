@@ -1,12 +1,13 @@
-package sideeffect.project.common.domain;
+package sideeffect.project.domain.common;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import sideeffect.project.config.JpaAuditingConfig;
+import sideeffect.project.common.jpa.TestDataRepository;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.repository.FreeBoardRepository;
@@ -15,12 +16,7 @@ import sideeffect.project.repository.UserRepository;
 import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
-@Import(JpaAuditingConfig.class)
-@DataJpaTest
-class BaseTimeEntityTest {
+class BaseTimeEntityTest extends TestDataRepository {
 
     @Autowired
     private FreeBoardRepository freeBoardRepository;

@@ -10,16 +10,25 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import sideeffect.project.dto.user.UserJoinRequest;
+import sideeffect.project.common.security.WithCustomUser;
+import sideeffect.project.domain.user.UserRoleType;
+import sideeffect.project.dto.user.UserRequest;
+import sideeffect.project.dto.user.UserResponse;
 import sideeffect.project.service.UserService;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
-
 
     MockMvc mockMvc;
 
@@ -28,17 +37,29 @@ class UserControllerTest {
 
     ObjectMapper objectMapper;
 
-    UserJoinRequest userJoinRequest;
+    UserRequest userJoinRequest;
+
+    UserResponse userResponse;
+
     @BeforeEach
     void beforeEach(WebApplicationContext context){
         objectMapper = new ObjectMapper();
         mockMvc = MockMvcBuilders.webAppContextSetup(context)
+                .apply(springSecurity())
                 .build();
 
-        userJoinRequest = UserJoinRequest.builder()
+        userJoinRequest = UserRequest.builder()
                 .email("1111@gmail.com")
                 .password("1234")
                 .nickname("ABC")
+                .build();
+
+        userResponse = UserResponse.builder()
+                .email("1111@gmail.com")
+                .nickname("ABC")
+                .blogUrl("tistory/1111.com")
+                .githubUrl("github/1111.com")
+                .userRoleType(UserRoleType.ROLE_USER)
                 .build();
     }
     @Test
@@ -47,8 +68,27 @@ class UserControllerTest {
 
         mockMvc.perform(post("/join")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf())
                         .content(objectMapper.writeValueAsBytes(userJoinRequest)))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("단건조회")
+    @WithCustomUser
+    void view() throws Exception {
+        when(userService.findOne(any(), any())).thenReturn(userResponse);
+        mockMvc.perform(get("/user/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("email", userResponse.getEmail()).exists())
+                .andExpect(jsonPath("nickname", userResponse.getNickname()).exists())
+                .andExpect(jsonPath("blogUrl", userResponse.getBlogUrl()).exists())
+                .andExpect(jsonPath("githubUrl", userResponse.getGithubUrl()).exists())
+                .andExpect(jsonPath("userRoleType", userResponse.getUserRoleType()).exists())
+                .andDo(print());
+        verify(userService).findOne(any(), any());
     }
 }

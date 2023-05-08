@@ -2,10 +2,10 @@ package sideeffect.project.repository;
 
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Pageable;
 import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.domain.applicant.ApplicantStatus;
+import sideeffect.project.common.jpa.TestDataRepository;
 import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.BoardPosition;
@@ -27,8 +27,7 @@ import java.util.stream.LongStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@DataJpaTest
-class RecruitBoardRepositoryTest {
+class RecruitBoardRepositoryTest extends TestDataRepository {
 
     @Autowired
     RecruitBoardRepository recruitBoardRepository;

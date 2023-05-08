@@ -1,20 +1,13 @@
 package sideeffect.project.repository;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.TestExecutionListeners;
+import sideeffect.project.common.jpa.TestDataRepository;
 import sideeffect.project.domain.user.User;
-import sideeffect.project.domain.user.UserRoleType;
 
-import javax.persistence.EntityManager;
-
-
-@DataJpaTest
-class UserRepositoryTest {
+class UserRepositoryTest extends TestDataRepository {
 
     @Autowired
     UserRepository userRepository;

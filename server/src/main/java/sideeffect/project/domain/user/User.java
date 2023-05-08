@@ -2,14 +2,17 @@ package sideeffect.project.domain.user;
 
 import lombok.*;
 import sideeffect.project.domain.applicant.Applicant;
+import sideeffect.project.common.domain.BaseTimeEntity;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
+import sideeffect.project.domain.recommend.Recommend;
 import sideeffect.project.domain.recruit.RecruitBoard;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter @Setter
@@ -24,7 +27,7 @@ import java.util.List;
                 )
         }
 )
-public class User {
+public class User extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -39,16 +42,13 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRoleType userRoleType;
 
-    private LocalDateTime createAt;
-
-    private LocalDateTime updateAt;
-
-    private LocalDateTime deleteAt;
-
     @Enumerated(EnumType.STRING)
     private ProviderType providerType;
 
     private String imgUrl;
+
+    private String blogUrl;
+    private String githubUrl;
 
     @Builder.Default
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
@@ -67,8 +67,33 @@ public class User {
 
     @Builder.Default
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
-    @OrderBy("id desc")
     private List<Applicant> applicants = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+        mappedBy = "user")
+    private Set<Recommend> recommends = new HashSet<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
+    private List<UserPosition> userPositions = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
+    private List<UserStack> userStacks = new ArrayList<>();
+
+    @Builder
+    public User(Long id, String email, String password, String nickname, UserRoleType userRoleType, ProviderType providerType, String imgUrl, String blogUrl, String githubUrl) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.userRoleType = userRoleType;
+        this.providerType = providerType;
+        this.imgUrl = imgUrl;
+        this.blogUrl = blogUrl;
+        this.githubUrl = githubUrl;
+    }
 
     public void addFreeBoard(FreeBoard freeBoard) {
         this.freeBoards.add(freeBoard);
@@ -100,5 +125,31 @@ public class User {
 
     public void deleteApplicant(Applicant applicant) {
         this.applicants.remove(applicant);
+    }
+
+    public void addRecommend(Recommend recommend) {
+        this.recommends.add(recommend);
+    }
+
+    public void deleteRecommend(Recommend recommend) {
+        this.recommends.remove(recommend);
+    }
+
+    public void update(User user){
+        if(user.getNickname() != null) {
+            this.nickname = user.getNickname();
+        }
+        this.blogUrl = user.getBlogUrl();
+        this.githubUrl = user.getGithubUrl();
+    }
+
+    public void updateUserPosition(List<UserPosition> userPositions){
+        this.userPositions.clear();
+        this.userPositions.addAll(userPositions);
+    }
+
+    public void updateUserStack(List<UserStack> userStacks){
+        this.userStacks.clear();
+        this.userStacks.addAll(userStacks);
     }
 }
