@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import sideeffect.project.common.jpa.TestDataRepository;
 import sideeffect.project.domain.stack.Stack;
 import sideeffect.project.domain.stack.StackType;
 
@@ -13,8 +13,7 @@ import javax.persistence.EntityManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
-class StackRepositoryTest {
+class StackRepositoryTest extends TestDataRepository {
 
     @Autowired
     private StackRepository repository;

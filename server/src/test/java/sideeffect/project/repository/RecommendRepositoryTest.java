@@ -8,13 +8,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import sideeffect.project.common.jpa.TestDataRepository;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.recommend.Recommend;
 import sideeffect.project.domain.user.User;
 
-@DataJpaTest
-class RecommendRepositoryTest {
+class RecommendRepositoryTest extends TestDataRepository {
 
     @Autowired
     private RecommendRepository recommendRepository;
