@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import sideeffect.project.common.jpa.TestDataRepository;
 import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.position.PositionType;
@@ -17,8 +17,7 @@ import javax.persistence.EntityManager;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@DataJpaTest
-class BoardPositionRepositoryTest {
+class BoardPositionRepositoryTest extends TestDataRepository {
 
     @Autowired
     BoardPositionRepository boardPositionRepository;
