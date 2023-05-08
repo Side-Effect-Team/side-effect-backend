@@ -35,13 +35,13 @@ public class FreeBoardController {
     }
 
     @GetMapping("/scroll")
-    public FreeBoardScrollResponse scrollBoard(@ModelAttribute FreeBoardScrollRequest request) {
-        return freeBoardService.findScroll(request);
+    public FreeBoardScrollResponse scrollBoard(@ModelAttribute FreeBoardScrollRequest request, @LoginUser User user) {
+        return freeBoardService.findScroll(request, user.getId());
     }
 
     @GetMapping("/search")
-    public FreeBoardScrollResponse searchBoard(@ModelAttribute FreeBoardKeyWordRequest request) {
-        return freeBoardService.findScrollWithKeyword(request);
+    public FreeBoardScrollResponse searchBoard(@ModelAttribute FreeBoardKeyWordRequest request, @LoginUser User user) {
+        return freeBoardService.findScrollWithKeyword(request, user.getId());
     }
 
     @GetMapping("/rank")

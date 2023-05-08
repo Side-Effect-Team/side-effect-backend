@@ -125,7 +125,7 @@ class FreeBoardControllerTest {
         associateCommentsAndFreeBoards(freeBoards, generateComments(81L, 100L));
         List<FreeBoardResponse> responses = FreeBoardResponse.listOf(freeBoards);
         FreeBoardScrollResponse scrollResponse = FreeBoardScrollResponse.of(responses, true);
-        given(freeBoardService.findScroll(any())).willReturn(scrollResponse);
+        given(freeBoardService.findScroll(any(), any())).willReturn(scrollResponse);
 
         mvc.perform(get("/api/free-boards/scroll")
                 .contentType(MediaType.APPLICATION_JSON)
