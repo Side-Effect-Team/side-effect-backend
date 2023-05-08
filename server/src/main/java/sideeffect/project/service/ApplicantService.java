@@ -7,16 +7,14 @@ import org.springframework.transaction.annotation.Transactional;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.EntityNotFoundException;
 import sideeffect.project.common.exception.ErrorCode;
+import sideeffect.project.common.exception.InvalidValueException;
 import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.domain.applicant.ApplicantStatus;
 import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.user.User;
-import sideeffect.project.dto.applicant.ApplicantListResponse;
-import sideeffect.project.dto.applicant.ApplicantPositionResponse;
-import sideeffect.project.dto.applicant.ApplicantRequest;
-import sideeffect.project.dto.applicant.ApplicantResponse;
+import sideeffect.project.dto.applicant.*;
 import sideeffect.project.repository.ApplicantRepository;
 import sideeffect.project.repository.BoardPositionRepository;
 import sideeffect.project.repository.RecruitBoardRepository;
@@ -60,8 +58,62 @@ public class ApplicantService {
 
         validateOwner(findRecruitBoard, userId);
 
-        List<ApplicantListResponse> applicantListResponses = recruitBoardRepository.getApplicantsByPosition(boardId, status);
+        List<ApplicantListResponse> applicantListResponses = recruitBoardRepository.getApplicantsByPosition(findRecruitBoard.getId(), status);
         return ApplicantPositionResponse.mapOf(applicantListResponses);
+    }
+
+    @Transactional
+    public void approveApplicant(Long userId, ApplicantUpdateRequest applicantUpdateRequest) {
+        BoardPosition findBoardPosition = boardPositionRepository.findBoardPositionIfRecruitable(applicantUpdateRequest.getApplicantId())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOARD_POSITION_FULL));
+        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(applicantUpdateRequest.getRecruitBoardId())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
+
+        validateOwner(findRecruitBoard, userId);
+
+        Applicant findApplicant = applicantRepository.findById(applicantUpdateRequest.getApplicantId())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.APPLICANT_NOT_FOUND));
+
+        if(checkIfApplicantIdExists(findRecruitBoard.getId(), findApplicant.getId())) {
+            throw new InvalidValueException(ErrorCode.APPLICANT_EXISTS);
+        }
+
+        findApplicant.updateStatus(applicantUpdateRequest.getStatus());
+        findBoardPosition.increaseCurrentNumber();
+    }
+
+    @Transactional
+    public void rejectApplicant(Long userId, ApplicantUpdateRequest applicantUpdateRequest) {
+        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(applicantUpdateRequest.getRecruitBoardId())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
+
+        validateOwner(findRecruitBoard, userId);
+
+        Applicant findApplicant = applicantRepository.findById(applicantUpdateRequest.getApplicantId())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.APPLICANT_NOT_FOUND));
+
+        findApplicant.updateStatus(applicantUpdateRequest.getStatus());
+    }
+
+    @Transactional
+    public void releaseApplicant(Long userId, ApplicantReleaseRequest applicantReleaseRequest) {
+        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(applicantReleaseRequest.getRecruitBoardId())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
+
+        validateOwner(findRecruitBoard, userId);
+
+        Applicant findApplicant = applicantRepository.findById(applicantReleaseRequest.getApplicantId())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.APPLICANT_NOT_FOUND));
+
+        if(!checkIfApplicantIdExists(findRecruitBoard.getId(), findApplicant.getId())) {
+            throw new InvalidValueException(ErrorCode.APPLICANT_NOT_EXISTS);
+        }
+
+        BoardPosition findBoardPosition = boardPositionRepository.findByApplicantId(findApplicant.getId())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOARD_POSITION_NOT_FOUND));
+
+        findApplicant.updateStatus(ApplicantStatus.REJECTED);
+        findBoardPosition.decreaseCurrentNumber();
     }
 
     private void isDuplicateApplicant(Long recruitBoardId, Long userId) {
@@ -80,6 +132,11 @@ public class ApplicantService {
         if (!userId.equals(recruitBoard.getUser().getId())) {
             throw new AuthException(ErrorCode.APPLICANT_UNAUTHORIZED);
         }
+    }
+
+    private boolean checkIfApplicantIdExists(Long RecruitBoardId, Long targetApplicantId) {
+        List<ApplicantListResponse> applicantListResponses = recruitBoardRepository.getApplicantsByPosition(RecruitBoardId, ApplicantStatus.APPROVED);
+        return applicantListResponses.stream().anyMatch(a -> a.getApplicantId().equals(targetApplicantId));
     }
 
 }
