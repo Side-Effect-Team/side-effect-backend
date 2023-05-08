@@ -24,11 +24,11 @@ public class Applicant extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ApplicantStatus status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_position_id")
     private BoardPosition boardPosition;
 
@@ -41,7 +41,12 @@ public class Applicant extends BaseTimeEntity {
     public void associate(User user, BoardPosition boardPosition) {
         boardPosition.addApplicant(this);
         user.addApplicant(this);
-        this.user =user;
+        this.user = user;
         this.boardPosition = boardPosition;
     }
+
+    public void updateStatus(ApplicantStatus status) {
+        this.status = status;
+    }
+
 }

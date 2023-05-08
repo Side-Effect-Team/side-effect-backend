@@ -58,4 +58,16 @@ public class BoardPosition {
         this.applicants.add(applicant);
     }
 
+    public void increaseCurrentNumber() {
+        if(this.currentNumber < this.targetNumber) {
+            this.currentNumber++;
+        }
+    }
+
+    public void decreaseCurrentNumber() {
+        if(this.currentNumber > 0) {
+            this.currentNumber--;
+        }
+    }
+
 }

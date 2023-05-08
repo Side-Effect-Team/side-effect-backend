@@ -66,7 +66,6 @@ class RecruitBoardRepositoryTest {
         stackRepository.save(javaStack);
 
         user = User.builder()
-                .id(1L)
                 .nickname("tester")
                 .password("1234")
                 .userRoleType(UserRoleType.ROLE_USER)
@@ -314,6 +313,34 @@ class RecruitBoardRepositoryTest {
         applicantRepository.save(applicant2);
 
         List<ApplicantListResponse> applicantListResponses = recruitBoardRepository.getApplicantsByPosition(savedBoard.getId(), ApplicantStatus.PENDING);
+
+        assertAll(
+                () -> assertThat(applicantListResponses).hasSize(2)
+        );
+    }
+
+    @DisplayName("게시판에 모집된 지원자의 목록을 조회한다.")
+    @Test
+    void getApplicantsByPositionApproved() {
+        RecruitBoard recruitBoard = RecruitBoard.builder().title("모집 게시판").contents("내용").build();
+        BoardPosition boardPositionBack = BoardPosition.builder().position(backEndPosition).targetNumber(3).build();
+        BoardPosition boardPositionFront = BoardPosition.builder().position(frontEndPosition).targetNumber(3).build();
+        recruitBoard.addBoardPosition(boardPositionBack);
+        recruitBoard.addBoardPosition(boardPositionFront);
+        RecruitBoard savedBoard = recruitBoardRepository.save(recruitBoard);
+
+        Applicant applicant1 = Applicant.builder().build();
+        applicant1.associate(user, boardPositionBack);
+        applicantRepository.save(applicant1);
+
+        Applicant applicant2 = Applicant.builder().build();
+        applicant2.associate(user, boardPositionFront);
+        applicantRepository.save(applicant2);
+
+        applicant1.updateStatus(ApplicantStatus.APPROVED);
+        applicant2.updateStatus(ApplicantStatus.APPROVED);
+
+        List<ApplicantListResponse> applicantListResponses = recruitBoardRepository.getApplicantsByPosition(savedBoard.getId(), ApplicantStatus.APPROVED);
 
         assertAll(
                 () -> assertThat(applicantListResponses).hasSize(2)
