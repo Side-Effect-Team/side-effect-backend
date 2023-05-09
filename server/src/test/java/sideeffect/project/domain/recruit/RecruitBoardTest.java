@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import sideeffect.project.domain.stack.StackLevelType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 
@@ -66,9 +65,7 @@ class RecruitBoardTest {
         List<BoardStack> boardStacks = new ArrayList<>();
 
         for(int i = 0; i < 3; i++) {
-            boardStacks.add(BoardStack.builder()
-                    .stackLevelType(StackLevelType.LOW)
-                    .build());
+            boardStacks.add(BoardStack.builder().build());
         }
 
         recruitBoard.updateBoardStacks(boardStacks);

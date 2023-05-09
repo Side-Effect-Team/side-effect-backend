@@ -17,7 +17,6 @@ import sideeffect.project.domain.recruit.ProgressType;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.recruit.RecruitBoardType;
 import sideeffect.project.domain.stack.Stack;
-import sideeffect.project.domain.stack.StackLevelType;
 import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
@@ -103,7 +102,7 @@ class RecruitBoardServiceTest {
                 .deadline(LocalDateTime.now())
                 .expectedPeriod("3개월")
                 .positions(List.of(new BoardPositionRequest(PositionType.BACKEND, 3)))
-                .stacks(List.of(new BoardStackRequest(StackType.SPRING, StackLevelType.LOW)))
+                .stacks(List.of(new BoardStackRequest(StackType.SPRING)))
                 .build();
 
         Long userId = 1L;
@@ -148,8 +147,8 @@ class RecruitBoardServiceTest {
                         new BoardPositionRequest(PositionType.BACKEND, 2)
                 ))
                 .stacks(List.of(
-                        new BoardStackRequest(StackType.SPRING, StackLevelType.LOW),
-                        new BoardStackRequest(StackType.JAVA, StackLevelType.LOW)
+                        new BoardStackRequest(StackType.SPRING),
+                        new BoardStackRequest(StackType.JAVA)
                 ))
                 .build();
 
@@ -184,7 +183,7 @@ class RecruitBoardServiceTest {
                 .deadline(LocalDateTime.now())
                 .expectedPeriod("3개월")
                 .positions(List.of(new BoardPositionRequest(PositionType.BACKEND, 3)))
-                .stacks(List.of(new BoardStackRequest(StackType.SPRING, StackLevelType.LOW)))
+                .stacks(List.of(new BoardStackRequest(StackType.SPRING)))
                 .build();
 
         Long nonOwnerId = 2L;

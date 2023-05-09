@@ -13,7 +13,6 @@ import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.ProgressType;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.recruit.RecruitBoardType;
-import sideeffect.project.domain.stack.StackLevelType;
 import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.recruit.BoardPositionResponse;
@@ -67,7 +66,7 @@ class RecruitBoardControllerTest {
                 .deadline(LocalDateTime.now())
                 .expectedPeriod("3개월")
                 .positions(List.of(new BoardPositionResponse(1L, PositionType.BACKEND, 3, 0)))
-                .stacks(List.of(new BoardStackResponse(StackType.SPRING, StackLevelType.LOW, "url")))
+                .stacks(List.of(new BoardStackResponse(StackType.SPRING, "url")))
                 .build();
 
         given(recruitBoardService.findRecruitBoard(any())).willReturn(response);

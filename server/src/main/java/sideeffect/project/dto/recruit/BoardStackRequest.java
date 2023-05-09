@@ -4,7 +4,6 @@ import lombok.*;
 import sideeffect.project.domain.recruit.BoardStack;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.stack.Stack;
-import sideeffect.project.domain.stack.StackLevelType;
 import sideeffect.project.domain.stack.StackType;
 
 @Getter
@@ -14,11 +13,9 @@ import sideeffect.project.domain.stack.StackType;
 public class BoardStackRequest {
 
     private StackType stackType;
-    private StackLevelType stackLevelType;
 
     public BoardStack toBoardStack(RecruitBoard recruitBoard, Stack stack) {
         return BoardStack.builder()
-                .stackLevelType(stackLevelType)
                 .recruitBoard(recruitBoard)
                 .stack(stack)
                 .build();
