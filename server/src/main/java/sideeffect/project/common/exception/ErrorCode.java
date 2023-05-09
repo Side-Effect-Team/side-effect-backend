@@ -13,7 +13,9 @@ public enum ErrorCode {
     COMMENT_UNAUTHORIZED(403, "CM_002", "해당 댓글에 대한 권한이 없습니다."),
 
     RECRUIT_BOARD_NOT_FOUND(400, "RB_001", "해당 모집 게시판을 찾을 수 없습니다."),
-    RECRUIT_BOARD_UNAUTHORIZED(403, "RB_002", "해당 모집 게시판에 대한 권한이 없습니다."),
+    RECRUIT_BOARD_TYPE_NOT_FOUND(400, "RB_002", "모집 게시판의 유형을 찾을 수 없습니다."),
+    RECRUIT_BOARD_PROGRESS_TYPE_NOT_FOUND(400, "RB_003", "모집 게시판의 진행방식을 찾을 수 없습니다."),
+    RECRUIT_BOARD_UNAUTHORIZED(403, "RB_004", "해당 모집 게시판에 대한 권한이 없습니다."),
 
     BOARD_POSITION_NOT_FOUND(400, "BP_001", "해당 게시판이 모집하는 포지션을 찾을 수 없습니다."),
     BOARD_POSITION_FULL(409, "BP_002", "해당 포지션은 전부 모집되었습니다."),
