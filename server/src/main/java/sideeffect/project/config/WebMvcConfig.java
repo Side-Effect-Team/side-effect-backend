@@ -1,8 +1,10 @@
 package sideeffect.project.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import sideeffect.project.common.converter.StackTypeRequestConverter;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -13,5 +15,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PATCH", "DELETE")
                 .allowCredentials(true);
+    }
+
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        registry.addConverter(new StackTypeRequestConverter());
     }
 }
