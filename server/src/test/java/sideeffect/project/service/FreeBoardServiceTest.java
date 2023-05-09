@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import sideeffect.project.repository.freeboard.FreeBoardRepositoryCustom;
 
 @ExtendWith(MockitoExtension.class)
 class FreeBoardServiceTest {
@@ -180,7 +179,7 @@ class FreeBoardServiceTest {
         FreeBoard freeBoard2 = FreeBoard.builder().id(90L).content("게시판 입니다.").title("test").build();
         freeBoard1.associateUser(user);
         freeBoard2.associateUser(user);
-        FreeBoardKeyWordRequest request = FreeBoardKeyWordRequest.builder().keyWord("test").size(2).build();
+        FreeBoardKeyWordRequest request = FreeBoardKeyWordRequest.builder().keyword("test").size(2).build();
         List<FreeBoardResponse> responses = FreeBoardResponse.listOf(List.of(freeBoard1, freeBoard2));
         when(freeBoardRepository.searchScrollWithKeyword(any(), any(), any(), any())).thenReturn(responses);
 
@@ -201,7 +200,7 @@ class FreeBoardServiceTest {
         freeBoard1.associateUser(user);
         freeBoard2.associateUser(user);
         FreeBoardKeyWordRequest request = FreeBoardKeyWordRequest
-            .builder().lastId(100L).keyWord("test").size(5).build();
+            .builder().lastId(100L).keyword("test").size(5).build();
 
         when(freeBoardRepository.searchScrollWithKeyword(any(), any(), any(), any()))
             .thenReturn(FreeBoardResponse.listOf(List.of(freeBoard1, freeBoard2)));

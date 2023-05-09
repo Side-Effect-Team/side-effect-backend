@@ -49,10 +49,10 @@ public class FreeBoardService {
     public FreeBoardScrollResponse findScrollWithKeyword(FreeBoardKeyWordRequest request, Long userId) {
         FreeBoardScrollDto scrollDto;
         if (request.getLastId() == null || request.getLastId() < 0) {
-            scrollDto = new FreeBoardScrollDto(null, request.getSize(), request.getKeyWord());
+            scrollDto = new FreeBoardScrollDto(null, request.getSize(), request.getKeyword());
             return searchScrollWithKeyword(scrollDto, userId);
         }
-        scrollDto = new FreeBoardScrollDto(request.getLastId(), request.getSize(), request.getKeyWord());
+        scrollDto = new FreeBoardScrollDto(request.getLastId(), request.getSize(), request.getKeyword());
         return searchScrollWithKeyword(scrollDto, userId);
     }
 

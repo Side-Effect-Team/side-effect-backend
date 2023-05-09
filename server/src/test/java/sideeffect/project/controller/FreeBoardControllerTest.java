@@ -118,7 +118,7 @@ class FreeBoardControllerTest {
         verify(freeBoardService).findBoard(any());
     }
 
-    @DisplayName("게시판을 스크롤 한다.")
+    @DisplayName("게시판 스크롤 요청한다.")
     @Test
     void scrollBoard() throws Exception {
         List<FreeBoard> freeBoards = generateFreeBoards(91L, 100L);
@@ -136,6 +136,29 @@ class FreeBoardControllerTest {
             .andExpect(jsonPath("$.hasNext").value(true))
             .andExpect(jsonPath("$.lastId").value(91))
             .andDo(print());
+        verify(freeBoardService).findScroll(any(), any());
+    }
+
+    @DisplayName("검색 스크롤을 요청한다.")
+    @Test
+    void scrollBoardWithKeyWord() throws Exception {
+        List<FreeBoard> freeBoards = generateFreeBoards(91L, 100L);
+        associateCommentsAndFreeBoards(freeBoards, generateComments(81L, 100L));
+        List<FreeBoardResponse> responses = FreeBoardResponse.listOf(freeBoards);
+        FreeBoardScrollResponse scrollResponse = FreeBoardScrollResponse.of(responses, true);
+        given(freeBoardService.findScrollWithKeyword(any(), any())).willReturn(scrollResponse);
+
+        mvc.perform(get("/api/free-boards/scroll")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("lastid", "101")
+                .param("size", "10")
+                .param("keyword", "번째"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.projects.length()").value(10))
+            .andExpect(jsonPath("$.hasNext").value(true))
+            .andExpect(jsonPath("$.lastId").value(91))
+            .andDo(print());
+        verify(freeBoardService).findScrollWithKeyword(any(), any());
     }
 
     @DisplayName("랭킹 게시판을 가져온다.")
@@ -156,7 +179,8 @@ class FreeBoardControllerTest {
     @WithCustomUser
     @Test
     void registerBoard() throws Exception {
-        FreeBoardRequest request = FreeBoardRequest.builder().content("test").build();
+        FreeBoardRequest request = FreeBoardRequest.builder()
+            .projectUrl("http://1234test.co.kr").content("test").title("게시판 입니다").build();
         given(freeBoardService.register(any(), any())).willReturn(freeBoard);
         mvc.perform(post("/api/free-boards")
                 .with(csrf())

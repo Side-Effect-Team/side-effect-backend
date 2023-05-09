@@ -1,16 +1,17 @@
 package sideeffect.project.controller;
 
 import java.util.List;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.freeboard.FreeBoardKeyWordRequest;
@@ -35,13 +36,17 @@ public class FreeBoardController {
     }
 
     @GetMapping("/scroll")
-    public FreeBoardScrollResponse scrollBoard(@ModelAttribute FreeBoardScrollRequest request, @LoginUser User user) {
-        return freeBoardService.findScroll(request, user.getId());
-    }
-
-    @GetMapping("/search")
-    public FreeBoardScrollResponse searchBoard(@ModelAttribute FreeBoardKeyWordRequest request, @LoginUser User user) {
-        return freeBoardService.findScrollWithKeyword(request, user.getId());
+    public FreeBoardScrollResponse scrollBoard(@RequestParam(defaultValue = "-1", name = "lastid") Long lastId,
+        @RequestParam Integer size,
+        @RequestParam(required = false) String keyword,
+        @LoginUser User user) {
+        if (keyword == null) {
+            FreeBoardScrollRequest scrollRequest = FreeBoardScrollRequest.builder().size(size).lastId(lastId).build();
+            return searchScroll(scrollRequest, user);
+        }
+        FreeBoardKeyWordRequest request = FreeBoardKeyWordRequest.builder().lastId(lastId).size(size).keyword(keyword)
+            .build();
+        return searchScrollWithKeyword(request, user);
     }
 
     @GetMapping("/rank")
@@ -51,7 +56,7 @@ public class FreeBoardController {
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @PostMapping
-    public FreeBoardResponse registerBoard(@RequestBody FreeBoardRequest request, @LoginUser User user) {
+    public FreeBoardResponse registerBoard(@Valid @RequestBody FreeBoardRequest request, @LoginUser User user) {
         return FreeBoardResponse.of(freeBoardService.register(user, request));
     }
 
@@ -67,5 +72,13 @@ public class FreeBoardController {
     @DeleteMapping("/{id}")
     public void deleteBoard(@PathVariable("id") Long boardId, @LoginUser User user) {
         freeBoardService.deleteBoard(user.getId(), boardId);
+    }
+
+    private FreeBoardScrollResponse searchScrollWithKeyword(FreeBoardKeyWordRequest request, User user) {
+        return freeBoardService.findScrollWithKeyword(request, user.getId());
+    }
+
+    private FreeBoardScrollResponse searchScroll(FreeBoardScrollRequest request, User user) {
+        return freeBoardService.findScroll(request, user.getId());
     }
 }
