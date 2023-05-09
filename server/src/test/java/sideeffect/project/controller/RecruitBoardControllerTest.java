@@ -60,13 +60,13 @@ class RecruitBoardControllerTest {
                 .id(1L)
                 .views(0)
                 .title("모집 게시글 제목")
-                .contents("모집 게시글 내용")
-                .recruitBoardType(RecruitBoardType.PROJECT)
-                .progressType(ProgressType.ONLINE)
+                .content("모집 게시글 내용")
+                .recruitBoardType(RecruitBoardType.PROJECT.getValue())
+                .progressType(ProgressType.ONLINE.getValue())
                 .deadline(LocalDateTime.now())
                 .expectedPeriod("3개월")
-                .positions(List.of(new BoardPositionResponse(1L, PositionType.BACKEND, 3, 0)))
-                .stacks(List.of(new BoardStackResponse(StackType.SPRING, "url")))
+                .positions(List.of(new BoardPositionResponse(1L, PositionType.BACKEND.getValue(), 3, 0)))
+                .tags(List.of(new BoardStackResponse(StackType.SPRING.getValue(), "url")))
                 .build();
 
         given(recruitBoardService.findRecruitBoard(any())).willReturn(response);
@@ -75,13 +75,13 @@ class RecruitBoardControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title", response.getTitle()).exists())
-                .andExpect(jsonPath("$.contents", response.getContents()).exists())
+                .andExpect(jsonPath("$.contents", response.getContent()).exists())
                 .andExpect(jsonPath("$.recruitBoardType", response.getRecruitBoardType()).exists())
                 .andExpect(jsonPath("$.progressType", response.getProgressType()).exists())
                 .andExpect(jsonPath("$.deadline", response.getDeadline()).exists())
                 .andExpect(jsonPath("$.expectedPeriod", response.getExpectedPeriod()).exists())
                 .andExpect(jsonPath("$.positions", response.getPositions()).exists())
-                .andExpect(jsonPath("$.stacks", response.getStacks()).exists())
+                .andExpect(jsonPath("$.stacks", response.getTags()).exists())
                 .andDo(print());
 
         verify(recruitBoardService).findRecruitBoard(any());
@@ -90,8 +90,8 @@ class RecruitBoardControllerTest {
     @DisplayName("모집게시글 목록을 조회한다.")
     @Test
     void findScrollRecruitBoard() throws Exception {
-        RecruitBoard recruitBoard1 = RecruitBoard.builder().id(10L).title("모집 게시판1").contents("모집합니다1.").build();
-        RecruitBoard recruitBoard2 = RecruitBoard.builder().id(5L).title("모집 게시판2").contents("모집합니다2.").build();
+        RecruitBoard recruitBoard1 = RecruitBoard.builder().id(10L).title("모집 게시판1").recruitBoardType(RecruitBoardType.PROJECT).progressType(ProgressType.ONLINE).contents("모집합니다1.").build();
+        RecruitBoard recruitBoard2 = RecruitBoard.builder().id(5L).title("모집 게시판2").recruitBoardType(RecruitBoardType.PROJECT).progressType(ProgressType.ONLINE).contents("모집합니다2.").build();
         recruitBoard1.associateUser(user);
         recruitBoard2.associateUser(user);
         List<RecruitBoardResponse> recruitBoardResponses = RecruitBoardResponse.listOf(List.of(recruitBoard1, recruitBoard2));

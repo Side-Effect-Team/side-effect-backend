@@ -102,7 +102,7 @@ class RecruitBoardServiceTest {
                 .deadline(LocalDateTime.now())
                 .expectedPeriod("3개월")
                 .positions(List.of(new BoardPositionRequest(PositionType.BACKEND, 3)))
-                .stacks(List.of(new BoardStackRequest(StackType.SPRING)))
+                .tags(List.of(StackType.SPRING))
                 .build();
 
         Long userId = 1L;
@@ -146,9 +146,9 @@ class RecruitBoardServiceTest {
                         new BoardPositionRequest(PositionType.FRONTEND, 3),
                         new BoardPositionRequest(PositionType.BACKEND, 2)
                 ))
-                .stacks(List.of(
-                        new BoardStackRequest(StackType.SPRING),
-                        new BoardStackRequest(StackType.JAVA)
+                .tags(List.of(
+                        StackType.SPRING,
+                        StackType.JAVA
                 ))
                 .build();
 
@@ -183,7 +183,7 @@ class RecruitBoardServiceTest {
                 .deadline(LocalDateTime.now())
                 .expectedPeriod("3개월")
                 .positions(List.of(new BoardPositionRequest(PositionType.BACKEND, 3)))
-                .stacks(List.of(new BoardStackRequest(StackType.SPRING)))
+                .tags(List.of(StackType.SPRING))
                 .build();
 
         Long nonOwnerId = 2L;
@@ -236,8 +236,8 @@ class RecruitBoardServiceTest {
     @Test
     void findBoardWithKeyword() {
         String searchContents = "검색할 컨텐츠";
-        RecruitBoard recruitBoard1 = RecruitBoard.builder().id(10L).title("모집 게시판" + searchContents).contents("!@#$%").build();
-        RecruitBoard recruitBoard2 = RecruitBoard.builder().id(1L).title("모집 게시판").contents("!@#$%" + searchContents).build();
+        RecruitBoard recruitBoard1 = RecruitBoard.builder().id(10L).recruitBoardType(RecruitBoardType.PROJECT).progressType(ProgressType.ONLINE).title("모집 게시판" + searchContents).contents("!@#$%").build();
+        RecruitBoard recruitBoard2 = RecruitBoard.builder().id(1L).recruitBoardType(RecruitBoardType.PROJECT).progressType(ProgressType.ONLINE).title("모집 게시판").contents("!@#$%" + searchContents).build();
         recruitBoard1.associateUser(user);
         recruitBoard2.associateUser(user);
         RecruitBoardScrollRequest request = RecruitBoardScrollRequest.builder().keyword(searchContents).size(2).build();
@@ -277,7 +277,7 @@ class RecruitBoardServiceTest {
         User owner = User.builder().id(1L).email("test1234@naver.com").password("qwer1234!").build();
         List<RecruitBoard> recruitBoards = new ArrayList<>();
         for (Long i = startId; i < startId + size; i++) {
-            RecruitBoard recruitBoard = RecruitBoard.builder().id(i).title("모집 게시판" + i).contents("모집합니다." + i).build();
+            RecruitBoard recruitBoard = RecruitBoard.builder().id(i).title("모집 게시판" + i).recruitBoardType(RecruitBoardType.PROJECT).progressType(ProgressType.ONLINE).contents("모집합니다." + i).build();
             recruitBoard.associateUser(owner);
             recruitBoards.add(recruitBoard);
         }
