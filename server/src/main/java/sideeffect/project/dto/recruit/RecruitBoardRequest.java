@@ -16,6 +16,7 @@ import java.util.List;
 public class RecruitBoardRequest {
 
     private String title;
+    private String projectName;
     private String contents;
     private RecruitBoardType recruitBoardType;
     private ProgressType progressType;
@@ -27,6 +28,7 @@ public class RecruitBoardRequest {
     public RecruitBoard toRecruitBoard() {
         return RecruitBoard.builder()
                 .title(title)
+                .projectName(projectName)
                 .contents(contents)
                 .recruitBoardType(recruitBoardType)
                 .progressType(progressType)

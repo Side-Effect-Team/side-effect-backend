@@ -15,6 +15,7 @@ public class RecruitBoardResponse {
 
     private Long id;
     private String title;
+    private String projectName;
     private String content;
     private int views;
     private String recruitBoardType;
@@ -27,6 +28,7 @@ public class RecruitBoardResponse {
     public static RecruitBoardResponse of(RecruitBoard recruitBoard) {
         return RecruitBoardResponse.builder()
                 .id(recruitBoard.getId())
+                .projectName(recruitBoard.getProjectName())
                 .title(recruitBoard.getTitle())
                 .content(recruitBoard.getContents())
                 .views(recruitBoard.getViews())

@@ -25,6 +25,9 @@ public class RecruitBoard extends BaseTimeEntity {
 
     private String title;
 
+    @Column(name = "project_name")
+    private String projectName;
+
     private String contents;
 
     private int views;
@@ -53,9 +56,10 @@ public class RecruitBoard extends BaseTimeEntity {
     private List<BoardStack> boardStacks = new ArrayList<>();
 
     @Builder
-    public RecruitBoard(Long id, String title, String contents, RecruitBoardType recruitBoardType, ProgressType progressType, String expectedPeriod, LocalDateTime deadline) {
+    public RecruitBoard(Long id, String title, String projectName, String contents, RecruitBoardType recruitBoardType, ProgressType progressType, String expectedPeriod, LocalDateTime deadline) {
         this.id = id;
         this.title = title;
+        this.projectName = projectName;
         this.contents = contents;
         this.views = 0;
         this.recruitBoardType = recruitBoardType;
@@ -87,6 +91,9 @@ public class RecruitBoard extends BaseTimeEntity {
     public void update(RecruitBoard recruitBoard) {
         if(recruitBoard.getTitle() != null) {
             this.title = recruitBoard.getTitle();
+        }
+        if(recruitBoard.getProjectName() != null) {
+            this.projectName = recruitBoard.getProjectName();
         }
         if(recruitBoard.getContents() != null) {
             this.contents = recruitBoard.getContents();
