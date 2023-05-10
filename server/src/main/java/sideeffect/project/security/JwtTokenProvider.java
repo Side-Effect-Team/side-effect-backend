@@ -1,7 +1,6 @@
 package sideeffect.project.security;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +9,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import sideeffect.project.common.exception.AuthException;
+import sideeffect.project.common.exception.ErrorCode;
 
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -31,8 +32,24 @@ public class JwtTokenProvider {
                 .getBody().get("name", String.class);
     }
     public boolean isExpired(String token){
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token)
-                .getBody().getExpiration().before(new Date());
+//        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token)
+//                .getBody().getExpiration().before(new Date());
+        try {
+            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            return false;
+        }catch (UnsupportedJwtException e){
+            log.error("if the claimsJws argument does not represent an Claims JWS");
+        }catch (MalformedJwtException e){
+            log.error(" if the claimsJws string is not a valid JWS");
+        }catch (SignatureException e){
+            log.error("if the claimsJws JWS signature validation fails");
+        }catch (ExpiredJwtException e){
+            log.error("if the specified JWT is a Claims JWT and the Claims has an expiration time before the time this method is invoked.");
+            throw new AuthException(ErrorCode.TOKEN_EXPIRED);
+        }catch (IllegalStateException e){
+            log.error("if the claimsJws string is null or empty or only whitespace");
+        }
+        return true;
     }
 
     public String createJwt(Authentication authentication){
