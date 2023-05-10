@@ -26,4 +26,6 @@ public interface FreeBoardRepository extends JpaRepository<FreeBoard, Long>, Fre
 
     @Query("SELECT b from FreeBoard b order by b.recommends.size desc")
     List<FreeBoard> findRankFreeBoard(Pageable pageable);
+
+    boolean existsByProjectUrl(String projectUrl);
 }
