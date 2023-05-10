@@ -14,19 +14,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sideeffect.project.domain.freeboard.FreeBoard;
-import sideeffect.project.domain.recommend.Recommend;
+import sideeffect.project.domain.like.Like;
 import sideeffect.project.domain.user.User;
-import sideeffect.project.dto.recommend.RecommendResult;
-import sideeffect.project.dto.recommend.RecommendRequest;
-import sideeffect.project.dto.recommend.RecommendResponse;
+import sideeffect.project.dto.like.LikeResult;
+import sideeffect.project.dto.like.LikeRequest;
+import sideeffect.project.dto.like.LikeResponse;
 import sideeffect.project.repository.FreeBoardRepository;
-import sideeffect.project.repository.RecommendRepository;
+import sideeffect.project.repository.LikeRepository;
 import sideeffect.project.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
-class RecommendServiceTest {
+class LikeServiceTest {
 
-    private RecommendService recommendService;
+    private LikeService likeService;
 
     @Mock
     private UserRepository userRepository;
@@ -35,15 +35,15 @@ class RecommendServiceTest {
     private FreeBoardRepository freeBoardRepository;
 
     @Mock
-    private RecommendRepository recommendRepository;
+    private LikeRepository likeRepository;
 
     private User user;
     private FreeBoard freeBoard;
-    private Recommend recommend;
+    private Like like;
 
     @BeforeEach
     void setUp() {
-        recommendService = new RecommendService(recommendRepository, userRepository, freeBoardRepository);
+        likeService = new LikeService(likeRepository, userRepository, freeBoardRepository);
 
         user = User.builder()
             .id(1L)
@@ -60,41 +60,41 @@ class RecommendServiceTest {
             .content("test")
             .build();
 
-        recommend = Recommend.recommend(user, freeBoard);
+        like = like.like(user, freeBoard);
     }
 
     @DisplayName("유저가 게시판을 추천한다.")
     @Test
-    void recommendBoard() {
-        when(recommendRepository.findByUserIdAndFreeBoardId(any(), any())).thenReturn(Optional.empty());
+    void likeBoard() {
+        when(likeRepository.findByUserIdAndFreeBoardId(any(), any())).thenReturn(Optional.empty());
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(freeBoardRepository.findById(any())).thenReturn(Optional.of(freeBoard));
-        when(recommendRepository.save(any())).thenReturn(recommend);
-        RecommendRequest request = new RecommendRequest(user.getId(), freeBoard.getId());
+        when(likeRepository.save(any())).thenReturn(like);
+        LikeRequest request = new LikeRequest(user.getId(), freeBoard.getId());
 
-        RecommendResponse response = recommendService.toggleRecommend(request);
+        LikeResponse response = likeService.toggleLike(request);
 
         assertAll(
-            () -> verify(recommendRepository).findByUserIdAndFreeBoardId(any(), any()),
+            () -> verify(likeRepository).findByUserIdAndFreeBoardId(any(), any()),
             () -> verify(userRepository).findById(any()),
             () -> verify(freeBoardRepository).findById(any()),
-            () -> verify(recommendRepository).save(any()),
-            () -> assertThat(response.getMessage()).isEqualTo(RecommendResult.RECOMMEND.getMessage())
+            () -> verify(likeRepository).save(any()),
+            () -> assertThat(response.getMessage()).isEqualTo(LikeResult.LIKE.getMessage())
         );
     }
 
     @DisplayName("유저가 게시판 추천을 취소한다.")
     @Test
-    void cancelRecommend() {
-        when(recommendRepository.findByUserIdAndFreeBoardId(any(), any())).thenReturn(Optional.of(recommend));
-        RecommendRequest request = new RecommendRequest(user.getId(), freeBoard.getId());
+    void cancelLike() {
+        when(likeRepository.findByUserIdAndFreeBoardId(any(), any())).thenReturn(Optional.of(like));
+        LikeRequest request = new LikeRequest(user.getId(), freeBoard.getId());
 
-        RecommendResponse response = recommendService.toggleRecommend(request);
+        LikeResponse response = likeService.toggleLike(request);
 
         assertAll(
-            () -> verify(recommendRepository).findByUserIdAndFreeBoardId(any(), any()),
-            () -> assertThat(response.getMessage()).isEqualTo(RecommendResult.CANCEL_RECOMMEND.getMessage()),
-            () -> assertThat(freeBoard.getRecommends()).doesNotContain(recommend)
+            () -> verify(likeRepository).findByUserIdAndFreeBoardId(any(), any()),
+            () -> assertThat(response.getMessage()).isEqualTo(LikeResult.CANCEL_LIKE.getMessage()),
+            () -> assertThat(freeBoard.getLikes()).doesNotContain(like)
         );
     }
 }

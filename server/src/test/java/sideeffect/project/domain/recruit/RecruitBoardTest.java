@@ -6,11 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import sideeffect.project.domain.stack.StackLevelType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -37,10 +35,6 @@ class RecruitBoardTest {
                 .id(1L)
                 .title("모집 게시판")
                 .contents("모집합니다.")
-                .recruitBoardType(RecruitBoardType.PROJECT)
-                .progressType(ProgressType.ONLINE)
-                .deadline(LocalDateTime.now())
-                .expectedPeriod("3개월")
                 .build();
     }
 
@@ -66,9 +60,7 @@ class RecruitBoardTest {
         List<BoardStack> boardStacks = new ArrayList<>();
 
         for(int i = 0; i < 3; i++) {
-            boardStacks.add(BoardStack.builder()
-                    .stackLevelType(StackLevelType.LOW)
-                    .build());
+            boardStacks.add(BoardStack.builder().build());
         }
 
         recruitBoard.updateBoardStacks(boardStacks);
@@ -91,26 +83,6 @@ class RecruitBoardTest {
                 () -> {
                     if (updateRecruitBoard.getContents() != null) {
                         assertThat(recruitBoard.getContents()).isEqualTo(updateRecruitBoard.getContents());
-                    }
-                },
-                () -> {
-                    if (updateRecruitBoard.getRecruitBoardType() != null) {
-                        assertThat(recruitBoard.getRecruitBoardType()).isEqualTo(updateRecruitBoard.getRecruitBoardType());
-                    }
-                },
-                () -> {
-                    if (updateRecruitBoard.getProgressType() != null) {
-                        assertThat(recruitBoard.getProgressType()).isEqualTo(updateRecruitBoard.getProgressType());
-                    }
-                },
-                () -> {
-                    if (updateRecruitBoard.getDeadline() != null) {
-                        assertThat(recruitBoard.getDeadline()).isEqualTo(updateRecruitBoard.getDeadline());
-                    }
-                },
-                () -> {
-                    if (updateRecruitBoard.getExpectedPeriod() != null) {
-                        assertThat(recruitBoard.getExpectedPeriod()).isEqualTo(updateRecruitBoard.getExpectedPeriod());
                     }
                 });
     }
@@ -139,11 +111,7 @@ class RecruitBoardTest {
     private static Stream<Arguments> generateUpdateBoards() {
         return Stream.of(
                 Arguments.arguments(RecruitBoard.builder().title("변경").build()),
-                Arguments.arguments(RecruitBoard.builder().title("변경").contents("내용 변경").build()),
-                Arguments.arguments(RecruitBoard.builder().title("변경").contents("내용 변경").recruitBoardType(RecruitBoardType.STUDY).build()),
-                Arguments.arguments(RecruitBoard.builder().title("변경").contents("내용 변경").recruitBoardType(RecruitBoardType.STUDY).progressType(ProgressType.OFFLINE).build()),
-                Arguments.arguments(RecruitBoard.builder().title("변경").contents("내용 변경").recruitBoardType(RecruitBoardType.STUDY).progressType(ProgressType.OFFLINE).deadline(LocalDateTime.now().plusMinutes(5)).build()),
-                Arguments.arguments(RecruitBoard.builder().title("변경").contents("내용 변경").recruitBoardType(RecruitBoardType.STUDY).progressType(ProgressType.OFFLINE).deadline(LocalDateTime.now().plusMinutes(5)).expectedPeriod("1개월").build()));
+                Arguments.arguments(RecruitBoard.builder().title("변경2").contents("내용 변경2").build()));
     }
 
 }
