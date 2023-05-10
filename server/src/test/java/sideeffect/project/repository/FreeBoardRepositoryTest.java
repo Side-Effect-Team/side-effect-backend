@@ -21,6 +21,7 @@ import sideeffect.project.domain.like.Like;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
+import sideeffect.project.dto.freeboard.FreeBoardScrollDto;
 
 class FreeBoardRepositoryTest extends TestDataRepository {
 
@@ -107,9 +108,10 @@ class FreeBoardRepositoryTest extends TestDataRepository {
         List<Long> answerBoardIds =
             LongStream.rangeClosed(lastId - pagingSize + 1, lastId).sorted().boxed().collect(Collectors.toList());
         Collections.reverse(answerBoardIds);
+        FreeBoardScrollDto scrollDto = FreeBoardScrollDto.builder().size(pagingSize).build();
 
         List<FreeBoardResponse> freeBoards = repository
-            .searchScroll(null, null, pagingSize);
+            .searchScroll(scrollDto, null);
         List<Long> resultBoardId = freeBoards.stream().map(FreeBoardResponse::getId).collect(Collectors.toList());
 
         assertAll(
@@ -121,13 +123,15 @@ class FreeBoardRepositoryTest extends TestDataRepository {
     @DisplayName("스크롤 페이징 방식으로 querydsl 조회")
     @Test
     void searchScrollByBoardId() {
+        int pagingSize = 10;
         Long lastId = getLastId();
         List<Long> answerBoardIds =
             LongStream.rangeClosed(lastId - 19, lastId - 10).sorted().boxed().collect(Collectors.toList());
         Collections.reverse(answerBoardIds);
+        FreeBoardScrollDto scrollDto = FreeBoardScrollDto.builder().lastId(lastId - 9).size(pagingSize).build();
 
         List<FreeBoardResponse> freeBoards = repository
-            .searchScroll(lastId - 9, null, 10);
+            .searchScroll(scrollDto, null);
         List<Long> resultBoardId = freeBoards.stream().map(FreeBoardResponse::getId).collect(Collectors.toList());
 
         assertAll(
@@ -159,6 +163,7 @@ class FreeBoardRepositoryTest extends TestDataRepository {
     @Test
     void searchFreeBoardScrollWithKeyWord() {
         String title = "검색할 제목";
+        int pagingSize =5;
         FreeBoard freeBoard1 = FreeBoard.builder().title("게시판" + title).content("내용").build();
         FreeBoard freeBoard2 = FreeBoard.builder().title("게시판" + title).content("내용").build();
         FreeBoard freeBoard3 = FreeBoard.builder().title("게시판" + title).content("내용").build();
@@ -168,9 +173,11 @@ class FreeBoardRepositoryTest extends TestDataRepository {
         repository.save(freeBoard1);
         repository.save(freeBoard2);
         repository.save(freeBoard3);
+        FreeBoardScrollDto scrollDto = FreeBoardScrollDto.builder()
+            .keyword(title).lastId(freeBoard2.getId() + 1).size(pagingSize).build();
 
         List<FreeBoardResponse> boards = repository
-            .searchScrollWithKeyword(freeBoard2.getId() + 1, null, title, 5);
+            .searchScrollWithKeyword(scrollDto, null);
         List<Long> boardIds = boards.stream().map(FreeBoardResponse::getId).collect(Collectors.toList());
 
         assertThat(boardIds).containsExactly(freeBoard2.getId(), freeBoard1.getId());

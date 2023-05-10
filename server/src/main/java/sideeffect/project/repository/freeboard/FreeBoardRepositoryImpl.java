@@ -15,6 +15,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
+import sideeffect.project.dto.freeboard.FreeBoardScrollDto;
 
 
 @Repository
@@ -24,23 +25,24 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<FreeBoardResponse> searchScroll(Long lastId, Long userId, Integer size) {
+    public List<FreeBoardResponse> searchScroll(FreeBoardScrollDto scrollDto, Long userId) {
         return jpaQueryFactory.select(getResponseConstructor(userId))
             .from(freeBoard)
-            .where(boardIdLt(lastId))
+            .where(boardIdLt(scrollDto.getLastId()))
             .orderBy(freeBoard.id.desc())
-            .limit(size)
+            .limit(scrollDto.getSize())
             .fetch();
     }
 
     @Override
-    public List<FreeBoardResponse> searchScrollWithKeyword(Long lastId, Long userId, String keyword, Integer size) {
+    public List<FreeBoardResponse> searchScrollWithKeyword(FreeBoardScrollDto scrollDto, Long userId) {
         return jpaQueryFactory.select(getResponseConstructor(userId))
             .from(freeBoard)
-            .where(boardIdLt(lastId),
-                freeBoard.content.containsIgnoreCase(keyword).or(freeBoard.title.containsIgnoreCase(keyword)))
+            .where(boardIdLt(scrollDto.getLastId()),
+                freeBoard.content.containsIgnoreCase(scrollDto.getKeyword())
+                    .or(freeBoard.title.containsIgnoreCase(scrollDto.getKeyword())))
             .orderBy(freeBoard.id.desc())
-            .limit(size)
+            .limit(scrollDto.getSize())
             .fetch();
     }
 
