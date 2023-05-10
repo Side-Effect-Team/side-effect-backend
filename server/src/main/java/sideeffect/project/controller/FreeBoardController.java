@@ -36,7 +36,7 @@ public class FreeBoardController {
     }
 
     @GetMapping("/scroll")
-    public FreeBoardScrollResponse scrollBoard(@RequestParam(defaultValue = "-1", name = "lastid") Long lastId,
+    public FreeBoardScrollResponse scrollBoard(@RequestParam(defaultValue = "-1") Long lastId,
         @RequestParam Integer size,
         @RequestParam(required = false) String keyword,
         @LoginUser User user) {
