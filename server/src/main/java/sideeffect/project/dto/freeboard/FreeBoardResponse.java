@@ -26,9 +26,9 @@ public class FreeBoardResponse {
     private String title;
     private String content;
     private String headerImage;
-    private int recommendNumber;
+    private int likeNum;
     private int commentNumber;
-    private boolean recommend;
+    private boolean like;
 
     @JsonFormat(shape = Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
     private LocalDateTime createAt;
@@ -48,7 +48,7 @@ public class FreeBoardResponse {
             .userNickname(freeBoard.getUser().getNickname())
             .content(freeBoard.getContent())
             .headerImage(freeBoard.getImgUrl())
-            .recommendNumber(freeBoard.getRecommends().size())
+            .likeNum(freeBoard.getLikes().size())
             .commentNumber(freeBoard.getComments().size())
             .createAt(freeBoard.getCreateAt())
             .build();

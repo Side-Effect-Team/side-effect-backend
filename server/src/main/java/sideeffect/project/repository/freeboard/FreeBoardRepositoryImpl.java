@@ -1,7 +1,7 @@
 package sideeffect.project.repository.freeboard;
 
 import static sideeffect.project.domain.freeboard.QFreeBoard.freeBoard;
-import static sideeffect.project.domain.recommend.QRecommend.recommend;
+import static sideeffect.project.domain.like.QLike.like;
 
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Expression;
@@ -52,7 +52,7 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
             freeBoard.title,
             freeBoard.content,
             freeBoard.imgUrl,
-            freeBoard.recommends.size(),
+            freeBoard.likes.size(),
             freeBoard.comments.size(),
             getLikeExpression(userId),
             freeBoard.createAt);
@@ -71,8 +71,8 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
             return Expressions.asBoolean(false).isTrue();
         }
         return ExpressionUtils.as(JPAExpressions.selectOne()
-                .from(recommend)
-                .where(recommend.user.id.eq(userId).and(recommend.freeBoard.id.eq(freeBoard.id))).limit(1).isNotNull(),
+                .from(like)
+                .where(like.user.id.eq(userId).and(like.freeBoard.id.eq(freeBoard.id))).limit(1).isNotNull(),
             "like");
 
     }

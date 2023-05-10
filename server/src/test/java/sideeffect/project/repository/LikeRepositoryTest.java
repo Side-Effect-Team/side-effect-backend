@@ -10,13 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import sideeffect.project.common.jpa.TestDataRepository;
 import sideeffect.project.domain.freeboard.FreeBoard;
-import sideeffect.project.domain.recommend.Recommend;
+import sideeffect.project.domain.like.Like;
 import sideeffect.project.domain.user.User;
 
-class RecommendRepositoryTest extends TestDataRepository {
+class LikeRepositoryTest extends TestDataRepository {
 
     @Autowired
-    private RecommendRepository recommendRepository;
+    private LikeRepository likeRepository;
 
     @Autowired
     private EntityManager em;
@@ -45,38 +45,38 @@ class RecommendRepositoryTest extends TestDataRepository {
 
     @DisplayName("유저가 해당 게시판이 추천했으면 true 반환")
     @Test
-    void existsRecommend() {
-        Recommend recommend = Recommend.recommend(user, freeBoard);
-        recommendRepository.saveAndFlush(recommend);
+    void existsLike() {
+        Like like = Like.like(user, freeBoard);
+        likeRepository.saveAndFlush(like);
         em.clear();
 
-        boolean result = recommendRepository.existsByUserIdAndFreeBoardId(user.getId(), freeBoard.getId());
+        boolean result = likeRepository.existsByUserIdAndFreeBoardId(user.getId(), freeBoard.getId());
         assertThat(result).isTrue();
     }
 
     @DisplayName("유저가 해당 게시판을 추천하지 않았으면 false 반환")
     @Test
-    void notExistsRecommend() {
-        boolean result = recommendRepository.existsByUserIdAndFreeBoardId(user.getId(), freeBoard.getId());
+    void notExistsLike() {
+        boolean result = likeRepository.existsByUserIdAndFreeBoardId(user.getId(), freeBoard.getId());
         assertThat(result).isFalse();
     }
 
     @DisplayName("게시판과 연관관계가 끊기면 자동으로 삭제된다.")
     @Test
-    void deleteRecommend() {
-        Recommend recommend = Recommend.recommend(user, freeBoard);
-        recommendRepository.saveAndFlush(recommend);
+    void deleteLike() {
+        Like like = Like.like(user, freeBoard);
+        likeRepository.saveAndFlush(like);
         em.clear();
 
-        deleteRecommend(recommend.getId());
+        deleteLike(like.getId());
         em.flush();
         em.clear();
 
-        assertThat(recommendRepository.findById(recommend.getId())).isEmpty();
+        assertThat(likeRepository.findById(like.getId())).isEmpty();
     }
 
-    private void deleteRecommend(Long id) {
-        Recommend recommend = recommendRepository.findById(id).orElseThrow(EntityExistsException::new);
-        recommend.getFreeBoard().deleteRecommend(recommend);
+    private void deleteLike(Long id) {
+        Like like = likeRepository.findById(id).orElseThrow(EntityExistsException::new);
+        like.getFreeBoard().deleteLike(like);
     }
 }
