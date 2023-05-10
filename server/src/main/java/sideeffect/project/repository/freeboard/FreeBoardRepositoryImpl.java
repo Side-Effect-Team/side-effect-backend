@@ -52,7 +52,7 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
             freeBoard.content,
             freeBoard.createAt,
             getLikeExpression(userId),
-            freeBoard.recommends.size(),
+            freeBoard.likes.size(),
             freeBoard.comments.size());
     }
 
@@ -69,8 +69,8 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
             return Expressions.asBoolean(false).isTrue();
         }
         return ExpressionUtils.as(JPAExpressions.selectOne()
-                .from(recommend)
-                .where(recommend.user.id.eq(userId).and(recommend.freeBoard.id.eq(freeBoard.id))).limit(1).isNotNull(),
+                .from(likes)
+                .where(likes.user.id.eq(userId).and(recommend.freeBoard.id.eq(freeBoard.id))).limit(1).isNotNull(),
             "like");
 
     }

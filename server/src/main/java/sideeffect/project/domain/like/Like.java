@@ -1,4 +1,4 @@
-package sideeffect.project.domain.recommend;
+package sideeffect.project.domain.like;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -20,13 +20,14 @@ import sideeffect.project.domain.user.User;
 @Getter
 @Entity
 @Table(
+    name = "likes",
     indexes = {
         @Index(name = "board_index", columnList = "free_board_id")
     }
 )
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Recommend extends BaseTimeEntity {
+public class Like extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,20 +41,20 @@ public class Recommend extends BaseTimeEntity {
     @JoinColumn(name = "free_board_id")
     private FreeBoard freeBoard;
 
-    public static Recommend recommend(User user, FreeBoard freeBoard) {
-        Recommend recommend = new Recommend();
-        recommend.setUser(user);
-        recommend.setFreeBoard(freeBoard);
-        return recommend;
+    public static Like like(User user, FreeBoard freeBoard) {
+        Like like = new Like();
+        like.setUser(user);
+        like.setFreeBoard(freeBoard);
+        return like;
     }
 
     public void setUser(User user) {
         this.user = user;
-        user.addRecommend(this);
+        user.addLike(this);
     }
 
     public void setFreeBoard(FreeBoard freeBoard) {
         this.freeBoard = freeBoard;
-        freeBoard.addRecommend(this);
+        freeBoard.addLike(this);
     }
 }

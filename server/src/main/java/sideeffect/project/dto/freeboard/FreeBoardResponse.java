@@ -42,9 +42,9 @@ public class FreeBoardResponse {
             .title(freeBoard.getTitle())
             .content(freeBoard.getContent())
             .headerImage(freeBoard.getImgUrl())
-            .likeNum(freeBoard.getRecommends().size())
-            .commentNum(freeBoard.getComments().size())
-            .createdAt(freeBoard.getCreateAt())
+            .likeNum(freeBoard.getLikes().size())
+            .commentNumber(freeBoard.getComments().size())
+            .createAt(freeBoard.getCreateAt())
             .build();
     }
 }

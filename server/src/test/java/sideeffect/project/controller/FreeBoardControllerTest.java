@@ -37,7 +37,7 @@ import sideeffect.project.common.security.WithCustomUser;
 import sideeffect.project.config.WebSecurityConfig;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
-import sideeffect.project.domain.recommend.Recommend;
+import sideeffect.project.domain.like.Like;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.dto.freeboard.FreeBoardRequest;
@@ -98,7 +98,7 @@ class FreeBoardControllerTest {
         int recommendNumber = 20;
         List<Comment> freeBoards = generateComments(1L, 10L);
         freeBoards.forEach(comment -> comment.associate(user, freeBoard));
-        recommend(recommendNumber, freeBoard);
+        like(recommendNumber, freeBoard);
         DetailedFreeBoardResponse response = DetailedFreeBoardResponse.of(freeBoard);
         given(freeBoardService.findBoard(any())).willReturn(response);
 
@@ -113,7 +113,7 @@ class FreeBoardControllerTest {
             .andExpect(jsonPath("$.projectUrl").value(response.getProjectUrl()))
             .andExpect(jsonPath("$.imgUrl").value(response.getImgUrl()))
             .andExpect(jsonPath("$.comments.size()").value(10))
-            .andExpect(jsonPath("$.recommendation").value(recommendNumber))
+            .andExpect(jsonPath("$.likeNum").value(recommendNumber))
             .andDo(print());
         verify(freeBoardService).findBoard(any());
     }
@@ -165,7 +165,7 @@ class FreeBoardControllerTest {
     @WithAnonymousUser
     @Test
     void getRankBoard() throws Exception {
-        List<FreeBoard> freeBoards = generateRecommendBoards();
+        List<FreeBoard> freeBoards = generateLikeBoards();
         given(freeBoardService.findRankFreeBoards()).willReturn(FreeBoardResponse.listOf(freeBoards));
 
         mvc.perform(get("/api/free-boards/rank")
@@ -236,20 +236,20 @@ class FreeBoardControllerTest {
             .andExpect(status().isForbidden());
     }
 
-    private List<FreeBoard> generateRecommendBoards() {
+    private List<FreeBoard> generateLikeBoards() {
         List<FreeBoard> freeBoards = new ArrayList<>();
         for (int i = 6; i >= 1; i--) {
             FreeBoard board = FreeBoard.builder().title("게시판" + i).content("내용" + i).build();
             board.associateUser(user);
-            recommend(i, board);
+            like(i, board);
             freeBoards.add(board);
         }
         return freeBoards;
     }
 
-    private void recommend(int number, FreeBoard freeBoard) {
+    private void like(int number, FreeBoard freeBoard) {
         IntStream.range(0, number)
-            .forEach((id) -> Recommend.recommend(User.builder().id((long) id).build(), freeBoard));
+            .forEach((id) -> Like.like(User.builder().id((long) id).build(), freeBoard));
     }
 
     private void associateCommentsAndFreeBoards(List<FreeBoard> freeBoards, List<Comment> comments) {
