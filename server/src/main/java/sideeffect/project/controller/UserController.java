@@ -11,6 +11,7 @@ import sideeffect.project.service.UserService;
 
 @Slf4j
 @RestController
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -21,21 +22,28 @@ public class UserController {
         return userService.join(request);
     }
 
-    @GetMapping("/user/{id}")
+    @GetMapping("/mypage/{id}")
     public UserResponse view(@LoginUser User user, @PathVariable Long id){
         return userService.findOne(user, id);
     }
 
-    @PatchMapping("/user/{id}")
+   /* @GetMapping("/editpage/{id}")
+    public UserResponse edit(@LoginUser User user, @PathVariable Long id){
+
+        return userService.findOne(user, id);
+    }*/
+
+    @PatchMapping("/{id}")
     public String update(@LoginUser User user, @PathVariable Long id, @RequestBody UserRequest request){
         userService.update(user, id, request);
         return "update success";
     }
-    @DeleteMapping("/user/{id}")
+    @DeleteMapping("/{id}")
     public String delete(@LoginUser User user, @PathVariable Long id){
         userService.delete(user, id);
         return "delete success";
     }
+
 
 
 }
