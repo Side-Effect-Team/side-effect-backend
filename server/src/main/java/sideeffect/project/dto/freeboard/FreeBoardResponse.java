@@ -21,18 +21,14 @@ import sideeffect.project.domain.freeboard.FreeBoard;
 public class FreeBoardResponse {
 
     private Long id;
-    private int views;
-    private String userNickname;
+    private String headerImage;
     private String title;
     private String content;
-    private String headerImage;
-    private int recommendNumber;
-    private int commentNumber;
-    private boolean recommend;
-
     @JsonFormat(shape = Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
-    private LocalDateTime createAt;
-
+    private LocalDateTime createdAt;
+    private boolean like;
+    private int likeNum;
+    private int commentNum;
 
     public static List<FreeBoardResponse> listOf(List<FreeBoard> freeBoards) {
         return freeBoards.stream()
@@ -43,14 +39,12 @@ public class FreeBoardResponse {
     public static FreeBoardResponse of(FreeBoard freeBoard) {
         return FreeBoardResponse.builder()
             .id(freeBoard.getId())
-            .views(freeBoard.getViews())
             .title(freeBoard.getTitle())
-            .userNickname(freeBoard.getUser().getNickname())
             .content(freeBoard.getContent())
             .headerImage(freeBoard.getImgUrl())
-            .recommendNumber(freeBoard.getRecommends().size())
-            .commentNumber(freeBoard.getComments().size())
-            .createAt(freeBoard.getCreateAt())
+            .likeNum(freeBoard.getRecommends().size())
+            .commentNum(freeBoard.getComments().size())
+            .createdAt(freeBoard.getCreateAt())
             .build();
     }
 }

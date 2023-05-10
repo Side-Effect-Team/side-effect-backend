@@ -47,15 +47,13 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
     private ConstructorExpression<FreeBoardResponse> getResponseConstructor(Long userId) {
         return Projections.constructor(FreeBoardResponse.class,
             freeBoard.id,
-            freeBoard.views,
-            freeBoard.user.nickname,
+            freeBoard.imgUrl,
             freeBoard.title,
             freeBoard.content,
-            freeBoard.imgUrl,
-            freeBoard.recommends.size(),
-            freeBoard.comments.size(),
+            freeBoard.createAt,
             getLikeExpression(userId),
-            freeBoard.createAt);
+            freeBoard.recommends.size(),
+            freeBoard.comments.size());
     }
 
 
