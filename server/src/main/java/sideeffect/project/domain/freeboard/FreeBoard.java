@@ -22,7 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sideeffect.project.common.domain.BaseTimeEntity;
 import sideeffect.project.domain.comment.Comment;
-import sideeffect.project.domain.recommend.Recommend;
+import sideeffect.project.domain.like.Like;
 import sideeffect.project.domain.user.User;
 
 @Entity
@@ -55,6 +55,8 @@ public class FreeBoard extends BaseTimeEntity {
 
     private String imgUrl;
 
+    private String projectName;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -64,18 +66,19 @@ public class FreeBoard extends BaseTimeEntity {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "freeBoard", orphanRemoval = true,
         cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private Set<Recommend> recommends;
+    private Set<Like> likes;
 
     @Builder
-    public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl) {
+    public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl, String projectName) {
         this.id = id;
         this.views = 0;
         this.title = title;
         this.projectUrl = projectUrl;
         this.content = content;
         this.imgUrl = imgUrl;
+        this.projectName = projectName;
         this.comments = new ArrayList<>();
-        this.recommends = new HashSet<>();
+        this.likes = new HashSet<>();
     }
 
     public void update(FreeBoard freeBoard) {
@@ -87,6 +90,9 @@ public class FreeBoard extends BaseTimeEntity {
         }
         if (freeBoard.getProjectUrl() != null) {
             this.projectUrl = freeBoard.getProjectUrl();
+        }
+        if (freeBoard.getProjectName() != null) {
+            this.projectName = freeBoard.getProjectName();
         }
     }
 
@@ -118,11 +124,11 @@ public class FreeBoard extends BaseTimeEntity {
         this.comments.remove(comment);
     }
 
-    public void addRecommend(Recommend recommend) {
-        this.recommends.add(recommend);
+    public void addLike(Like like) {
+        this.likes.add(like);
     }
 
-    public void deleteRecommend(Recommend recommend) {
-        this.recommends.remove(recommend);
+    public void deleteLike(Like like) {
+        this.likes.remove(like);
     }
 }

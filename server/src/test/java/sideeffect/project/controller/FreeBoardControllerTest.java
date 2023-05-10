@@ -37,7 +37,7 @@ import sideeffect.project.common.security.WithCustomUser;
 import sideeffect.project.config.WebSecurityConfig;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
-import sideeffect.project.domain.recommend.Recommend;
+import sideeffect.project.domain.like.Like;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.dto.freeboard.FreeBoardRequest;
@@ -98,7 +98,7 @@ class FreeBoardControllerTest {
         int recommendNumber = 20;
         List<Comment> freeBoards = generateComments(1L, 10L);
         freeBoards.forEach(comment -> comment.associate(user, freeBoard));
-        recommend(recommendNumber, freeBoard);
+        like(recommendNumber, freeBoard);
         DetailedFreeBoardResponse response = DetailedFreeBoardResponse.of(freeBoard);
         given(freeBoardService.findBoard(any())).willReturn(response);
 
@@ -113,12 +113,12 @@ class FreeBoardControllerTest {
             .andExpect(jsonPath("$.projectUrl").value(response.getProjectUrl()))
             .andExpect(jsonPath("$.imgUrl").value(response.getImgUrl()))
             .andExpect(jsonPath("$.comments.size()").value(10))
-            .andExpect(jsonPath("$.recommendation").value(recommendNumber))
+            .andExpect(jsonPath("$.likeNum").value(recommendNumber))
             .andDo(print());
         verify(freeBoardService).findBoard(any());
     }
 
-    @DisplayName("게시판을 스크롤 한다.")
+    @DisplayName("게시판 스크롤 요청한다.")
     @Test
     void scrollBoard() throws Exception {
         List<FreeBoard> freeBoards = generateFreeBoards(91L, 100L);
@@ -136,13 +136,36 @@ class FreeBoardControllerTest {
             .andExpect(jsonPath("$.hasNext").value(true))
             .andExpect(jsonPath("$.lastId").value(91))
             .andDo(print());
+        verify(freeBoardService).findScroll(any(), any());
+    }
+
+    @DisplayName("검색 스크롤을 요청한다.")
+    @Test
+    void scrollBoardWithKeyWord() throws Exception {
+        List<FreeBoard> freeBoards = generateFreeBoards(91L, 100L);
+        associateCommentsAndFreeBoards(freeBoards, generateComments(81L, 100L));
+        List<FreeBoardResponse> responses = FreeBoardResponse.listOf(freeBoards);
+        FreeBoardScrollResponse scrollResponse = FreeBoardScrollResponse.of(responses, true);
+        given(freeBoardService.findScrollWithKeyword(any(), any())).willReturn(scrollResponse);
+
+        mvc.perform(get("/api/free-boards/scroll")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("lastid", "101")
+                .param("size", "10")
+                .param("keyword", "번째"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.projects.length()").value(10))
+            .andExpect(jsonPath("$.hasNext").value(true))
+            .andExpect(jsonPath("$.lastId").value(91))
+            .andDo(print());
+        verify(freeBoardService).findScrollWithKeyword(any(), any());
     }
 
     @DisplayName("랭킹 게시판을 가져온다.")
     @WithAnonymousUser
     @Test
     void getRankBoard() throws Exception {
-        List<FreeBoard> freeBoards = generateRecommendBoards();
+        List<FreeBoard> freeBoards = generateLikeBoards();
         given(freeBoardService.findRankFreeBoards()).willReturn(FreeBoardResponse.listOf(freeBoards));
 
         mvc.perform(get("/api/free-boards/rank")
@@ -156,7 +179,8 @@ class FreeBoardControllerTest {
     @WithCustomUser
     @Test
     void registerBoard() throws Exception {
-        FreeBoardRequest request = FreeBoardRequest.builder().content("test").build();
+        FreeBoardRequest request = FreeBoardRequest.builder()
+            .projectUrl("http://1234test.co.kr").content("test").title("게시판 입니다").build();
         given(freeBoardService.register(any(), any())).willReturn(freeBoard);
         mvc.perform(post("/api/free-boards")
                 .with(csrf())
@@ -212,20 +236,20 @@ class FreeBoardControllerTest {
             .andExpect(status().isForbidden());
     }
 
-    private List<FreeBoard> generateRecommendBoards() {
+    private List<FreeBoard> generateLikeBoards() {
         List<FreeBoard> freeBoards = new ArrayList<>();
         for (int i = 6; i >= 1; i--) {
             FreeBoard board = FreeBoard.builder().title("게시판" + i).content("내용" + i).build();
             board.associateUser(user);
-            recommend(i, board);
+            like(i, board);
             freeBoards.add(board);
         }
         return freeBoards;
     }
 
-    private void recommend(int number, FreeBoard freeBoard) {
+    private void like(int number, FreeBoard freeBoard) {
         IntStream.range(0, number)
-            .forEach((id) -> Recommend.recommend(User.builder().id((long) id).build(), freeBoard));
+            .forEach((id) -> Like.like(User.builder().id((long) id).build(), freeBoard));
     }
 
     private void associateCommentsAndFreeBoards(List<FreeBoard> freeBoards, List<Comment> comments) {

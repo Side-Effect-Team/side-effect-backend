@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import sideeffect.project.common.jpa.TestDataRepository;
 import sideeffect.project.domain.freeboard.FreeBoard;
-import sideeffect.project.domain.recommend.Recommend;
+import sideeffect.project.domain.like.Like;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
@@ -199,34 +199,34 @@ class FreeBoardRepositoryTest extends TestDataRepository {
         int rankSize = 6;
         int boardsSize = 10;
         List<Integer> recommendNumbers = List.of(11, 9, 11, 23, 21, 8, 6, 7, 2, 0);
-        saveFreeBoardsAndRecommend(boardsSize, recommendNumbers);
+        saveFreeBoardsAndLike(boardsSize, recommendNumbers);
         em.flush();
         em.clear();
 
         List<Integer> result = repository.findRankFreeBoard(Pageable.ofSize(rankSize))
-            .stream().map(FreeBoard::getRecommends).map(Set::size).collect(Collectors.toList());
+            .stream().map(FreeBoard::getLikes).map(Set::size).collect(Collectors.toList());
         System.out.println("result = " + result);
         System.out.println(repository.findRankFreeBoard(Pageable.ofSize(rankSize)));
         assertThat(result).isEqualTo(List.of(23, 21, 11, 11, 9, 8));
     }
 
-    private void saveFreeBoardsAndRecommend(int boardSize, List<Integer> recommendNumbers) {
+    private void saveFreeBoardsAndLike(int boardSize, List<Integer> recommendNumbers) {
         for (int i = 0; i < boardSize; i++) {
             User user = User.builder().nickname("유저" + i).build();
             em.persist(user);
             FreeBoard freeBoard = FreeBoard.builder().title("게시판" + i).build();
             freeBoard.associateUser(user);
             repository.save(freeBoard);
-            recommend(freeBoard, recommendNumbers.get(i));
+            like(freeBoard, recommendNumbers.get(i));
         }
     }
 
-    private void recommend(FreeBoard freeBoard, Integer recommendNumber) {
+    private void like(FreeBoard freeBoard, Integer recommendNumber) {
         for (int i = 0; i < recommendNumber; i++) {
             User user = User.builder().nickname("추천한 유저" + i).build();
             em.persist(user);
-            Recommend recommend = Recommend.recommend(user, freeBoard);
-            em.persist(recommend);
+            Like like = Like.like(user, freeBoard);
+            em.persist(like);
         }
     }
 

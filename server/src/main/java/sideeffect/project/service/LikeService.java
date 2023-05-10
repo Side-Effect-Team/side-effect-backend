@@ -7,47 +7,47 @@ import org.springframework.transaction.annotation.Transactional;
 import sideeffect.project.common.exception.EntityNotFoundException;
 import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.domain.freeboard.FreeBoard;
-import sideeffect.project.domain.recommend.Recommend;
+import sideeffect.project.domain.like.Like;
 import sideeffect.project.domain.user.User;
-import sideeffect.project.dto.recommend.RecommendResult;
-import sideeffect.project.dto.recommend.RecommendRequest;
-import sideeffect.project.dto.recommend.RecommendResponse;
+import sideeffect.project.dto.like.LikeResult;
+import sideeffect.project.dto.like.LikeRequest;
+import sideeffect.project.dto.like.LikeResponse;
 import sideeffect.project.repository.FreeBoardRepository;
-import sideeffect.project.repository.RecommendRepository;
+import sideeffect.project.repository.LikeRepository;
 import sideeffect.project.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
-public class RecommendService {
+public class LikeService {
 
-    private final RecommendRepository recommendRepository;
+    private final LikeRepository likeRepository;
     private final UserRepository userRepository;
     private final FreeBoardRepository freeBoardRepository;
 
     @Transactional
-    public RecommendResponse toggleRecommend(RecommendRequest request) {
-        Optional<Recommend> recommend = recommendRepository.findByUserIdAndFreeBoardId(
+    public LikeResponse toggleLike(LikeRequest request) {
+        Optional<Like> recommend = likeRepository.findByUserIdAndFreeBoardId(
             request.getUserId(), request.getFreeBoardId());
 
         if (recommend.isPresent()) {
-            Recommend recommendFound = recommend.get();
-            cancelRecommend(recommendFound);
-            return RecommendResponse.of(recommendFound, RecommendResult.CANCEL_RECOMMEND);
+            Like likeFound = recommend.get();
+            cancelLike(likeFound);
+            return LikeResponse.of(likeFound, LikeResult.CANCEL_LIKE);
         }
 
-        return RecommendResponse.of(recommendBoard(request), RecommendResult.RECOMMEND);
+        return LikeResponse.of(likeBoard(request), LikeResult.LIKE);
     }
 
-    private Recommend recommendBoard(RecommendRequest request) {
+    private Like likeBoard(LikeRequest request) {
         User user = userRepository.findById(request.getUserId())
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
         FreeBoard board = freeBoardRepository.findById(request.getFreeBoardId())
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.FREE_BOARD_NOT_FOUND));
-        return recommendRepository.save(Recommend.recommend(user, board));
+        return likeRepository.save(Like.like(user, board));
     }
 
-    private void cancelRecommend(Recommend recommend) {
-        FreeBoard freeBoard = recommend.getFreeBoard();
-        freeBoard.deleteRecommend(recommend);
+    private void cancelLike(Like like) {
+        FreeBoard freeBoard = like.getFreeBoard();
+        freeBoard.deleteLike(like);
     }
 }

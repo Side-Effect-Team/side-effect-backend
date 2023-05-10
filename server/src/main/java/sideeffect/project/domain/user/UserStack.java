@@ -2,21 +2,20 @@ package sideeffect.project.domain.user;
 
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sideeffect.project.domain.stack.Stack;
-import sideeffect.project.domain.stack.StackLevelType;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "USER_STACK")
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserStack {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private StackLevelType stackLevelType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stack_id")
@@ -27,9 +26,8 @@ public class UserStack {
     private User user;
 
     @Builder
-    public UserStack(Long id, StackLevelType stackLevelType, Stack stack, User user){
+    public UserStack(Long id, Stack stack, User user){
         this.id = id;
-        this.stackLevelType = stackLevelType;
         this.stack = stack;
         this.user = user;
     }

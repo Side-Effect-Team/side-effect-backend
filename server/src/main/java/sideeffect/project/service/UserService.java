@@ -8,16 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.common.exception.IllegalStateException;
-import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.stack.Stack;
+import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
-import sideeffect.project.domain.user.UserPosition;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.domain.user.UserStack;
-import sideeffect.project.dto.user.UserPositionRequest;
 import sideeffect.project.dto.user.UserRequest;
 import sideeffect.project.dto.user.UserResponse;
-import sideeffect.project.dto.user.UserStackRequest;
 import sideeffect.project.repository.UserRepository;
 
 import java.util.Collections;
@@ -41,12 +38,11 @@ public class UserService {
         User user = request.toUser();
         user.setPassword(encoder.encode(user.getPassword()));
         user.setUserRoleType(UserRoleType.ROLE_USER);
-        user.updateUserPosition(getUserPositions(user, request.getPositions()));
         user.updateUserStack(getUserStacks(user, request.getStacks()));
         return userRepository.save(user).getId();
     }
 
-    private List<UserStack> getUserStacks(User user, List<UserStackRequest> stacks) {
+    private List<UserStack> getUserStacks(User user, List<StackType> stacks) {
         List<UserStack> userStacks = Collections.emptyList();
 
         if(stacks!=null && !stacks.isEmpty()){
@@ -57,26 +53,12 @@ public class UserService {
         return userStacks;
     }
 
-    private UserStack toUserStack(User user, UserStackRequest userStackRequest) {
-        Stack stack = stackService.findByStackType(userStackRequest.getStackType());
-        return userStackRequest.toUserStack(user, stack);
-    }
-
-    private List<UserPosition> getUserPositions(User user, List<UserPositionRequest> positions) {
-        List<UserPosition> userPositions = Collections.emptyList();
-
-        if(positions!=null && !positions.isEmpty()){
-            userPositions = positions.stream()
-                    .map(userPositionRequest -> toUserPosition(user, userPositionRequest))
-                    .collect(Collectors.toList());
-        }
-
-        return userPositions;
-    }
-
-    private UserPosition toUserPosition(User user, UserPositionRequest userPositionRequest) {
-        Position position = positionService.findByPositionType(userPositionRequest.getPositionType());
-        return userPositionRequest.toUserPosition(user, position);
+    private UserStack toUserStack(User user, StackType userStackRequest) {
+        Stack stack = stackService.findByStackType(userStackRequest);
+        return UserStack.builder()
+                .user(user)
+                .stack(stack)
+                .build();
     }
 
     public UserResponse findOne(User user, Long id){

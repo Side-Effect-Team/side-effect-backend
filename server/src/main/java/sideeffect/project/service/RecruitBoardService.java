@@ -12,6 +12,7 @@ import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.BoardStack;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.stack.Stack;
+import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.recruit.*;
 import sideeffect.project.repository.RecruitBoardRepository;
@@ -31,13 +32,11 @@ public class RecruitBoardService {
     private final StackService stackService;
 
     @Transactional
-    public RecruitBoardResponse register(Long userId, RecruitBoardRequest request) {
-        User findUser = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+    public RecruitBoardResponse register(User user, RecruitBoardRequest request) {
         RecruitBoard recruitBoard = request.toRecruitBoard();
-        recruitBoard.associateUser(findUser);
+        recruitBoard.associateUser(user);
         recruitBoard.updateBoardPositions(getBoardPositions(recruitBoard, request.getPositions()));
-        recruitBoard.updateBoardStacks(getBoardStacks(recruitBoard, request.getStacks()));
+        recruitBoard.updateBoardStacks(getBoardStacks(recruitBoard, request.getTags()));
 
         return RecruitBoardResponse.of(recruitBoardRepository.save(recruitBoard));
     }
@@ -53,7 +52,7 @@ public class RecruitBoardService {
 
     @Transactional(readOnly = true)
     public RecruitBoardScrollResponse findRecruitBoards(RecruitBoardScrollRequest request) {
-        List<RecruitBoard> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(request.getLastId(), request.getKeyword(), request.getStackTypes(), Pageable.ofSize(request.getSize() + 1));
+        List<RecruitBoard> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(request.getLastId(), request.getKeyword(), request.validateStackTypes(), Pageable.ofSize(request.getSize() + 1));
         boolean hasNext = hasNextRecruitBoards(findRecruitBoards, request.getSize());
         return RecruitBoardScrollResponse.of(RecruitBoardResponse.listOf(findRecruitBoards), hasNext);
     }
@@ -64,7 +63,7 @@ public class RecruitBoardService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
         validateOwner(userId, findRecruitBoard);
         findRecruitBoard.updateBoardPositions(getBoardPositions(findRecruitBoard, request.getPositions()));
-        findRecruitBoard.updateBoardStacks(getBoardStacks(findRecruitBoard, request.getStacks()));
+        findRecruitBoard.updateBoardStacks(getBoardStacks(findRecruitBoard, request.getTags()));
 
         findRecruitBoard.update(request.toRecruitBoard());
     }
@@ -89,12 +88,12 @@ public class RecruitBoardService {
         return boardPositions;
     }
 
-    private List<BoardStack> getBoardStacks(RecruitBoard recruitBoard, List<BoardStackRequest> stackRequests) {
+    private List<BoardStack> getBoardStacks(RecruitBoard recruitBoard, List<StackType> stackRequests) {
         List<BoardStack> boardStacks = Collections.emptyList();
 
         if(stackRequests != null && !stackRequests.isEmpty()) {
             boardStacks = stackRequests.stream()
-                    .map(boardStackRequest -> this.toBoardStack(recruitBoard, boardStackRequest))
+                    .map(stackType -> this.toBoardStack(recruitBoard, stackType))
                     .collect(Collectors.toList());
         }
 
@@ -106,9 +105,12 @@ public class RecruitBoardService {
         return request.toBoardPosition(recruitBoard, findPosition);
     }
 
-    private BoardStack toBoardStack(RecruitBoard recruitBoard, BoardStackRequest request) {
-        Stack findStack = stackService.findByStackType(request.getStackType());
-        return request.toBoardStack(recruitBoard, findStack);
+    private BoardStack toBoardStack(RecruitBoard recruitBoard, StackType stackType) {
+        Stack findStack = stackService.findByStackType(stackType);
+        return BoardStack.builder()
+                .recruitBoard(recruitBoard)
+                .stack(findStack)
+                .build();
     }
 
     private void validateOwner(Long userId, RecruitBoard recruitBoard) {
