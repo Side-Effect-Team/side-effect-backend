@@ -84,9 +84,6 @@ public class RecruitBoard extends BaseTimeEntity {
         if(recruitBoard.getContents() != null) {
             this.contents = recruitBoard.getContents();
         }
-        if(recruitBoard.getImgSrc() != null) {
-            this.imgSrc = recruitBoard.getImgSrc();
-        }
     }
 
     public void increaseViews() {
