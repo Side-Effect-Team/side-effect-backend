@@ -76,10 +76,6 @@ public class User extends BaseTimeEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
-    private List<UserPosition> userPositions = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
     private List<UserStack> userStacks = new ArrayList<>();
 
     @Builder
@@ -141,11 +137,6 @@ public class User extends BaseTimeEntity {
         }
         this.blogUrl = user.getBlogUrl();
         this.githubUrl = user.getGithubUrl();
-    }
-
-    public void updateUserPosition(List<UserPosition> userPositions){
-        this.userPositions.clear();
-        this.userPositions.addAll(userPositions);
     }
 
     public void updateUserStack(List<UserStack> userStacks){
