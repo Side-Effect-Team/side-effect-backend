@@ -37,7 +37,7 @@ public class BoardPosition {
     @JoinColumn(name = "recruit_board_id")
     private RecruitBoard recruitBoard;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "boardPosition")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "boardPosition", cascade = CascadeType.REMOVE)
     private List<Applicant> applicants;
 
     @Builder
