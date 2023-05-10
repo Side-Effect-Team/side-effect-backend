@@ -5,6 +5,7 @@ import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.common.domain.BaseTimeEntity;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
+import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recommend.Recommend;
 import sideeffect.project.domain.recruit.RecruitBoard;
 
@@ -38,6 +39,9 @@ public class User extends BaseTimeEntity {
     private String password;
 
     private String nickname;
+    private String introduction;
+    private PositionType position;
+    private String career;
 
     @Enumerated(EnumType.STRING)
     private UserRoleType userRoleType;
@@ -49,6 +53,7 @@ public class User extends BaseTimeEntity {
 
     private String blogUrl;
     private String githubUrl;
+    private String portfolioUrl;
 
     @Builder.Default
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
@@ -76,23 +81,21 @@ public class User extends BaseTimeEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
-    private List<UserPosition> userPositions = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
     private List<UserStack> userStacks = new ArrayList<>();
 
     @Builder
-    public User(Long id, String email, String password, String nickname, UserRoleType userRoleType, ProviderType providerType, String imgUrl, String blogUrl, String githubUrl) {
+    public User(Long id, String email, String password, String nickname, String introduction, UserRoleType userRoleType, ProviderType providerType, String imgUrl, String blogUrl, String githubUrl, String portfolioUrl) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.nickname = nickname;
+        this.introduction = introduction;
         this.userRoleType = userRoleType;
         this.providerType = providerType;
         this.imgUrl = imgUrl;
         this.blogUrl = blogUrl;
         this.githubUrl = githubUrl;
+        this.portfolioUrl = portfolioUrl;
     }
 
     public void addFreeBoard(FreeBoard freeBoard) {
@@ -141,11 +144,6 @@ public class User extends BaseTimeEntity {
         }
         this.blogUrl = user.getBlogUrl();
         this.githubUrl = user.getGithubUrl();
-    }
-
-    public void updateUserPosition(List<UserPosition> userPositions){
-        this.userPositions.clear();
-        this.userPositions.addAll(userPositions);
     }
 
     public void updateUserStack(List<UserStack> userStacks){
