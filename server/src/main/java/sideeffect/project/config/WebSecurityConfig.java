@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import sideeffect.project.security.ExceptionHandlerFilter;
 import sideeffect.project.security.JwtFilter;
 import sideeffect.project.security.JwtTokenProvider;
 
@@ -63,6 +64,7 @@ public class WebSecurityConfig{
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                     .and()
                 .addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new ExceptionHandlerFilter(), JwtFilter.class)
                 .build();
     }
 
