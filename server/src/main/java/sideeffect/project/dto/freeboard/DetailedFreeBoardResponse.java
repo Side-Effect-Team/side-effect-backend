@@ -24,6 +24,7 @@ public class DetailedFreeBoardResponse {
     private String projectUrl;
     private String imgUrl;
     private int recommendation;
+    private String projectName;
     private List<CommentResponse> comments;
 
     public static List<DetailedFreeBoardResponse> listOf(List<FreeBoard> freeBoards) {
@@ -42,6 +43,7 @@ public class DetailedFreeBoardResponse {
             .projectUrl(freeBoard.getProjectUrl())
             .imgUrl(freeBoard.getImgUrl())
             .recommendation(freeBoard.getRecommends().size())
+            .projectName(freeBoard.getProjectName())
             .comments(CommentResponse.listOf(freeBoard.getComments()))
             .build();
     }

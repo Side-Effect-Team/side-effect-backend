@@ -2,6 +2,7 @@ package sideeffect.project.dto.freeboard;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,11 +27,17 @@ public class FreeBoardRequest {
     @NotBlank
     private String content;
 
+    private String imgSrc;
+
+    @Size(min = 3, max = 20)
+    private String projectName;
+
     public FreeBoard toFreeBoard() {
         return FreeBoard.builder()
             .title(title)
             .content(content)
             .projectUrl(projectUrl)
+            .projectName(projectName)
             .build();
     }
 }

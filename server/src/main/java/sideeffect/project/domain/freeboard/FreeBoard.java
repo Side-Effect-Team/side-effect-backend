@@ -55,6 +55,8 @@ public class FreeBoard extends BaseTimeEntity {
 
     private String imgUrl;
 
+    private String projectName;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -67,13 +69,14 @@ public class FreeBoard extends BaseTimeEntity {
     private Set<Recommend> recommends;
 
     @Builder
-    public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl) {
+    public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl, String projectName) {
         this.id = id;
         this.views = 0;
         this.title = title;
         this.projectUrl = projectUrl;
         this.content = content;
         this.imgUrl = imgUrl;
+        this.projectName = projectName;
         this.comments = new ArrayList<>();
         this.recommends = new HashSet<>();
     }
@@ -87,6 +90,9 @@ public class FreeBoard extends BaseTimeEntity {
         }
         if (freeBoard.getProjectUrl() != null) {
             this.projectUrl = freeBoard.getProjectUrl();
+        }
+        if (freeBoard.getProjectName() != null) {
+            this.projectName = freeBoard.getProjectName();
         }
     }
 
