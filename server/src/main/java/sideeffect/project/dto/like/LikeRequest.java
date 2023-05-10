@@ -1,4 +1,4 @@
-package sideeffect.project.dto.recommend;
+package sideeffect.project.dto.like;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class RecommendRequest {
+public class LikeRequest {
     private Long userId;
     private Long freeBoardId;
 }

@@ -19,5 +19,5 @@ public class FreeBoardKeyWordRequest {
     private int size;
 
     @NotEmpty
-    private String keyWord;
+    private String keyword;
 }

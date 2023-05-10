@@ -5,7 +5,7 @@ import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.common.domain.BaseTimeEntity;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
-import sideeffect.project.domain.recommend.Recommend;
+import sideeffect.project.domain.like.Like;
 import sideeffect.project.domain.recruit.RecruitBoard;
 
 import javax.persistence.*;
@@ -72,7 +72,7 @@ public class User extends BaseTimeEntity {
     @Builder.Default
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE},
         mappedBy = "user")
-    private Set<Recommend> recommends = new HashSet<>();
+    private Set<Like> likes = new HashSet<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
@@ -127,12 +127,12 @@ public class User extends BaseTimeEntity {
         this.applicants.remove(applicant);
     }
 
-    public void addRecommend(Recommend recommend) {
-        this.recommends.add(recommend);
+    public void addLike(Like like) {
+        this.likes.add(like);
     }
 
-    public void deleteRecommend(Recommend recommend) {
-        this.recommends.remove(recommend);
+    public void deleteLike(Like like) {
+        this.likes.remove(like);
     }
 
     public void update(User user){

@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assumptions.assumingThat;
 
 class FreeBoardTest {
 
@@ -45,21 +46,15 @@ class FreeBoardTest {
         freeBoard.update(updateBoard);
 
         assertAll(
-            () -> {
-                if (updateBoard.getProjectUrl() != null) {
-                    assertThat(freeBoard.getProjectUrl()).isEqualTo(updateBoard.getProjectUrl());
-                }
-            },
-            () -> {
-                if (updateBoard.getContent() != null) {
-                    assertThat(freeBoard.getContent()).isEqualTo(updateBoard.getContent());
-                }
-            },
-            () -> {
-                if (updateBoard.getTitle() != null) {
-                    assertThat(freeBoard.getTitle()).isEqualTo(updateBoard.getTitle());
-                }
-            });
+            () -> assumingThat(updateBoard.getProjectUrl() != null,
+                () -> assertThat(freeBoard.getProjectUrl()).isEqualTo(updateBoard.getProjectUrl())),
+            () -> assumingThat(updateBoard.getContent() != null,
+                () -> assertThat(updateBoard.getContent()).isEqualTo(freeBoard.getContent())),
+            () -> assumingThat(updateBoard.getTitle() != null,
+                () -> assertThat(updateBoard.getTitle()).isEqualTo(freeBoard.getTitle())),
+            () -> assumingThat(updateBoard.getProjectName() != null,
+                () -> assertThat(updateBoard.getProjectName()).isEqualTo(freeBoard.getProjectName()))
+            );
     }
 
     @DisplayName("조회수가 증가한다.")
@@ -124,7 +119,8 @@ class FreeBoardTest {
         return Stream.of(
             Arguments.arguments(FreeBoard.builder().content("변경").projectUrl("변경 url").title("변경 제목").build()),
             Arguments.arguments(FreeBoard.builder().content("변경").projectUrl("변경 url").build()),
-            Arguments.arguments(FreeBoard.builder().content("변경").title("변경 제목").build()),
-            Arguments.arguments(FreeBoard.builder().projectUrl("변경 url").title("변경 제목").build()));
+            Arguments.arguments(FreeBoard.builder().content("변경").title("변경 제목").projectName("강아지 앱").build()),
+            Arguments.arguments(FreeBoard.builder().projectUrl("변경 url").title("변경 제목").build()),
+            Arguments.arguments(FreeBoard.builder().content("변경").title("변경 제목").build()));
     }
 }

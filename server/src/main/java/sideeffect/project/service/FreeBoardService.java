@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.EntityNotFoundException;
 import sideeffect.project.common.exception.ErrorCode;
+import sideeffect.project.common.exception.InvalidValueException;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.freeboard.FreeBoardKeyWordRequest;
@@ -31,6 +32,7 @@ public class FreeBoardService {
     public FreeBoard register(User user, FreeBoardRequest request) {
         FreeBoard freeBoard = request.toFreeBoard();
         freeBoard.associateUser(user);
+        validateDuplicateProjectUrl(request);
         return repository.save(freeBoard);
     }
 
@@ -49,10 +51,10 @@ public class FreeBoardService {
     public FreeBoardScrollResponse findScrollWithKeyword(FreeBoardKeyWordRequest request, Long userId) {
         FreeBoardScrollDto scrollDto;
         if (request.getLastId() == null || request.getLastId() < 0) {
-            scrollDto = new FreeBoardScrollDto(null, request.getSize(), request.getKeyWord());
+            scrollDto = new FreeBoardScrollDto(null, request.getSize(), request.getKeyword());
             return searchScrollWithKeyword(scrollDto, userId);
         }
-        scrollDto = new FreeBoardScrollDto(request.getLastId(), request.getSize(), request.getKeyWord());
+        scrollDto = new FreeBoardScrollDto(request.getLastId(), request.getSize(), request.getKeyword());
         return searchScrollWithKeyword(scrollDto, userId);
     }
 
@@ -89,8 +91,14 @@ public class FreeBoardService {
 
     private FreeBoardScrollResponse searchScrollWithKeyword(FreeBoardScrollDto scrollDto, Long userId) {
         List<FreeBoardResponse> responses = repository.searchScrollWithKeyword(scrollDto.getLastId(), userId,
-            scrollDto.getKeyWord(), scrollDto.getSize());
+            scrollDto.getKeyword(), scrollDto.getSize());
         return FreeBoardScrollResponse.of(responses, hasNextBoards(responses.size(), scrollDto.getSize()));
+    }
+
+    private void validateDuplicateProjectUrl(FreeBoardRequest request) {
+        if (repository.existsByProjectUrl(request.getProjectUrl())) {
+            throw new InvalidValueException(ErrorCode.FREE_BOARD_DUPLICATE);
+        }
     }
 
     private FreeBoardScrollResponse searchScroll(FreeBoardScrollDto scrollDto, Long userId) {
