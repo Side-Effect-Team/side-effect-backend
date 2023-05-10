@@ -1,12 +1,9 @@
 package sideeffect.project.dto.recruit;
 
 import lombok.*;
-import sideeffect.project.domain.recruit.ProgressType;
 import sideeffect.project.domain.recruit.RecruitBoard;
-import sideeffect.project.domain.recruit.RecruitBoardType;
 import sideeffect.project.domain.stack.StackType;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -17,11 +14,7 @@ public class RecruitBoardRequest {
 
     private String title;
     private String projectName;
-    private String contents;
-    private RecruitBoardType recruitBoardType;
-    private ProgressType progressType;
-    private LocalDateTime deadline;
-    private String expectedPeriod;
+    private String content;
     private List<BoardPositionRequest> positions;
     private List<StackType> tags;
 
@@ -29,11 +22,7 @@ public class RecruitBoardRequest {
         return RecruitBoard.builder()
                 .title(title)
                 .projectName(projectName)
-                .contents(contents)
-                .recruitBoardType(recruitBoardType)
-                .progressType(progressType)
-                .expectedPeriod(expectedPeriod)
-                .deadline(deadline)
+                .contents(content)
                 .build();
     }
 

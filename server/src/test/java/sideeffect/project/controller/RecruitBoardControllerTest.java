@@ -10,9 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import sideeffect.project.domain.position.PositionType;
-import sideeffect.project.domain.recruit.ProgressType;
 import sideeffect.project.domain.recruit.RecruitBoard;
-import sideeffect.project.domain.recruit.RecruitBoardType;
 import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.recruit.BoardPositionResponse;
@@ -21,7 +19,6 @@ import sideeffect.project.dto.recruit.RecruitBoardResponse;
 import sideeffect.project.dto.recruit.RecruitBoardScrollResponse;
 import sideeffect.project.service.RecruitBoardService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.BDDMockito.any;
@@ -62,10 +59,6 @@ class RecruitBoardControllerTest {
                 .title("모집 게시글 제목")
                 .projectName("프로젝트명1")
                 .content("모집 게시글 내용")
-                .recruitBoardType(RecruitBoardType.PROJECT.getValue())
-                .progressType(ProgressType.ONLINE.getValue())
-                .deadline(LocalDateTime.now())
-                .expectedPeriod("3개월")
                 .positions(List.of(new BoardPositionResponse(1L, PositionType.BACKEND.getValue(), 3, 0)))
                 .tags(List.of(new BoardStackResponse(StackType.SPRING.getValue(), "url")))
                 .build();
@@ -78,10 +71,6 @@ class RecruitBoardControllerTest {
                 .andExpect(jsonPath("$.title").value(response.getTitle()))
                 .andExpect(jsonPath("$.projectName").value(response.getProjectName()))
                 .andExpect(jsonPath("$.content").value(response.getContent()))
-                .andExpect(jsonPath("$.recruitBoardType").value(response.getRecruitBoardType()))
-                .andExpect(jsonPath("$.progressType").value(response.getProgressType()))
-                .andExpect(jsonPath("$.deadline", response.getDeadline()).exists())
-                .andExpect(jsonPath("$.expectedPeriod").value(response.getExpectedPeriod()))
                 .andExpect(jsonPath("$.positions.length()").value(1))
                 .andExpect(jsonPath("$.tags.length()").value(1))
                 .andDo(print());
@@ -92,8 +81,8 @@ class RecruitBoardControllerTest {
     @DisplayName("모집게시글 목록을 조회한다.")
     @Test
     void findScrollRecruitBoard() throws Exception {
-        RecruitBoard recruitBoard1 = RecruitBoard.builder().id(10L).title("모집 게시판1").recruitBoardType(RecruitBoardType.PROJECT).progressType(ProgressType.ONLINE).contents("모집합니다1.").build();
-        RecruitBoard recruitBoard2 = RecruitBoard.builder().id(5L).title("모집 게시판2").recruitBoardType(RecruitBoardType.PROJECT).progressType(ProgressType.ONLINE).contents("모집합니다2.").build();
+        RecruitBoard recruitBoard1 = RecruitBoard.builder().id(10L).title("모집 게시판1").contents("모집합니다1.").build();
+        RecruitBoard recruitBoard2 = RecruitBoard.builder().id(5L).title("모집 게시판2").contents("모집합니다2.").build();
         recruitBoard1.associateUser(user);
         recruitBoard2.associateUser(user);
         List<RecruitBoardResponse> recruitBoardResponses = RecruitBoardResponse.listOf(List.of(recruitBoard1, recruitBoard2));

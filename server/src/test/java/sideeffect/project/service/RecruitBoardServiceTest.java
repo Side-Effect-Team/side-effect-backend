@@ -13,18 +13,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.position.PositionType;
-import sideeffect.project.domain.recruit.ProgressType;
 import sideeffect.project.domain.recruit.RecruitBoard;
-import sideeffect.project.domain.recruit.RecruitBoardType;
 import sideeffect.project.domain.stack.Stack;
 import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
-import sideeffect.project.dto.recruit.*;
+import sideeffect.project.dto.recruit.BoardPositionRequest;
+import sideeffect.project.dto.recruit.RecruitBoardRequest;
+import sideeffect.project.dto.recruit.RecruitBoardScrollRequest;
+import sideeffect.project.dto.recruit.RecruitBoardScrollResponse;
 import sideeffect.project.repository.RecruitBoardRepository;
 import sideeffect.project.repository.UserRepository;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -72,10 +72,6 @@ class RecruitBoardServiceTest {
                 .id(1L)
                 .title("모집 게시판")
                 .contents("모집합니다.")
-                .recruitBoardType(RecruitBoardType.PROJECT)
-                .progressType(ProgressType.ONLINE)
-                .deadline(LocalDateTime.now())
-                .expectedPeriod("3개월")
                 .build();
 
         recruitBoard.associateUser(user);
@@ -96,11 +92,7 @@ class RecruitBoardServiceTest {
     void register() {
         RecruitBoardRequest request = RecruitBoardRequest.builder()
                 .title("모집 게시판 제목")
-                .contents("모집합니다.")
-                .recruitBoardType(RecruitBoardType.PROJECT)
-                .progressType(ProgressType.ONLINE)
-                .deadline(LocalDateTime.now())
-                .expectedPeriod("3개월")
+                .content("모집합니다.")
                 .positions(List.of(new BoardPositionRequest(PositionType.BACKEND, 3)))
                 .tags(List.of(StackType.SPRING))
                 .build();
@@ -137,11 +129,7 @@ class RecruitBoardServiceTest {
     public void updateRecruitBoard() {
         RecruitBoardRequest request = RecruitBoardRequest.builder()
                 .title("수정된 제목")
-                .contents("수정된 내용")
-                .recruitBoardType(RecruitBoardType.STUDY)
-                .progressType(ProgressType.OFFLINE)
-                .deadline(LocalDateTime.now())
-                .expectedPeriod("5개월")
+                .content("수정된 내용")
                 .positions(List.of(
                         new BoardPositionRequest(PositionType.FRONTEND, 3),
                         new BoardPositionRequest(PositionType.BACKEND, 2)
@@ -162,11 +150,7 @@ class RecruitBoardServiceTest {
         assertAll(
                 () -> verify(recruitBoardRepository).findById(any()),
                 () -> assertThat(recruitBoard.getTitle()).isEqualTo(request.getTitle()),
-                () -> assertThat(recruitBoard.getContents()).isEqualTo(request.getContents()),
-                () -> assertThat(recruitBoard.getRecruitBoardType()).isEqualTo(request.getRecruitBoardType()),
-                () -> assertThat(recruitBoard.getProgressType()).isEqualTo(request.getProgressType()),
-                () -> assertThat(recruitBoard.getExpectedPeriod()).isEqualTo(request.getExpectedPeriod()),
-                () -> assertThat(recruitBoard.getDeadline()).isEqualTo(request.getDeadline()),
+                () -> assertThat(recruitBoard.getContents()).isEqualTo(request.getContent()),
                 () -> assertThat(recruitBoard.getBoardPositions()).hasSize(2),
                 () -> assertThat(recruitBoard.getBoardStacks()).hasSize(2)
         );
@@ -177,11 +161,7 @@ class RecruitBoardServiceTest {
     void updateByNonOwner() {
         RecruitBoardRequest request = RecruitBoardRequest.builder()
                 .title("모집 게시판 제목")
-                .contents("모집합니다.")
-                .recruitBoardType(RecruitBoardType.PROJECT)
-                .progressType(ProgressType.ONLINE)
-                .deadline(LocalDateTime.now())
-                .expectedPeriod("3개월")
+                .content("모집합니다.")
                 .positions(List.of(new BoardPositionRequest(PositionType.BACKEND, 3)))
                 .tags(List.of(StackType.SPRING))
                 .build();
@@ -236,8 +216,8 @@ class RecruitBoardServiceTest {
     @Test
     void findBoardWithKeyword() {
         String searchContents = "검색할 컨텐츠";
-        RecruitBoard recruitBoard1 = RecruitBoard.builder().id(10L).recruitBoardType(RecruitBoardType.PROJECT).progressType(ProgressType.ONLINE).title("모집 게시판" + searchContents).contents("!@#$%").build();
-        RecruitBoard recruitBoard2 = RecruitBoard.builder().id(1L).recruitBoardType(RecruitBoardType.PROJECT).progressType(ProgressType.ONLINE).title("모집 게시판").contents("!@#$%" + searchContents).build();
+        RecruitBoard recruitBoard1 = RecruitBoard.builder().id(10L).title("모집 게시판" + searchContents).contents("!@#$%").build();
+        RecruitBoard recruitBoard2 = RecruitBoard.builder().id(1L).title("모집 게시판").contents("!@#$%" + searchContents).build();
         recruitBoard1.associateUser(user);
         recruitBoard2.associateUser(user);
         RecruitBoardScrollRequest request = RecruitBoardScrollRequest.builder().keyword(searchContents).size(2).build();
@@ -277,7 +257,7 @@ class RecruitBoardServiceTest {
         User owner = User.builder().id(1L).email("test1234@naver.com").password("qwer1234!").build();
         List<RecruitBoard> recruitBoards = new ArrayList<>();
         for (Long i = startId; i < startId + size; i++) {
-            RecruitBoard recruitBoard = RecruitBoard.builder().id(i).title("모집 게시판" + i).recruitBoardType(RecruitBoardType.PROJECT).progressType(ProgressType.ONLINE).contents("모집합니다." + i).build();
+            RecruitBoard recruitBoard = RecruitBoard.builder().id(i).title("모집 게시판" + i).contents("모집합니다." + i).build();
             recruitBoard.associateUser(owner);
             recruitBoards.add(recruitBoard);
         }
