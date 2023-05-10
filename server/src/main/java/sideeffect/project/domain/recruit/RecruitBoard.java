@@ -29,6 +29,9 @@ public class RecruitBoard extends BaseTimeEntity {
 
     private String contents;
 
+    @Column(name = "img_src")
+    private String imgSrc;
+
     private int views;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,11 +45,12 @@ public class RecruitBoard extends BaseTimeEntity {
     private List<BoardStack> boardStacks = new ArrayList<>();
 
     @Builder
-    public RecruitBoard(Long id, String title, String projectName, String contents) {
+    public RecruitBoard(Long id, String title, String projectName, String contents, String imgSrc) {
         this.id = id;
         this.title = title;
         this.projectName = projectName;
         this.contents = contents;
+        this.imgSrc = imgSrc;
         this.views = 0;
     }
 
@@ -79,6 +83,9 @@ public class RecruitBoard extends BaseTimeEntity {
         }
         if(recruitBoard.getContents() != null) {
             this.contents = recruitBoard.getContents();
+        }
+        if(recruitBoard.getImgSrc() != null) {
+            this.imgSrc = recruitBoard.getImgSrc();
         }
     }
 
