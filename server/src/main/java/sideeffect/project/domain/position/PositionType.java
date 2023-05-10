@@ -19,7 +19,7 @@ public enum PositionType {
         return value;
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static PositionType parsing(String value) {
         return Stream.of(PositionType.values())
                 .filter(positionType -> positionType.getValue().equalsIgnoreCase(value))

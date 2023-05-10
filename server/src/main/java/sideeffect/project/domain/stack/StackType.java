@@ -21,7 +21,7 @@ public enum StackType {
         return value;
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static StackType parsing(String value) {
         return Stream.of(StackType.values())
                 .filter(stackType -> stackType.getValue().equalsIgnoreCase(value))
