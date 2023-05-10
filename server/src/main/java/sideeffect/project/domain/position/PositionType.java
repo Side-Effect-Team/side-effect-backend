@@ -22,7 +22,7 @@ public enum PositionType {
     @JsonCreator
     public static PositionType parsing(String value) {
         return Stream.of(PositionType.values())
-                .filter(positionType -> positionType.getValue().equals(value))
+                .filter(positionType -> positionType.getValue().equalsIgnoreCase(value))
                 .findFirst()
                 .orElseThrow(() -> new InvalidValueException(ErrorCode.POSITION_NOT_FOUND));
     }

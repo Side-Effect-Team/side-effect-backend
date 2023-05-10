@@ -24,14 +24,14 @@ public enum StackType {
     @JsonCreator
     public static StackType parsing(String value) {
         return Stream.of(StackType.values())
-                .filter(stackType -> stackType.getValue().equals(value))
+                .filter(stackType -> stackType.getValue().equalsIgnoreCase(value))
                 .findFirst()
                 .orElseThrow(() -> new InvalidValueException(ErrorCode.STACK_NOT_FOUND));
     }
 
     public static StackType of(String value) {
         return Stream.of(StackType.values())
-                .filter(stackType -> stackType.getValue().equals(value))
+                .filter(stackType -> stackType.getValue().equalsIgnoreCase(value))
                 .findFirst()
                 .orElse(null);
     }
