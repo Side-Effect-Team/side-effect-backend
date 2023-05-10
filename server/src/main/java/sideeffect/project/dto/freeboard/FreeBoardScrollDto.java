@@ -14,9 +14,7 @@ import lombok.NoArgsConstructor;
 public class FreeBoardScrollDto {
 
     private Long lastId;
-
     private int size;
-
     private String keyword;
-
+    private OrderType orderType;
 }

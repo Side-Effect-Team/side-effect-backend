@@ -1,7 +1,5 @@
 package sideeffect.project.dto.freeboard;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,9 +13,26 @@ import lombok.NoArgsConstructor;
 public class FreeBoardKeyWordRequest {
     private Long lastId;
 
-    @NotNull
     private int size;
 
-    @NotEmpty
     private String keyword;
+
+    private OrderType orderType;
+
+    public FreeBoardScrollDto toScrollDto() {
+        return FreeBoardScrollDto.builder()
+            .lastId(lastId)
+            .size(size)
+            .keyword(keyword)
+            .orderType(orderType)
+            .build();
+    }
+
+    public FreeBoardScrollDto toScrollDtoWithoutLastId() {
+        return FreeBoardScrollDto.builder()
+            .size(size)
+            .keyword(keyword)
+            .orderType(orderType)
+            .build();
+    }
 }
