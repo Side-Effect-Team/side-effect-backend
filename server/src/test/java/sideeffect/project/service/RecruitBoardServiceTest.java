@@ -100,11 +100,10 @@ class RecruitBoardServiceTest {
         Long userId = 1L;
 
         when(recruitBoardRepository.save(any())).thenReturn(recruitBoard);
-        when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(positionService.findByPositionType(any())).thenReturn(position);
         when(stackService.findByStackType(any())).thenReturn(stack);
 
-        recruitBoardService.register(userId, request);
+        recruitBoardService.register(user, request);
 
         verify(recruitBoardRepository).save(any());
     }

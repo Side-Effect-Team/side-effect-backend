@@ -32,11 +32,9 @@ public class RecruitBoardService {
     private final StackService stackService;
 
     @Transactional
-    public RecruitBoardResponse register(Long userId, RecruitBoardRequest request) {
-        User findUser = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+    public RecruitBoardResponse register(User user, RecruitBoardRequest request) {
         RecruitBoard recruitBoard = request.toRecruitBoard();
-        recruitBoard.associateUser(findUser);
+        recruitBoard.associateUser(user);
         recruitBoard.updateBoardPositions(getBoardPositions(recruitBoard, request.getPositions()));
         recruitBoard.updateBoardStacks(getBoardStacks(recruitBoard, request.getTags()));
 
