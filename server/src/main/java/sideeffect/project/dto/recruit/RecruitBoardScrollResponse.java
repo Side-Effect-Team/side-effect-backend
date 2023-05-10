@@ -15,6 +15,13 @@ public class RecruitBoardScrollResponse {
     private boolean hasNext;
 
     public static RecruitBoardScrollResponse of(List<RecruitBoardResponse> recruitBoards, boolean hasNext) {
+        if (recruitBoards.isEmpty()) {
+            return RecruitBoardScrollResponse.builder()
+                    .recruitBoards(recruitBoards)
+                    .hasNext(hasNext)
+                    .build();
+        }
+
         return RecruitBoardScrollResponse.builder()
                 .recruitBoards(recruitBoards)
                 .lastId(recruitBoards.get(recruitBoards.size() - 1).getId())

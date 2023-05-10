@@ -8,7 +8,6 @@ import sideeffect.project.common.domain.BaseTimeEntity;
 import sideeffect.project.domain.user.User;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,22 +24,15 @@ public class RecruitBoard extends BaseTimeEntity {
 
     private String title;
 
+    @Column(name = "project_name")
+    private String projectName;
+
     private String contents;
 
+    @Column(name = "img_src")
+    private String imgSrc;
+
     private int views;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "recruit_board_type")
-    private RecruitBoardType recruitBoardType;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "progress_type")
-    private ProgressType progressType;
-
-    @Column(name = "expected_period")
-    private String expectedPeriod;
-
-    private LocalDateTime deadline;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -53,15 +45,13 @@ public class RecruitBoard extends BaseTimeEntity {
     private List<BoardStack> boardStacks = new ArrayList<>();
 
     @Builder
-    public RecruitBoard(Long id, String title, String contents, RecruitBoardType recruitBoardType, ProgressType progressType, String expectedPeriod, LocalDateTime deadline) {
+    public RecruitBoard(Long id, String title, String projectName, String contents, String imgSrc) {
         this.id = id;
         this.title = title;
+        this.projectName = projectName;
         this.contents = contents;
+        this.imgSrc = imgSrc;
         this.views = 0;
-        this.recruitBoardType = recruitBoardType;
-        this.progressType = progressType;
-        this.expectedPeriod = expectedPeriod;
-        this.deadline = deadline;
     }
 
     public void updateBoardPositions(List<BoardPosition> boardPositions) {
@@ -88,20 +78,11 @@ public class RecruitBoard extends BaseTimeEntity {
         if(recruitBoard.getTitle() != null) {
             this.title = recruitBoard.getTitle();
         }
+        if(recruitBoard.getProjectName() != null) {
+            this.projectName = recruitBoard.getProjectName();
+        }
         if(recruitBoard.getContents() != null) {
             this.contents = recruitBoard.getContents();
-        }
-        if(recruitBoard.getRecruitBoardType() != null) {
-            this.recruitBoardType = recruitBoard.getRecruitBoardType();
-        }
-        if(recruitBoard.getProgressType() != null) {
-            this.progressType = recruitBoard.getProgressType();
-        }
-        if(recruitBoard.getExpectedPeriod() != null) {
-            this.expectedPeriod = recruitBoard.getExpectedPeriod();
-        }
-        if(recruitBoard.getDeadline() != null) {
-            this.deadline = recruitBoard.getDeadline();
         }
     }
 

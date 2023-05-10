@@ -17,9 +17,7 @@ import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.domain.applicant.ApplicantStatus;
 import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.BoardPosition;
-import sideeffect.project.domain.recruit.ProgressType;
 import sideeffect.project.domain.recruit.RecruitBoard;
-import sideeffect.project.domain.recruit.RecruitBoardType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.dto.applicant.*;
@@ -27,7 +25,6 @@ import sideeffect.project.repository.ApplicantRepository;
 import sideeffect.project.repository.BoardPositionRepository;
 import sideeffect.project.repository.RecruitBoardRepository;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -74,10 +71,6 @@ class ApplicantServiceTest {
                 .id(1L)
                 .title("모집 게시판")
                 .contents("모집합니다.")
-                .recruitBoardType(RecruitBoardType.PROJECT)
-                .progressType(ProgressType.ONLINE)
-                .deadline(LocalDateTime.now())
-                .expectedPeriod("3개월")
                 .build();
 
         recruitBoard.associateUser(user);
