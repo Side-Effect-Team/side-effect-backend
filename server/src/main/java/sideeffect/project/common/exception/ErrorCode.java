@@ -6,6 +6,8 @@ public enum ErrorCode {
     USER_UNAUTHORIZED(403, "U_002", "해당 유저가 아닙니다."),
     USER_ALREADY_EXIST(400, "U_003", "이미 존재하는 이메일입니다"),
 
+    TOKEN_EXPIRED(401, "T_001", "토큰이 만료되었습니다"),
+
     FREE_BOARD_NOT_FOUND(400, "FB_001", "해당 게시판을 찾을 수 없습니다."),
     FREE_BOARD_UNAUTHORIZED(403, "FB_002", "해당 게시판에 대한 권한이 없습니다."),
 
