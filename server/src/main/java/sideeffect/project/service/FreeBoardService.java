@@ -91,7 +91,7 @@ public class FreeBoardService {
 
     private FreeBoardScrollResponse searchScrollWithKeyword(FreeBoardScrollDto scrollDto, Long userId) {
         List<FreeBoardResponse> responses = repository.searchScrollWithKeyword(scrollDto.getLastId(), userId,
-            scrollDto.getKeyWord(), scrollDto.getSize());
+            scrollDto.getKeyword(), scrollDto.getSize());
         return FreeBoardScrollResponse.of(responses, hasNextBoards(responses.size(), scrollDto.getSize()));
     }
 

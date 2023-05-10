@@ -17,6 +17,6 @@ public class FreeBoardScrollDto {
 
     private int size;
 
-    private String keyWord;
+    private String keyword;
 
 }
