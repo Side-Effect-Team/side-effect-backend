@@ -168,7 +168,7 @@ class ApplicantControllerTest {
                 .status(ApplicantStatus.APPROVED)
                 .build();
 
-        mvc.perform(put("/api/applicant")
+        mvc.perform(patch("/api/applicant")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -188,7 +188,7 @@ class ApplicantControllerTest {
         doThrow(new EntityNotFoundException(ErrorCode.BOARD_POSITION_FULL))
                 .when(applicantService).approveApplicant(any(), any());
 
-        mvc.perform(put("/api/applicant")
+        mvc.perform(patch("/api/applicant")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
@@ -207,7 +207,7 @@ class ApplicantControllerTest {
         doThrow(new AuthException(ErrorCode.APPLICANT_UNAUTHORIZED))
                 .when(applicantService).approveApplicant(any(), any());
 
-        mvc.perform(put("/api/applicant")
+        mvc.perform(patch("/api/applicant")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
@@ -226,7 +226,7 @@ class ApplicantControllerTest {
         doThrow(new InvalidValueException(ErrorCode.APPLICANT_NOT_EXISTS))
                 .when(applicantService).approveApplicant(any(), any());
 
-        mvc.perform(put("/api/applicant")
+        mvc.perform(patch("/api/applicant")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
@@ -242,7 +242,7 @@ class ApplicantControllerTest {
                 .status(ApplicantStatus.REJECTED)
                 .build();
 
-        mvc.perform(put("/api/applicant")
+        mvc.perform(patch("/api/applicant")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -262,7 +262,7 @@ class ApplicantControllerTest {
         doThrow(new AuthException(ErrorCode.APPLICANT_UNAUTHORIZED))
                 .when(applicantService).rejectApplicant(any(), any());
 
-        mvc.perform(put("/api/applicant")
+        mvc.perform(patch("/api/applicant")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
@@ -277,7 +277,7 @@ class ApplicantControllerTest {
                 .applicantId(applicant.getId())
                 .build();
 
-        mvc.perform(put("/api/applicant/release")
+        mvc.perform(patch("/api/applicant/release")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -296,7 +296,7 @@ class ApplicantControllerTest {
         doThrow(new AuthException(ErrorCode.APPLICANT_UNAUTHORIZED))
                 .when(applicantService).releaseApplicant(any(), any());
 
-        mvc.perform(put("/api/applicant/release")
+        mvc.perform(patch("/api/applicant/release")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
@@ -314,7 +314,7 @@ class ApplicantControllerTest {
         doThrow(new InvalidValueException(ErrorCode.APPLICANT_NOT_EXISTS))
                 .when(applicantService).releaseApplicant(any(), any());
 
-        mvc.perform(put("/api/applicant/release")
+        mvc.perform(patch("/api/applicant/release")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());

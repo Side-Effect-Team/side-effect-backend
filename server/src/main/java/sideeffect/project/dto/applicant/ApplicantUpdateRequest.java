@@ -3,7 +3,6 @@ package sideeffect.project.dto.applicant;
 import lombok.*;
 import sideeffect.project.domain.applicant.ApplicantStatus;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -18,7 +17,7 @@ public class ApplicantUpdateRequest {
     @NotNull
     private Long applicantId;
 
-    @NotBlank
+    @NotNull
     private ApplicantStatus status;
 
 }

@@ -10,6 +10,7 @@ import sideeffect.project.dto.applicant.*;
 import sideeffect.project.security.LoginUser;
 import sideeffect.project.service.ApplicantService;
 
+import javax.validation.Valid;
 import java.util.Map;
 
 @RestController
@@ -21,7 +22,7 @@ public class ApplicantController {
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @PostMapping
-    public ApplicantResponse registerApplicant(@LoginUser User user, @RequestBody ApplicantRequest request) {
+    public ApplicantResponse registerApplicant(@LoginUser User user, @Valid @RequestBody ApplicantRequest request) {
         return applicantService.register(user, request);
     }
 
@@ -36,8 +37,8 @@ public class ApplicantController {
     }
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    @PutMapping
-    public void updateApplicant(@LoginUser User user, @RequestBody ApplicantUpdateRequest request) {
+    @PatchMapping
+    public void updateApplicant(@LoginUser User user, @Valid @RequestBody ApplicantUpdateRequest request) {
         if(request.getStatus().equals(ApplicantStatus.APPROVED)) {
             applicantService.approveApplicant(user.getId(), request);
         }else if(request.getStatus().equals(ApplicantStatus.REJECTED)) {
@@ -46,8 +47,8 @@ public class ApplicantController {
     }
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    @PutMapping("/release")
-    public void releaseApplicant(@LoginUser User user, @RequestBody ApplicantReleaseRequest request) {
+    @PatchMapping("/release")
+    public void releaseApplicant(@LoginUser User user, @Valid @RequestBody ApplicantReleaseRequest request) {
         applicantService.releaseApplicant(user.getId(), request);
     }
 

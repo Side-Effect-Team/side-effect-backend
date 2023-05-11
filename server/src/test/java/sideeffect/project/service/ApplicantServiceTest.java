@@ -189,6 +189,8 @@ class ApplicantServiceTest {
     void approveApplicantFullPosition() {
         ApplicantUpdateRequest request = ApplicantUpdateRequest.builder().recruitBoardId(recruitBoard.getId()).applicantId(applicant.getId()).status(ApplicantStatus.APPROVED).build();
 
+        when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
+        when(applicantRepository.findById(any())).thenReturn(Optional.of(applicant));
         when(boardPositionRepository.findBoardPositionIfRecruitable(any())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> applicantService.approveApplicant(user.getId(), request))
@@ -200,8 +202,9 @@ class ApplicantServiceTest {
     void approveApplicantByNonOwner() {
         ApplicantUpdateRequest request = ApplicantUpdateRequest.builder().recruitBoardId(recruitBoard.getId()).applicantId(applicant.getId()).status(ApplicantStatus.APPROVED).build();
 
-        when(boardPositionRepository.findBoardPositionIfRecruitable(any())).thenReturn(Optional.of(boardPosition));
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
+        when(applicantRepository.findById(any())).thenReturn(Optional.of(applicant));
+        when(boardPositionRepository.findBoardPositionIfRecruitable(any())).thenReturn(Optional.of(boardPosition));
 
         Long nonOwner = 2L;
 
