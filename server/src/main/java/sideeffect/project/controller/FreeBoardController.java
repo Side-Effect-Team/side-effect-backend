@@ -20,6 +20,7 @@ import sideeffect.project.dto.freeboard.DetailedFreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
+import sideeffect.project.dto.freeboard.OrderType;
 import sideeffect.project.security.LoginUser;
 import sideeffect.project.service.FreeBoardService;
 
@@ -39,13 +40,15 @@ public class FreeBoardController {
     public FreeBoardScrollResponse scrollBoard(@RequestParam(defaultValue = "-1") Long lastId,
         @RequestParam Integer size,
         @RequestParam(required = false) String keyword,
+        @RequestParam(required = false, name = "filter", defaultValue = "LATEST") OrderType orderType,
         @LoginUser User user) {
         if (keyword == null) {
-            FreeBoardScrollRequest scrollRequest = FreeBoardScrollRequest.builder().size(size).lastId(lastId).build();
+            FreeBoardScrollRequest scrollRequest = FreeBoardScrollRequest.builder()
+                .orderType(orderType).size(size).lastId(lastId).build();
             return searchScroll(scrollRequest, user);
         }
-        FreeBoardKeyWordRequest request = FreeBoardKeyWordRequest.builder().lastId(lastId).size(size).keyword(keyword)
-            .build();
+        FreeBoardKeyWordRequest request = FreeBoardKeyWordRequest.builder()
+            .lastId(lastId).size(size).keyword(keyword).orderType(orderType).build();
         return searchScrollWithKeyword(request, user);
     }
 
