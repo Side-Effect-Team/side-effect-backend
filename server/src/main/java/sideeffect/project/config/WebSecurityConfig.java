@@ -55,7 +55,7 @@ public class WebSecurityConfig{
                     .permitAll()
                     .and()
                 .authorizeRequests()
-                    .antMatchers("/api/user/join").permitAll()
+                    .antMatchers("/api/user/join", "/api/user/mypage/**").permitAll()
                     .antMatchers(HttpMethod.POST, "/**").authenticated()
                     .antMatchers(HttpMethod.GET, "/api/free-boards/**").permitAll()
                     .and()

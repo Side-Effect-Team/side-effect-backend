@@ -29,6 +29,7 @@ public class UserResponse {
     //private List<LikeBoardResponse> likeBoards;
     private List<UploadBoardResponse> uploadBoards;
     //private List<ApplyBoardResponse> applyBoards;
+    private Boolean isOwner;
 
     public static UserResponse of(User user){
         return UserResponse.builder()
@@ -62,6 +63,10 @@ public class UserResponse {
         return userStacks.stream()
                 .map(userStack -> userStack.getStack().getStackType())
                 .collect(Collectors.toList());
+    }
+
+    public void setOwner(Boolean bool){
+        this.isOwner = bool;
     }
 
 }
