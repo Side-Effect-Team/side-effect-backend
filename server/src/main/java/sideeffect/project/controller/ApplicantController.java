@@ -37,7 +37,7 @@ public class ApplicantController {
     }
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    @PutMapping
+    @PatchMapping
     public void updateApplicant(@LoginUser User user, @Valid @RequestBody ApplicantUpdateRequest request) {
         if(request.getStatus().equals(ApplicantStatus.APPROVED)) {
             applicantService.approveApplicant(user.getId(), request);
@@ -47,7 +47,7 @@ public class ApplicantController {
     }
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    @PutMapping("/release")
+    @PatchMapping("/release")
     public void releaseApplicant(@LoginUser User user, @Valid @RequestBody ApplicantReleaseRequest request) {
         applicantService.releaseApplicant(user.getId(), request);
     }
