@@ -22,7 +22,7 @@ public class ApplicantController {
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @PostMapping
-    public ApplicantResponse registerApplicant(@LoginUser User user,@Valid @RequestBody ApplicantRequest request) {
+    public ApplicantResponse registerApplicant(@LoginUser User user, @Valid @RequestBody ApplicantRequest request) {
         return applicantService.register(user, request);
     }
 
