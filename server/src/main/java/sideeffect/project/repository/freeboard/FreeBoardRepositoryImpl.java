@@ -1,11 +1,17 @@
 package sideeffect.project.repository.freeboard;
 
+import static sideeffect.project.domain.comment.QComment.comment;
 import static sideeffect.project.domain.freeboard.QFreeBoard.freeBoard;
 import static sideeffect.project.domain.like.QLike.like;
+import static sideeffect.project.dto.freeboard.OrderType.COMMENT;
+import static sideeffect.project.dto.freeboard.OrderType.LIKE;
+import static sideeffect.project.dto.freeboard.OrderType.VIEWS;
 
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -13,11 +19,13 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollDto;
+import sideeffect.project.dto.freeboard.OrderType;
 
-
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
@@ -26,24 +34,84 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
 
     @Override
     public List<FreeBoardResponse> searchScroll(FreeBoardScrollDto scrollDto, Long userId) {
+        Integer filterNumber = getFilterNumber(scrollDto.getLastId(), scrollDto.getOrderType());
         return jpaQueryFactory.select(getResponseConstructor(userId))
             .from(freeBoard)
-            .where(boardIdLt(scrollDto.getLastId()))
-            .orderBy(freeBoard.id.desc())
+            .where(filterByOrderType(scrollDto.getLastId(), scrollDto.getOrderType(), filterNumber))
+            .orderBy(orderByType(scrollDto.getOrderType()), freeBoard.id.desc())
             .limit(scrollDto.getSize())
             .fetch();
     }
 
     @Override
     public List<FreeBoardResponse> searchScrollWithKeyword(FreeBoardScrollDto scrollDto, Long userId) {
+        Integer filterNumber = getFilterNumber(scrollDto.getLastId(), scrollDto.getOrderType());
         return jpaQueryFactory.select(getResponseConstructor(userId))
             .from(freeBoard)
-            .where(boardIdLt(scrollDto.getLastId()),
-                freeBoard.content.containsIgnoreCase(scrollDto.getKeyword())
-                    .or(freeBoard.title.containsIgnoreCase(scrollDto.getKeyword())))
-            .orderBy(freeBoard.id.desc())
+            .where(filterByOrderType(scrollDto.getLastId(), scrollDto.getOrderType(), filterNumber),
+                freeBoard.title.containsIgnoreCase(scrollDto.getKeyword())
+                    .or(freeBoard.content.containsIgnoreCase(scrollDto.getKeyword())))
+            .orderBy(orderByType(scrollDto.getOrderType()))
             .limit(scrollDto.getSize())
             .fetch();
+    }
+
+    private BooleanExpression filterByOrderType(Long boardId, OrderType type, Integer filterNumber) {
+        if (boardId == null) {
+            return null;
+        }
+        if (type.equals(COMMENT)) {
+            return freeBoard.comments.size().lt(filterNumber).or(sameNumberFilter(type, filterNumber, boardId));
+        } else if (type.equals(LIKE)) {
+            return freeBoard.likes.size().lt(filterNumber).or(sameNumberFilter(type, filterNumber, boardId));
+        } else if (type.equals(VIEWS)) {
+            return freeBoard.views.lt(filterNumber).or(sameNumberFilter(type, filterNumber, boardId));
+        }
+
+        return freeBoard.id.lt(boardId);
+    }
+
+    private BooleanExpression sameNumberFilter(OrderType type, int size, Long lastId) {
+        if (lastId == null) {
+            return null;
+        }
+
+        if (type.equals(COMMENT)) {
+            return freeBoard.comments.size().eq(size).and(freeBoard.id.lt(lastId));
+        } else if (type.equals(LIKE)) {
+            return freeBoard.likes.size().eq(size).and(freeBoard.id.lt(lastId));
+        } else if (type.equals(VIEWS)) {
+            return freeBoard.views.eq(size).and(freeBoard.id.lt(lastId));
+        }
+
+        return null;
+    }
+
+    private Integer getFilterNumber(Long lastId, OrderType orderType) {
+        if (lastId == null) {
+            return null;
+        }
+
+        if (orderType.equals(COMMENT)) {
+            return jpaQueryFactory.select(freeBoard.comments.size())
+                .from(freeBoard)
+                .leftJoin(freeBoard.comments, comment)
+                .where(freeBoard.id.eq(lastId))
+                .fetchOne();
+        } else if (orderType.equals(LIKE)) {
+            return jpaQueryFactory.select(freeBoard.likes.size())
+                .from(freeBoard)
+                .leftJoin(freeBoard.likes, like)
+                .where(freeBoard.id.eq(lastId))
+                .fetchOne();
+        } else if (orderType.equals(VIEWS)) {
+            return jpaQueryFactory.select(freeBoard.views)
+                .from(freeBoard)
+                .where(freeBoard.id.eq(lastId))
+                .fetchOne();
+        }
+
+        return null;
     }
 
     private ConstructorExpression<FreeBoardResponse> getResponseConstructor(Long userId) {
@@ -59,13 +127,6 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
     }
 
 
-    private BooleanExpression boardIdLt(Long boardId) {
-        if (boardId != null) {
-            return freeBoard.id.lt(boardId);
-        }
-        return null;
-    }
-
     private Expression<Boolean> getLikeExpression(Long userId) {
         if (userId == null) {
             return Expressions.asBoolean(false).isTrue();
@@ -74,6 +135,19 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
                 .from(like)
                 .where(like.user.id.eq(userId).and(like.freeBoard.id.eq(freeBoard.id))).limit(1).isNotNull(),
             "like");
+    }
 
+    private OrderSpecifier<?> orderByType(OrderType orderType) {
+        Order order = Order.DESC;
+
+        if (orderType.equals(COMMENT)) {
+            return new OrderSpecifier<>(order, freeBoard.comments.size());
+        } else if (orderType.equals(LIKE)) {
+            return new OrderSpecifier<>(order, freeBoard.likes.size());
+        } else if (orderType.equals(VIEWS)) {
+            return new OrderSpecifier<>(order, freeBoard.views);
+        }
+
+        return new OrderSpecifier<>(order, freeBoard.id);
     }
 }
