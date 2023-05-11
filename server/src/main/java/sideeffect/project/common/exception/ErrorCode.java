@@ -5,6 +5,7 @@ public enum ErrorCode {
     USER_NOT_FOUND(400, "U_001", "유저를 찾을 수 없습니다."),
     USER_UNAUTHORIZED(403, "U_002", "해당 유저가 아닙니다."),
     USER_ALREADY_EXIST(400, "U_003", "이미 존재하는 이메일입니다"),
+    USER_NOT_NULL(400, "U_004", "유저 ID에 Null값이 들어올 수 없습니다"),
 
     TOKEN_EXPIRED(401, "T_001", "토큰이 만료되었습니다"),
 

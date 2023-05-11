@@ -8,11 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.common.exception.IllegalStateException;
+import sideeffect.project.common.exception.InvalidValueException;
 import sideeffect.project.domain.stack.Stack;
 import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.domain.user.UserStack;
+import sideeffect.project.dto.user.UserEditResponse;
 import sideeffect.project.dto.user.UserRequest;
 import sideeffect.project.dto.user.UserResponse;
 import sideeffect.project.repository.UserRepository;
@@ -62,8 +64,22 @@ public class UserService {
     }
 
     public UserResponse findOne(User user, Long id){
-        if(user.getId()!=id) throw new AuthException(ErrorCode.USER_UNAUTHORIZED);
-        return UserResponse.of(user);
+        UserResponse userResponse;
+        if(user.getId()==id){
+            userResponse = UserResponse.of(user);
+            userResponse.setOwner(true);
+            return userResponse;
+        }
+        else{
+            User findUser = userRepository.findById(id).orElseThrow(() -> new InvalidValueException(ErrorCode.USER_NOT_FOUND));
+            userResponse = UserResponse.of(findUser);
+            userResponse.setOwner(false);
+            return userResponse;
+        }
+    }
+
+    public UserEditResponse findEditInfo(User user){
+        return UserEditResponse.of(user);
     }
     public void update(User user, Long id, UserRequest request){
         if(user.getId()!=id) throw new AuthException(ErrorCode.USER_UNAUTHORIZED);
