@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 @Builder
 public class UploadBoardResponse {
 
+    private String category;
     private Long id;
     private String title;
     private String content;
@@ -53,6 +54,7 @@ public class UploadBoardResponse {
 
     private static UploadBoardResponse getUploadBoardOfRecruit(RecruitBoard recruitBoard) {
         return UploadBoardResponse.builder()
+                .category("recruit")
                 .id(recruitBoard.getId())
                 .title(recruitBoard.getTitle())
                 .content(recruitBoard.getContents())
@@ -74,6 +76,7 @@ public class UploadBoardResponse {
 
     private static UploadBoardResponse getUploadBoardOfFree(FreeBoard freeBoard) {
         return UploadBoardResponse.builder()
+                .category("free")
                 .id(freeBoard.getId())
                 .title(freeBoard.getTitle())
                 .content(freeBoard.getContent())

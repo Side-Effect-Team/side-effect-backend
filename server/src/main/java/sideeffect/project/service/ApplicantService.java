@@ -60,15 +60,14 @@ public class ApplicantService {
 
     @Transactional
     public void approveApplicant(Long userId, ApplicantUpdateRequest applicantUpdateRequest) {
-        BoardPosition findBoardPosition = boardPositionRepository.findBoardPositionIfRecruitable(applicantUpdateRequest.getApplicantId())
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOARD_POSITION_FULL));
         RecruitBoard findRecruitBoard = recruitBoardRepository.findById(applicantUpdateRequest.getRecruitBoardId())
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
-
-        validateOwner(findRecruitBoard, userId);
-
         Applicant findApplicant = applicantRepository.findById(applicantUpdateRequest.getApplicantId())
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.APPLICANT_NOT_FOUND));
+        BoardPosition findBoardPosition = boardPositionRepository.findBoardPositionIfRecruitable(applicantUpdateRequest.getApplicantId())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOARD_POSITION_FULL));
+
+        validateOwner(findRecruitBoard, userId);
 
         if(checkIfApplicantIdExists(findRecruitBoard.getId(), findApplicant.getId())) {
             throw new InvalidValueException(ErrorCode.APPLICANT_EXISTS);

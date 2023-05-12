@@ -19,7 +19,7 @@ public interface RecruitBoardRepository extends JpaRepository<RecruitBoard, Long
             "AND a.user.id = :userId")
     boolean  existsApplicantByRecruitBoard(@Param("boardId") Long boardId, @Param("userId") Long userId);
 
-    @Query("SELECT new sideeffect.project.dto.applicant.ApplicantListResponse(a.user.id, a.id, u.nickname, p.positionType, a.createAt) " +
+    @Query("SELECT new sideeffect.project.dto.applicant.ApplicantListResponse(a.user.id, a.id, u.nickname, u.email, p.positionType, a.createAt) " +
             "FROM RecruitBoard rb " +
             "INNER JOIN rb.boardPositions bp " +
             "ON rb.id = :boardId " +

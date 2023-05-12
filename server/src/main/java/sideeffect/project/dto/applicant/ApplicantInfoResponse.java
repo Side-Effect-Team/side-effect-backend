@@ -13,14 +13,16 @@ public class ApplicantInfoResponse {
     private Long userId;
     private Long applicantId;
     private String nickName;
-    private LocalDateTime createAt;
+    private String email;
+    private LocalDateTime createdAt;
 
     public static ApplicantInfoResponse of(ApplicantListResponse response) {
         return ApplicantInfoResponse.builder()
                 .userId(response.getUserId())
                 .applicantId(response.getApplicantId())
                 .nickName(response.getNickName())
-                .createAt(response.getCreateAt())
+                .email(response.getEmail())
+                .createdAt(response.getCreatedAt())
                 .build();
     }
 }

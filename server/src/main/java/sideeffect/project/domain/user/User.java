@@ -145,8 +145,27 @@ public class User extends BaseTimeEntity {
         if(user.getNickname() != null) {
             this.nickname = user.getNickname();
         }
-        this.blogUrl = user.getBlogUrl();
-        this.githubUrl = user.getGithubUrl();
+        if(user.getIntroduction() != null) {
+            this.introduction = user.getIntroduction();
+        }
+        if(user.getPosition() != null) {
+            this.position = user.getPosition();
+        }
+        if(user.getCareer() != null) {
+            this.career = user.getCareer();
+        }
+        if(user.getImgUrl() != null) {
+            this.imgUrl = user.getImgUrl();
+        }
+        if(user.getBlogUrl() != null) {
+            this.blogUrl = user.getBlogUrl();
+        }
+        if(user.getGithubUrl() != null) {
+            this.githubUrl = user.getGithubUrl();
+        }
+        if(user.getPortfolioUrl() != null) {
+            this.portfolioUrl = user.getPortfolioUrl();
+        }
     }
 
     public void updateUserStack(List<UserStack> userStacks){
