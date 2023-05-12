@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import sideeffect.project.domain.user.User;
-import sideeffect.project.dto.recruit.RecruitBoardRequest;
-import sideeffect.project.dto.recruit.RecruitBoardResponse;
-import sideeffect.project.dto.recruit.RecruitBoardScrollRequest;
-import sideeffect.project.dto.recruit.RecruitBoardScrollResponse;
+import sideeffect.project.dto.recruit.*;
 import sideeffect.project.security.LoginUser;
 import sideeffect.project.service.RecruitBoardService;
 
@@ -21,6 +18,11 @@ public class RecruitBoardController {
     @GetMapping("/{id}")
     public RecruitBoardResponse findRecruitBoard(@PathVariable Long id) {
         return recruitBoardService.findRecruitBoard(id);
+    }
+
+    @GetMapping("/all")
+    public RecruitBoardAllResponse findAllRecruitBoard() {
+        return recruitBoardService.findAllRecruitBoard();
     }
 
     @GetMapping("/scroll")

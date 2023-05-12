@@ -51,6 +51,13 @@ public class RecruitBoardService {
     }
 
     @Transactional(readOnly = true)
+    public RecruitBoardAllResponse findAllRecruitBoard() {
+        List<RecruitBoard> recruitBoards = recruitBoardRepository.findAll();
+
+        return RecruitBoardAllResponse.of(RecruitBoardResponse.listOf(recruitBoards));
+    }
+
+    @Transactional(readOnly = true)
     public RecruitBoardScrollResponse findRecruitBoards(RecruitBoardScrollRequest request) {
         List<RecruitBoard> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(request.getLastId(), request.getKeyword(), request.validateStackTypes(), Pageable.ofSize(request.getSize() + 1));
         boolean hasNext = hasNextRecruitBoards(findRecruitBoards, request.getSize());
