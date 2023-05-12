@@ -121,6 +121,27 @@ class RecruitBoardControllerTest {
         verify(recruitBoardService).findRecruitBoards(any());
     }
 
+    @DisplayName("모집게시글 전체를 조회한다.")
+    @Test
+    void findAllRecruitBoard() throws Exception {
+        RecruitBoard recruitBoard1 = RecruitBoard.builder().id(10L).title("모집 게시판1").contents("모집합니다1.").build();
+        RecruitBoard recruitBoard2 = RecruitBoard.builder().id(5L).title("모집 게시판2").contents("모집합니다2.").build();
+        recruitBoard1.associateUser(user);
+        recruitBoard2.associateUser(user);
+        List<RecruitBoardResponse> recruitBoardResponses = RecruitBoardResponse.listOf(List.of(recruitBoard1, recruitBoard2));
+        RecruitBoardAllResponse response = RecruitBoardAllResponse.of(recruitBoardResponses);
+
+        given(recruitBoardService.findAllRecruitBoard()).willReturn(response);
+
+        mvc.perform(get("/api/recruit-board/all")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.recruitBoards.length()").value(2))
+                .andDo(print());
+
+        verify(recruitBoardService).findAllRecruitBoard();
+    }
+
     @DisplayName("모집 게시판을 등록한다.")
     @WithCustomUser
     @Test

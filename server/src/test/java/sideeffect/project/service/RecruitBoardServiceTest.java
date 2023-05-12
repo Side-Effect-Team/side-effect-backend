@@ -18,10 +18,7 @@ import sideeffect.project.domain.stack.Stack;
 import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
-import sideeffect.project.dto.recruit.BoardPositionRequest;
-import sideeffect.project.dto.recruit.RecruitBoardRequest;
-import sideeffect.project.dto.recruit.RecruitBoardScrollRequest;
-import sideeffect.project.dto.recruit.RecruitBoardScrollResponse;
+import sideeffect.project.dto.recruit.*;
 import sideeffect.project.repository.RecruitBoardRepository;
 import sideeffect.project.repository.UserRepository;
 
@@ -120,6 +117,21 @@ class RecruitBoardServiceTest {
         assertAll(
                 () -> verify(recruitBoardRepository).findById(any()),
                 () -> assertThat(recruitBoard.getViews()).isEqualTo(beforeViews + 1)
+        );
+    }
+
+    @DisplayName("모집 게시판을 전체 조회한다.")
+    @Test
+    void findAllRecruitBoard() {
+        List<RecruitBoard> recruitBoards = generateRecruitBoards(1L, 100);
+
+        when(recruitBoardRepository.findAll()).thenReturn(recruitBoards);
+
+        RecruitBoardAllResponse allRecruitBoard = recruitBoardService.findAllRecruitBoard();
+
+        assertAll(
+                () -> verify(recruitBoardRepository).findAll(),
+                () -> assertThat(allRecruitBoard.getRecruitBoards()).hasSize(100)
         );
     }
 
