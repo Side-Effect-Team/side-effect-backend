@@ -2,7 +2,6 @@ package sideeffect.project.dto.user;
 
 import lombok.*;
 import sideeffect.project.domain.position.PositionType;
-import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
 
 import java.util.List;
@@ -18,7 +17,7 @@ public class UserRequest {
     private String introduction;
     private PositionType position;
     private String career;
-    private List<StackType> stacks;
+    private List<String> stacks;
     private String blogUrl;
     private String githubUrl;
     private String imgUrl;
