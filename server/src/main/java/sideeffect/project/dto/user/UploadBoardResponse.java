@@ -36,8 +36,8 @@ public class UploadBoardResponse {
         if(freeBoards!=null && !freeBoards.isEmpty()){
             uploadBoardResponseList.addAll(
                     freeBoards.stream()
-                    .map(freeBoard -> getUploadBoardOfFree(freeBoard))
-                    .collect(Collectors.toList())
+                            .map(freeBoard -> getUploadBoardOfFree(freeBoard))
+                            .collect(Collectors.toList())
             );
         }
 
@@ -54,7 +54,7 @@ public class UploadBoardResponse {
 
     private static UploadBoardResponse getUploadBoardOfRecruit(RecruitBoard recruitBoard) {
         return UploadBoardResponse.builder()
-                .category("recruit")
+                .category("recruits")
                 .id(recruitBoard.getId())
                 .title(recruitBoard.getTitle())
                 .content(recruitBoard.getContents())
@@ -76,7 +76,7 @@ public class UploadBoardResponse {
 
     private static UploadBoardResponse getUploadBoardOfFree(FreeBoard freeBoard) {
         return UploadBoardResponse.builder()
-                .category("free")
+                .category("projects")
                 .id(freeBoard.getId())
                 .title(freeBoard.getTitle())
                 .content(freeBoard.getContent())
