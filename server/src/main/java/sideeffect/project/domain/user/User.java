@@ -77,11 +77,11 @@ public class User extends BaseTimeEntity {
 
     @Builder.Default
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE},
-        mappedBy = "user")
+            mappedBy = "user")
     private Set<Like> likes = new HashSet<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<UserStack> userStacks = new ArrayList<>();
 
     @Builder
