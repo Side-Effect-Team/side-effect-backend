@@ -20,9 +20,12 @@ import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
+import sideeffect.project.dto.like.LikeResult;
+import sideeffect.project.dto.like.RecruitLikeResponse;
 import sideeffect.project.dto.recruit.*;
 import sideeffect.project.security.UserDetailsServiceImpl;
 import sideeffect.project.service.RecruitBoardService;
+import sideeffect.project.service.RecruitLikeService;
 
 import java.util.List;
 
@@ -47,6 +50,9 @@ class RecruitBoardControllerTest {
 
     @MockBean
     private RecruitBoardService recruitBoardService;
+
+    @MockBean
+    private RecruitLikeService recruitLikeService;
 
     private MockMvc mvc;
     private User user;
@@ -204,6 +210,42 @@ class RecruitBoardControllerTest {
         mvc.perform(delete("/api/recruit-board/1")
                         .with(csrf()))
                 .andExpect(status().isForbidden());
+    }
+
+    @DisplayName("유저가 모집게시판에 좋아요를 누른다.")
+    @WithCustomUser
+    @Test
+    void recruitBoardLikeOk() throws Exception {
+        RecruitLikeResponse response = RecruitLikeResponse.builder().recruitBoardId(1L).userNickname("test1").message(LikeResult.LIKE.getMessage()).build();
+
+        given(recruitLikeService.toggleLike(any(), any())).willReturn(response);
+
+        mvc.perform(post("/api/recruit-board/likes/1")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.recruitBoardId").value(1))
+                .andExpect(jsonPath("$.userNickname").value("test1"))
+                .andExpect(jsonPath("$.message").value(LikeResult.LIKE.getMessage()))
+                .andDo(print());
+    }
+
+    @DisplayName("유저가 모집게시판에 좋아요를 취소한다.")
+    @WithCustomUser
+    @Test
+    void recruitBoardLikeCancel() throws Exception {
+        RecruitLikeResponse response = RecruitLikeResponse.builder().recruitBoardId(1L).userNickname("test1").message(LikeResult.CANCEL_LIKE.getMessage()).build();
+
+        given(recruitLikeService.toggleLike(any(), any())).willReturn(response);
+
+        mvc.perform(post("/api/recruit-board/likes/1")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.recruitBoardId").value(1))
+                .andExpect(jsonPath("$.userNickname").value("test1"))
+                .andExpect(jsonPath("$.message").value(LikeResult.CANCEL_LIKE.getMessage()))
+                .andDo(print());
     }
 
 }

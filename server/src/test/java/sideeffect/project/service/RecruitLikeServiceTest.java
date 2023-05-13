@@ -69,9 +69,7 @@ public class RecruitLikeServiceTest {
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
         when(recruitLikeRepository.save(any())).thenReturn(recruitLike);
 
-        RecruitLikeRequest request = new RecruitLikeRequest(user.getId(), recruitBoard.getId());
-
-        RecruitLikeResponse response = recruitLikeService.toggleLike(request);
+        RecruitLikeResponse response = recruitLikeService.toggleLike(user.getId(), recruitBoard.getId());
 
         assertAll(
                 () -> verify(recruitLikeRepository).findByUserIdAndRecruitBoardId(any(), any()),
@@ -87,9 +85,8 @@ public class RecruitLikeServiceTest {
     @Test
     void cancelLike() {
         when(recruitLikeRepository.findByUserIdAndRecruitBoardId(any(), any())).thenReturn(Optional.of(recruitLike));
-        RecruitLikeRequest request = new RecruitLikeRequest(user.getId(), recruitBoard.getId());
 
-        RecruitLikeResponse response = recruitLikeService.toggleLike(request);
+        RecruitLikeResponse response = recruitLikeService.toggleLike(user.getId(), recruitBoard.getId());
 
         assertAll(
                 () -> verify(recruitLikeRepository).findByUserIdAndRecruitBoardId(any(), any()),

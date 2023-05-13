@@ -9,7 +9,6 @@ import sideeffect.project.domain.like.RecruitLike;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.like.LikeResult;
-import sideeffect.project.dto.like.RecruitLikeRequest;
 import sideeffect.project.dto.like.RecruitLikeResponse;
 import sideeffect.project.repository.RecruitBoardRepository;
 import sideeffect.project.repository.RecruitLikeRepository;
@@ -26,9 +25,8 @@ public class RecruitLikeService {
     private final RecruitBoardRepository recruitBoardRepository;
 
     @Transactional
-    public RecruitLikeResponse toggleLike(RecruitLikeRequest request) {
-        Optional<RecruitLike> recruitLike = recruitLikeRepository.findByUserIdAndRecruitBoardId(
-                request.getUserId(), request.getRecruitBoardId());
+    public RecruitLikeResponse toggleLike(Long userId, Long boardId) {
+        Optional<RecruitLike> recruitLike = recruitLikeRepository.findByUserIdAndRecruitBoardId(userId, boardId);
 
         if (recruitLike.isPresent()) {
             RecruitLike findRecruitLike = recruitLike.get();
@@ -36,13 +34,13 @@ public class RecruitLikeService {
             return RecruitLikeResponse.of(findRecruitLike, LikeResult.CANCEL_LIKE);
         }
 
-        return RecruitLikeResponse.of(likeBoard(request), LikeResult.LIKE);
+        return RecruitLikeResponse.of(likeBoard(userId, boardId), LikeResult.LIKE);
     }
 
-    private RecruitLike likeBoard(RecruitLikeRequest request) {
-        User findUser = userRepository.findById(request.getUserId())
+    private RecruitLike likeBoard(Long userId, Long boardId) {
+        User findUser = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
-        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(request.getRecruitBoardId())
+        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
 
         return recruitLikeRepository.save(RecruitLike.createRecruitLike(findUser, findRecruitBoard));
