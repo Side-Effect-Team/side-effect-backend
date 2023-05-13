@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import sideeffect.project.domain.stack.Stack;
 
 import javax.persistence.*;
 
@@ -17,16 +16,15 @@ public class UserStack {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stack_id")
-    private Stack stack;
+    @Column(name = "stack_name")
+    private String stack;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
     @Builder
-    public UserStack(Long id, Stack stack, User user){
+    public UserStack(Long id, String stack, User user){
         this.id = id;
         this.stack = stack;
         this.user = user;
