@@ -18,6 +18,7 @@ public class RecruitBoardResponse {
     private String content;
     private String imgSrc;
     private int views;
+    private int likeNum;
     private List<BoardPositionResponse> positions;
     private List<BoardStackResponse> tags;
 
@@ -29,6 +30,7 @@ public class RecruitBoardResponse {
                 .content(recruitBoard.getContents())
                 .imgSrc(recruitBoard.getImgSrc())
                 .views(recruitBoard.getViews())
+                .likeNum(recruitBoard.getRecruitLikes().size())
                 .positions(BoardPositionResponse.listOf(recruitBoard.getBoardPositions()))
                 .tags(BoardStackResponse.listOf(recruitBoard.getBoardStacks()))
                 .build();
