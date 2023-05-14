@@ -138,7 +138,7 @@ class ApplicantServiceTest {
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
         when(recruitBoardRepository.getApplicantsByPosition(any(), any())).thenReturn(applicantListResponses);
 
-        Map<PositionType, ApplicantPositionResponse> applicants = applicantService.findApplicants(user.getId(), recruitBoard.getId(), ApplicantStatus.PENDING);
+        Map<String, ApplicantPositionResponse> applicants = applicantService.findApplicants(user.getId(), recruitBoard.getId(), ApplicantStatus.PENDING);
         AtomicInteger count = new AtomicInteger();
         applicants.forEach((key, value) -> count.addAndGet(value.getSize()));
 

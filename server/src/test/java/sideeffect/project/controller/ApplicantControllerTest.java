@@ -138,10 +138,10 @@ class ApplicantControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("status", String.valueOf(ApplicantStatus.PENDING)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.FRONTEND.applicants.length()").value(3))
-                .andExpect(jsonPath("$.BACKEND.applicants.length()").value(3))
-                .andExpect(jsonPath("$.FRONTEND.size").value(3))
-                .andExpect(jsonPath("$.BACKEND.size").value(3))
+                .andExpect(jsonPath("$.프론트엔드.applicants.length()").value(3))
+                .andExpect(jsonPath("$.백엔드.applicants.length()").value(3))
+                .andExpect(jsonPath("$.프론트엔드.size").value(3))
+                .andExpect(jsonPath("$.백엔드.size").value(3))
                 .andDo(print());
     }
 

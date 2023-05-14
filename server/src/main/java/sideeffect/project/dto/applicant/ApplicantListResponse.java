@@ -18,4 +18,8 @@ public class ApplicantListResponse {
     private PositionType positionType;
     private LocalDateTime createdAt;
 
+    public String getPositionTypeByKoreanName() {
+        return positionType.getKoreanName();
+    }
+
 }
