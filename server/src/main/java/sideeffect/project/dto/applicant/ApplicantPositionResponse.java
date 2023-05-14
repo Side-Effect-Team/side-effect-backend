@@ -1,7 +1,6 @@
 package sideeffect.project.dto.applicant;
 
 import lombok.*;
-import sideeffect.project.domain.position.PositionType;
 
 import java.util.List;
 import java.util.Map;
@@ -17,9 +16,9 @@ public class ApplicantPositionResponse {
     private List<ApplicantInfoResponse> applicants;
     private int size;
 
-    public static Map<PositionType, ApplicantPositionResponse> mapOf(List<ApplicantListResponse> listResponses) {
+    public static Map<String, ApplicantPositionResponse> mapOf(List<ApplicantListResponse> listResponses) {
         return listResponses.stream()
-                .collect(groupingBy(ApplicantListResponse::getPositionType,
+                .collect(groupingBy(ApplicantListResponse::getPositionTypeByKoreanName,
                         mapping(ApplicantInfoResponse::of, toList())))
                 .entrySet().stream()
                 .collect(Collectors.toMap(
