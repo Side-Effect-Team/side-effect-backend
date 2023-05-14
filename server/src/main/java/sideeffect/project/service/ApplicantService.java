@@ -10,7 +10,6 @@ import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.common.exception.InvalidValueException;
 import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.domain.applicant.ApplicantStatus;
-import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.user.User;
@@ -48,7 +47,7 @@ public class ApplicantService {
     }
 
     @Transactional(readOnly = true)
-    public Map<PositionType, ApplicantPositionResponse> findApplicants(Long userId, Long boardId, ApplicantStatus status) {
+    public Map<String, ApplicantPositionResponse> findApplicants(Long userId, Long boardId, ApplicantStatus status) {
         RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
 
