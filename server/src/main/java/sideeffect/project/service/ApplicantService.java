@@ -10,6 +10,7 @@ import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.common.exception.InvalidValueException;
 import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.domain.applicant.ApplicantStatus;
+import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.user.User;
@@ -18,6 +19,7 @@ import sideeffect.project.repository.ApplicantRepository;
 import sideeffect.project.repository.BoardPositionRepository;
 import sideeffect.project.repository.RecruitBoardRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +56,11 @@ public class ApplicantService {
         validateOwner(findRecruitBoard, userId);
 
         List<ApplicantListResponse> applicantListResponses = recruitBoardRepository.getApplicantsByPosition(findRecruitBoard.getId(), status);
-        return ApplicantPositionResponse.mapOf(applicantListResponses);
+        Map<String, ApplicantPositionResponse> responseMaps = ApplicantPositionResponse.mapOf(applicantListResponses);
+
+        addMissingPositionKeys(responseMaps);
+
+        return responseMaps;
     }
 
     @Transactional
@@ -131,6 +137,15 @@ public class ApplicantService {
     private boolean checkIfApplicantIdExists(Long RecruitBoardId, Long targetApplicantId) {
         List<ApplicantListResponse> applicantListResponses = recruitBoardRepository.getApplicantsByPosition(RecruitBoardId, ApplicantStatus.APPROVED);
         return applicantListResponses.stream().anyMatch(a -> a.getApplicantId().equals(targetApplicantId));
+    }
+
+    private void addMissingPositionKeys(Map<String, ApplicantPositionResponse> maps) {
+        for (PositionType positionType : PositionType.values()) {
+            if(!maps.containsKey(positionType.getKoreanName())) {
+                ApplicantPositionResponse response = ApplicantPositionResponse.builder().applicants(new ArrayList<>()).size(0).build();
+                maps.put(positionType.getKoreanName(), response);
+            }
+        }
     }
 
 }
