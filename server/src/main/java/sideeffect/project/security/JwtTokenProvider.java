@@ -31,7 +31,7 @@ public class JwtTokenProvider {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token)
                 .getBody().get("name", String.class);
     }
-    public boolean isExpired(String token){
+    public boolean validateAccessToken(String token){
 //        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token)
 //                .getBody().getExpiration().before(new Date());
         try {
