@@ -63,14 +63,14 @@ public class UserService {
     public UserResponse findOne(User user, Long id){
         UserResponse userResponse;
         if(user.getId()==id){
-            userResponse = UserResponse.of(user);
-            userResponse.setOwner(true);
+            userResponse = UserResponse.ownerOf(user);
+            userResponse.setIsOwner(true);
             return userResponse;
         }
         else{
             User findUser = userRepository.findById(id).orElseThrow(() -> new InvalidValueException(ErrorCode.USER_NOT_FOUND));
-            userResponse = UserResponse.of(findUser);
-            userResponse.setOwner(false);
+            userResponse = UserResponse.justOf(findUser);
+            userResponse.setIsOwner(false);
             return userResponse;
         }
     }

@@ -30,7 +30,7 @@ public class UserResponse {
     //private List<ApplyBoardResponse> applyBoards;
     private Boolean isOwner;
 
-    public static UserResponse of(User user){
+    public static UserResponse ownerOf(User user){
         return UserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -46,9 +46,26 @@ public class UserResponse {
                 .portfolioUrl(user.getPortfolioUrl())
                 .uploadBoards(UploadBoardResponse.listOf(user))
                 //.applyBoards(ApplyBoardResponse.listOf(user))
+
                 .build();
     }
 
+    public static UserResponse justOf(User user){
+        return UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .introduction(user.getIntroduction())
+                .boards(getBoards(user))
+                .position(user.getPosition())
+                .career(user.getCareer())
+                .stacks(listOf(user.getUserStacks()))
+                .imgUrl(user.getImgUrl())
+                .blogUrl(user.getBlogUrl())
+                .githubUrl(user.getGithubUrl())
+                .portfolioUrl(user.getPortfolioUrl())
+                .build();
+    }
     private static int getBoards(User user) {
         int boards = 0;
         if(user.getFreeBoards()!=null && !user.getFreeBoards().isEmpty())
@@ -64,8 +81,7 @@ public class UserResponse {
                 .collect(Collectors.toList());
     }
 
-    public void setOwner(Boolean bool){
-        this.isOwner = bool;
+    public void setIsOwner(boolean flag){
+        this.isOwner = flag;
     }
-
 }
