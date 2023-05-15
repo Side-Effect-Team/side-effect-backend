@@ -34,7 +34,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String username;
         String token = request.getHeader("Token");
         String providerType = request.getHeader("Provider-Type");
-
+        //refactor: OauthService 만들기
         if(token!=null && providerType!=null){
             ResponseEntity<String> authorization_response = sendToAuthorizationServer(token, providerType);
             ObjectMapper objectMapper = new ObjectMapper();
