@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.EntityNotFoundException;
 import sideeffect.project.common.exception.ErrorCode;
+import sideeffect.project.common.exception.InvalidValueException;
 import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.BoardStack;
@@ -75,6 +76,18 @@ public class RecruitBoardService {
     }
 
     @Transactional
+    public void addRecruitBoardPosition(Long userId, Long boardId, BoardPositionRequest request) {
+        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
+        validateOwner(userId, findRecruitBoard);
+
+        BoardPosition targetBoardPosition = toBoardPosition(findRecruitBoard, request);
+        isValidPosition(findRecruitBoard, targetBoardPosition);
+
+        findRecruitBoard.addBoardPosition(targetBoardPosition);
+    }
+
+    @Transactional
     public void deleteRecruitBoard(Long userId, Long boardId) {
         RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
@@ -134,6 +147,13 @@ public class RecruitBoardService {
         }
 
         return hasNext;
+    }
+
+    private void isValidPosition(RecruitBoard recruitBoard, BoardPosition targetBoardPosition) {
+        if(recruitBoard.getBoardPositions().stream()
+                .anyMatch(boardPosition -> boardPosition.getPosition().getId().equals(targetBoardPosition.getPosition().getId()))) {
+            throw new InvalidValueException(ErrorCode.BOARD_POSITION_ALREADY_EXISTS);
+        }
     }
 
 }

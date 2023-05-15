@@ -50,6 +50,16 @@ public class RecruitBoardController {
     }
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PostMapping("/{id}/add-position")
+    public void addRecruitBoardPosition(
+            @LoginUser User user,
+            @PathVariable("id") Long boardId,
+            @RequestBody BoardPositionRequest request
+    ) {
+        recruitBoardService.addRecruitBoardPosition(user.getId(), boardId, request);
+    }
+
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void deleteRecruitBoard(@LoginUser User user, @PathVariable("id") Long boardId) {
         recruitBoardService.deleteRecruitBoard(user.getId(), boardId);

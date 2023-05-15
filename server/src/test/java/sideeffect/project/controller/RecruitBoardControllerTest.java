@@ -192,6 +192,35 @@ class RecruitBoardControllerTest {
                 .andExpect(status().isForbidden());
     }
 
+    @DisplayName("모집 게시판에 포지션을 추가한다.")
+    @WithCustomUser
+    @Test
+    void addRecruitBoardPosition() throws Exception {
+        BoardPositionRequest request = BoardPositionRequest.builder().positionType(PositionType.BACKEND).targetNumber(3).build();
+
+        mvc.perform(post("/api/recruit-board/1/add-position")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("잘못된 유저가 모집 게시판의 포지션을 추가한다.")
+    @WithCustomUser
+    @Test
+    void addRecruitBoardPositionNonOwner() throws Exception {
+        BoardPositionRequest request = BoardPositionRequest.builder().positionType(PositionType.BACKEND).targetNumber(3).build();
+
+        doThrow(new AuthException(ErrorCode.RECRUIT_BOARD_UNAUTHORIZED))
+                .when(recruitBoardService).addRecruitBoardPosition(any(), any(), any());
+
+        mvc.perform(post("/api/recruit-board/1/add-position")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
     @DisplayName("모집 게시판을 삭제한다.")
     @WithCustomUser
     @Test
