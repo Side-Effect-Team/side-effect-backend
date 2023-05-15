@@ -6,6 +6,7 @@ import sideeffect.project.common.domain.BaseTimeEntity;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.like.Like;
+import sideeffect.project.domain.like.RecruitLike;
 import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.RecruitBoard;
 
@@ -81,6 +82,10 @@ public class User extends BaseTimeEntity {
     private Set<Like> likes = new HashSet<>();
 
     @Builder.Default
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = {CascadeType.REMOVE})
+    private List<RecruitLike> recruitLikes = new ArrayList<>();
+
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<UserStack> userStacks = new ArrayList<>();
 
@@ -139,6 +144,14 @@ public class User extends BaseTimeEntity {
 
     public void deleteLike(Like like) {
         this.likes.remove(like);
+    }
+
+    public void addRecruitLike(RecruitLike recruitLike) {
+        this.recruitLikes.add(recruitLike);
+    }
+
+    public void deleteRecruitLike(RecruitLike recruitLike) {
+        this.recruitLikes.remove(recruitLike);
     }
 
     public void update(User user){
