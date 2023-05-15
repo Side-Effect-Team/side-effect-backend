@@ -38,24 +38,18 @@ public class FreeBoardService {
 
     @Transactional(readOnly = true)
     public FreeBoardScrollResponse findScroll(FreeBoardScrollRequest request, Long userId) {
-        FreeBoardScrollDto scrollDto;
         if (request.getLastId() == null || request.getLastId() < 0) {
-            scrollDto = new FreeBoardScrollDto(null, request.getSize(), null);
-            return searchScroll(scrollDto, userId);
+            return searchScroll(request.toScrollDtoWithoutLastId(), userId);
         }
-        scrollDto = new FreeBoardScrollDto(request.getLastId(), request.getSize(), null);
-        return searchScroll(scrollDto, userId);
+        return searchScroll(request.toScrollDto(), userId);
     }
 
     @Transactional(readOnly = true)
     public FreeBoardScrollResponse findScrollWithKeyword(FreeBoardKeyWordRequest request, Long userId) {
-        FreeBoardScrollDto scrollDto;
         if (request.getLastId() == null || request.getLastId() < 0) {
-            scrollDto = new FreeBoardScrollDto(null, request.getSize(), request.getKeyword());
-            return searchScrollWithKeyword(scrollDto, userId);
+            return searchScrollWithKeyword(request.toScrollDtoWithoutLastId(), userId);
         }
-        scrollDto = new FreeBoardScrollDto(request.getLastId(), request.getSize(), request.getKeyword());
-        return searchScrollWithKeyword(scrollDto, userId);
+        return searchScrollWithKeyword(request.toScrollDto(), userId);
     }
 
     @Transactional(readOnly = true)
@@ -90,8 +84,7 @@ public class FreeBoardService {
     }
 
     private FreeBoardScrollResponse searchScrollWithKeyword(FreeBoardScrollDto scrollDto, Long userId) {
-        List<FreeBoardResponse> responses = repository.searchScrollWithKeyword(scrollDto.getLastId(), userId,
-            scrollDto.getKeyword(), scrollDto.getSize());
+        List<FreeBoardResponse> responses = repository.searchScrollWithKeyword(scrollDto, userId);
         return FreeBoardScrollResponse.of(responses, hasNextBoards(responses.size(), scrollDto.getSize()));
     }
 
@@ -102,8 +95,7 @@ public class FreeBoardService {
     }
 
     private FreeBoardScrollResponse searchScroll(FreeBoardScrollDto scrollDto, Long userId) {
-        List<FreeBoardResponse> responses = repository.searchScroll(scrollDto.getLastId(), userId,
-            scrollDto.getSize());
+        List<FreeBoardResponse> responses = repository.searchScroll(scrollDto, userId);
         return FreeBoardScrollResponse.of(responses, hasNextBoards(responses.size(), scrollDto.getSize()));
     }
 
@@ -113,7 +105,10 @@ public class FreeBoardService {
         }
     }
 
-    private boolean hasNextBoards(int boardsSize, int requestSize) {
+    private boolean hasNextBoards(Integer boardsSize, Integer requestSize) {
+        if (requestSize == null) {
+            return false;
+        }
         return boardsSize >= requestSize;
     }
 }

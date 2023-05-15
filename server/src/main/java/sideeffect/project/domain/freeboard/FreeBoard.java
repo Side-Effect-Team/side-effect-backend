@@ -20,6 +20,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import sideeffect.project.common.domain.BaseTimeEntity;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.like.Like;
@@ -36,6 +38,8 @@ import sideeffect.project.domain.user.User;
         )
     }
 )
+@SQLDelete(sql = "UPDATE free_boards SET deleted=true WHERE free_board_id=?")
+@Where(clause = "deleted = false")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class FreeBoard extends BaseTimeEntity {
 
@@ -61,12 +65,15 @@ public class FreeBoard extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "freeBoard")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "freeBoard", orphanRemoval = true,
+        cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Comment> comments;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "freeBoard", orphanRemoval = true,
         cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Like> likes;
+
+    private boolean deleted;
 
     @Builder
     public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl, String projectName) {

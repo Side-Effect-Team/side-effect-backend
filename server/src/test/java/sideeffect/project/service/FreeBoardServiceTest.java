@@ -146,14 +146,14 @@ class FreeBoardServiceTest {
     @MethodSource("generateScrollTestAugments")
     @ParameterizedTest
     void findBoardByScroll(FreeBoardScrollRequest request, List<FreeBoard> freeBoards, boolean hasNext) {
-        when(freeBoardRepository.searchScroll(any(), any(), any())).thenReturn(FreeBoardResponse.listOf(freeBoards));
+        when(freeBoardRepository.searchScroll(any(), any())).thenReturn(FreeBoardResponse.listOf(freeBoards));
 
         FreeBoardScrollResponse response = freeBoardService.findScroll(request, user.getId());
 
         assertAll(
             () -> assertThat(response.getLastId()).isEqualTo(freeBoards.get(freeBoards.size() - 1).getId()),
             () -> assertThat(response.isHasNext()).isEqualTo(hasNext),
-            () -> verify(freeBoardRepository).searchScroll(any(), any(), any())
+            () -> verify(freeBoardRepository).searchScroll(any(), any())
         );
     }
 
@@ -161,14 +161,14 @@ class FreeBoardServiceTest {
     @MethodSource("generateScrollTestWithoutLastIdAugments")
     @ParameterizedTest
     void findBoardByScrollWithoutLastId(FreeBoardScrollRequest request, List<FreeBoard> freeBoards, boolean hasNext) {
-        when(freeBoardRepository.searchScroll(any(), any(), any())).thenReturn(FreeBoardResponse.listOf(freeBoards));
+        when(freeBoardRepository.searchScroll(any(), any())).thenReturn(FreeBoardResponse.listOf(freeBoards));
 
         FreeBoardScrollResponse response = freeBoardService.findScroll(request, user.getId());
 
         assertAll(
             () -> assertThat(response.getLastId()).isEqualTo(freeBoards.get(freeBoards.size() - 1).getId()),
             () -> assertThat(response.isHasNext()).isEqualTo(hasNext),
-            () -> verify(freeBoardRepository).searchScroll(any(), any(), any())
+            () -> verify(freeBoardRepository).searchScroll(any(), any())
         );
     }
 
@@ -181,14 +181,14 @@ class FreeBoardServiceTest {
         freeBoard2.associateUser(user);
         FreeBoardKeyWordRequest request = FreeBoardKeyWordRequest.builder().keyword("test").size(2).build();
         List<FreeBoardResponse> responses = FreeBoardResponse.listOf(List.of(freeBoard1, freeBoard2));
-        when(freeBoardRepository.searchScrollWithKeyword(any(), any(), any(), any())).thenReturn(responses);
+        when(freeBoardRepository.searchScrollWithKeyword(any(), any())).thenReturn(responses);
 
         FreeBoardScrollResponse response = freeBoardService.findScrollWithKeyword(request, null);
 
         assertAll(
             () -> assertThat(response.getLastId()).isEqualTo(90L),
             () -> assertThat(response.isHasNext()).isTrue(),
-            () -> verify(freeBoardRepository).searchScrollWithKeyword(any(), any(), any(), any())
+            () -> verify(freeBoardRepository).searchScrollWithKeyword(any(), any())
         );
     }
 
@@ -202,7 +202,7 @@ class FreeBoardServiceTest {
         FreeBoardKeyWordRequest request = FreeBoardKeyWordRequest
             .builder().lastId(100L).keyword("test").size(5).build();
 
-        when(freeBoardRepository.searchScrollWithKeyword(any(), any(), any(), any()))
+        when(freeBoardRepository.searchScrollWithKeyword(any(), any()))
             .thenReturn(FreeBoardResponse.listOf(List.of(freeBoard1, freeBoard2)));
 
         FreeBoardScrollResponse response = freeBoardService.findScrollWithKeyword(request, null);
@@ -210,7 +210,7 @@ class FreeBoardServiceTest {
         assertAll(
             () -> assertThat(response.getLastId()).isEqualTo(90L),
             () -> assertThat(response.isHasNext()).isFalse(),
-            () -> verify(freeBoardRepository).searchScrollWithKeyword(any(), any(), any(), any())
+            () -> verify(freeBoardRepository).searchScrollWithKeyword(any(), any())
         );
     }
 

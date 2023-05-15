@@ -1,12 +1,13 @@
 package sideeffect.project.repository.freeboard;
 
-
 import java.util.List;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
+import sideeffect.project.dto.freeboard.FreeBoardScrollDto;
 
 public interface FreeBoardRepositoryCustom {
 
-    List<FreeBoardResponse> searchScroll(Long lastId, Long userId, Integer size);
+    List<FreeBoardResponse> searchScroll(FreeBoardScrollDto scrollDto, Long userId);
 
-    List<FreeBoardResponse> searchScrollWithKeyword(Long lastId, Long userId, String keyword, Integer size);
+    List<FreeBoardResponse> searchScrollWithKeyword(FreeBoardScrollDto scrollDto, Long userId);
+
 }
