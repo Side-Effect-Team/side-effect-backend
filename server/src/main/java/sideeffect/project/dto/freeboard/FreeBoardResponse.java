@@ -24,7 +24,7 @@ public class FreeBoardResponse {
     private String headerImage;
     private String title;
     private String content;
-    @JsonFormat(shape = Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
+    @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
     private boolean like;
     private int likeNum;
