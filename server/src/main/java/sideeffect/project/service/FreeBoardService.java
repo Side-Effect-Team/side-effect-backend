@@ -105,7 +105,10 @@ public class FreeBoardService {
         }
     }
 
-    private boolean hasNextBoards(int boardsSize, int requestSize) {
+    private boolean hasNextBoards(Integer boardsSize, Integer requestSize) {
+        if (requestSize == null) {
+            return false;
+        }
         return boardsSize >= requestSize;
     }
 }

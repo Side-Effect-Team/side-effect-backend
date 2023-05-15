@@ -16,6 +16,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -35,31 +36,37 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
     @Override
     public List<FreeBoardResponse> searchScroll(FreeBoardScrollDto scrollDto, Long userId) {
         Integer filterNumber = getFilterNumber(scrollDto.getLastId(), scrollDto.getOrderType());
-        return jpaQueryFactory.select(getResponseConstructor(userId))
+        JPAQuery<FreeBoardResponse> queryResult = jpaQueryFactory.select(getResponseConstructor(userId))
             .from(freeBoard)
-            .where(filterByOrderType(scrollDto.getLastId(), scrollDto.getOrderType(), filterNumber))
-            .orderBy(orderByType(scrollDto.getOrderType()), freeBoard.id.desc())
-            .limit(scrollDto.getSize())
-            .fetch();
+            .where(filterByOrderType(scrollDto, filterNumber))
+            .orderBy(orderByType(scrollDto.getOrderType()), freeBoard.id.desc());
+        if (scrollDto.getSize() != null && scrollDto.getSize() > 0) {
+            return queryResult.limit(scrollDto.getSize()).fetch();
+        }
+        return queryResult.fetch();
     }
 
     @Override
     public List<FreeBoardResponse> searchScrollWithKeyword(FreeBoardScrollDto scrollDto, Long userId) {
         Integer filterNumber = getFilterNumber(scrollDto.getLastId(), scrollDto.getOrderType());
-        return jpaQueryFactory.select(getResponseConstructor(userId))
+        JPAQuery<FreeBoardResponse> queryResult = jpaQueryFactory.select(getResponseConstructor(userId))
             .from(freeBoard)
-            .where(filterByOrderType(scrollDto.getLastId(), scrollDto.getOrderType(), filterNumber),
+            .where(filterByOrderType(scrollDto, filterNumber),
                 freeBoard.title.containsIgnoreCase(scrollDto.getKeyword())
                     .or(freeBoard.content.containsIgnoreCase(scrollDto.getKeyword())))
-            .orderBy(orderByType(scrollDto.getOrderType()))
-            .limit(scrollDto.getSize())
-            .fetch();
+            .orderBy(orderByType(scrollDto.getOrderType()));
+        if (scrollDto.getSize() != null && scrollDto.getSize() > 0) {
+            return queryResult.limit(scrollDto.getSize()).fetch();
+        }
+        return queryResult.fetch();
     }
 
-    private BooleanExpression filterByOrderType(Long boardId, OrderType type, Integer filterNumber) {
-        if (boardId == null) {
+    private BooleanExpression filterByOrderType(FreeBoardScrollDto scrollDto, Integer filterNumber) {
+        if (scrollDto.getLastId() == null || scrollDto.getSize() == null) {
             return null;
         }
+        OrderType type = scrollDto.getOrderType();
+        Long boardId = scrollDto.getLastId();
         if (type.equals(COMMENT)) {
             return freeBoard.comments.size().lt(filterNumber).or(sameNumberFilter(type, filterNumber, boardId));
         } else if (type.equals(LIKE)) {

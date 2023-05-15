@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FreeBoardScrollRequest {
     private Long lastId;
-    private int size;
+    private Integer size;
     private OrderType orderType;
 
     public FreeBoardScrollDto toScrollDto() {

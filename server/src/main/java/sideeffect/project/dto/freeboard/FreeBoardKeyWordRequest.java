@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class FreeBoardKeyWordRequest {
     private Long lastId;
 
-    private int size;
+    private Integer size;
 
     private String keyword;
 
