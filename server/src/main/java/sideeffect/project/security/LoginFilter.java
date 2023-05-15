@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private static final String GOOGLE_REQUEST_URL = "https://www.googleapis.com/userinfo/v2/me";
-    private static final String GOOGLE_TOKEN = "ya29.a0AWY7Ckl--pjLrSHZbT4QMznPEssRKy8cgdK7p83kHTPkedHnvL6M2lXL1PJHQLryh6XXaSFaEppyiKaz6pARm288cCpTaYN9qfOa84z3k7VfZdm7f-MdzNgPtbX17PEzN4_RZEBN075CNy48u_9vp6VeTquLFXfFI0YCrgaCgYKASESARESFQG1tDrpkTll7ths2UbopeSjy1YhnA0173";
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Override
@@ -31,34 +30,30 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
 
+        log.info("LoginFilter 진입");
+        String username;
         String token = request.getHeader("Token");
         String providerType = request.getHeader("Provider-Type");
-        ResponseEntity<String> authorization_response = sendToAuthorizationServer(token, providerType);
-        //log.info(String.valueOf(authorization_response));
-        ObjectMapper objectMapper = new ObjectMapper();
-        GoogleUser googleUser;
-        try {
-            googleUser = objectMapper.readValue(authorization_response.getBody(), GoogleUser.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        log.info(googleUser.getId());
-        log.info(googleUser.getEmail());
-        log.info(googleUser.getName());
-        log.info(googleUser.getGiven_name());
-        log.info(googleUser.getFamily_name());
-        log.info(googleUser.getPicture());
-        log.info(googleUser.getLocale());
 
-        setUsernameParameter("email");
-        String username = googleUser.getEmail();
-        //String username = obtainUsername(request);
+        if(token!=null && providerType!=null){
+            ResponseEntity<String> authorization_response = sendToAuthorizationServer(token, providerType);
+            ObjectMapper objectMapper = new ObjectMapper();
+            GoogleUser googleUser;
+            try {
+                googleUser = objectMapper.readValue(authorization_response.getBody(), GoogleUser.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            username = googleUser.getEmail();
+        }else{
+            username = obtainUsername(request);
+        }
+
         username = (username != null) ? username.trim() : "";
         String password = obtainPassword(request);
         password = (password != null) ? password : "";
         UsernamePasswordAuthenticationToken authRequest = UsernamePasswordAuthenticationToken.unauthenticated(username,
                 password);
-
         setDetails(request, authRequest);
         return this.getAuthenticationManager().authenticate(authRequest);
     }
