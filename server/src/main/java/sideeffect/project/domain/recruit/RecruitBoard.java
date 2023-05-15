@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sideeffect.project.common.domain.BaseTimeEntity;
+import sideeffect.project.domain.like.RecruitLike;
 import sideeffect.project.domain.user.User;
 
 import javax.persistence.*;
@@ -44,6 +45,9 @@ public class RecruitBoard extends BaseTimeEntity {
     @OneToMany(mappedBy = "recruitBoard", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<BoardStack> boardStacks = new ArrayList<>();
 
+    @OneToMany(mappedBy = "recruitBoard", cascade = {CascadeType.REMOVE})
+    private List<RecruitLike> recruitLikes = new ArrayList<>();
+
     @Builder
     public RecruitBoard(Long id, String title, String projectName, String contents, String imgSrc) {
         this.id = id;
@@ -72,6 +76,10 @@ public class RecruitBoard extends BaseTimeEntity {
     public void addBoardStack(BoardStack boardStack) {
         this.boardStacks.add(boardStack);
         boardStack.setRecruitBoard(this);
+    }
+
+    public void addRecruitLike(RecruitLike recruitLike) {
+        this.recruitLikes.add(recruitLike);
     }
 
     public void update(RecruitBoard recruitBoard) {

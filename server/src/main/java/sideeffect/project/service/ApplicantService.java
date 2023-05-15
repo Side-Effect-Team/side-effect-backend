@@ -19,6 +19,7 @@ import sideeffect.project.repository.ApplicantRepository;
 import sideeffect.project.repository.BoardPositionRepository;
 import sideeffect.project.repository.RecruitBoardRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -48,14 +49,18 @@ public class ApplicantService {
     }
 
     @Transactional(readOnly = true)
-    public Map<PositionType, ApplicantPositionResponse> findApplicants(Long userId, Long boardId, ApplicantStatus status) {
+    public Map<String, ApplicantPositionResponse> findApplicants(Long userId, Long boardId, ApplicantStatus status) {
         RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
 
         validateOwner(findRecruitBoard, userId);
 
         List<ApplicantListResponse> applicantListResponses = recruitBoardRepository.getApplicantsByPosition(findRecruitBoard.getId(), status);
-        return ApplicantPositionResponse.mapOf(applicantListResponses);
+        Map<String, ApplicantPositionResponse> responseMaps = ApplicantPositionResponse.mapOf(applicantListResponses);
+
+        addMissingPositionKeys(responseMaps);
+
+        return responseMaps;
     }
 
     @Transactional
@@ -132,6 +137,15 @@ public class ApplicantService {
     private boolean checkIfApplicantIdExists(Long RecruitBoardId, Long targetApplicantId) {
         List<ApplicantListResponse> applicantListResponses = recruitBoardRepository.getApplicantsByPosition(RecruitBoardId, ApplicantStatus.APPROVED);
         return applicantListResponses.stream().anyMatch(a -> a.getApplicantId().equals(targetApplicantId));
+    }
+
+    private void addMissingPositionKeys(Map<String, ApplicantPositionResponse> maps) {
+        for (PositionType positionType : PositionType.values()) {
+            if(!maps.containsKey(positionType.getKoreanName())) {
+                ApplicantPositionResponse response = ApplicantPositionResponse.builder().applicants(new ArrayList<>()).size(0).build();
+                maps.put(positionType.getKoreanName(), response);
+            }
+        }
     }
 
 }

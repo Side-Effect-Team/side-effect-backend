@@ -9,8 +9,6 @@ import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.common.exception.IllegalStateException;
 import sideeffect.project.common.exception.InvalidValueException;
-import sideeffect.project.domain.stack.Stack;
-import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.domain.user.UserStack;
@@ -44,7 +42,7 @@ public class UserService {
         return userRepository.save(user).getId();
     }
 
-    private List<UserStack> getUserStacks(User user, List<StackType> stacks) {
+    private List<UserStack> getUserStacks(User user, List<String> stacks) {
         List<UserStack> userStacks = Collections.emptyList();
 
         if(stacks!=null && !stacks.isEmpty()){
@@ -55,11 +53,10 @@ public class UserService {
         return userStacks;
     }
 
-    private UserStack toUserStack(User user, StackType userStackRequest) {
-        Stack stack = stackService.findByStackType(userStackRequest);
+    private UserStack toUserStack(User user, String userStackRequest) {
         return UserStack.builder()
                 .user(user)
-                .stack(stack)
+                .stack(userStackRequest)
                 .build();
     }
 
@@ -84,6 +81,7 @@ public class UserService {
     public void update(User user, Long id, UserRequest request){
         if(user.getId()!=id) throw new AuthException(ErrorCode.USER_UNAUTHORIZED);
         user.update(request.toUser());
+        user.updateUserStack(getUserStacks(user, request.getStacks()));
     }
 
     public void delete(User user, Long id){

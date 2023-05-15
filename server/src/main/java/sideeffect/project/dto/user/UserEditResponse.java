@@ -2,7 +2,6 @@ package sideeffect.project.dto.user;
 
 import lombok.*;
 import sideeffect.project.domain.position.PositionType;
-import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserStack;
 
@@ -20,7 +19,7 @@ public class UserEditResponse {
     private String introduction;
     private PositionType position;
     private String career;
-    private List<StackType> stacks;
+    private List<String> stacks;
     private String imgUrl;
     private String blogUrl;
     private String githubUrl;
@@ -40,11 +39,11 @@ public class UserEditResponse {
                 .build();
     }
 
-    private static List<StackType> getStackType(List<UserStack> userStacks) {
-        List<StackType> stackTypes = Collections.emptyList();
+    private static List<String> getStackType(List<UserStack> userStacks) {
+        List<String> stackTypes = Collections.emptyList();
         if(userStacks!=null && !userStacks.isEmpty()){
             stackTypes = userStacks.stream()
-                    .map(userStack -> userStack.getStack().getStackType())
+                    .map(userStack -> userStack.getStack())
                     .collect(Collectors.toList());
         }
         return stackTypes;

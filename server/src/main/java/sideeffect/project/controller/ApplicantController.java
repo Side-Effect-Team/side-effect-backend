@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import sideeffect.project.domain.applicant.ApplicantStatus;
-import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.applicant.*;
 import sideeffect.project.security.LoginUser;
@@ -28,7 +27,7 @@ public class ApplicantController {
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @GetMapping("list/{boardId}")
-    public Map<PositionType, ApplicantPositionResponse> findApplicants(
+    public Map<String, ApplicantPositionResponse> findApplicants(
             @LoginUser User user,
             @PathVariable Long boardId,
             @RequestParam(value = "status") ApplicantStatus status

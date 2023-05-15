@@ -1,8 +1,10 @@
 package sideeffect.project.dto.recruit;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import sideeffect.project.domain.recruit.RecruitBoard;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +20,9 @@ public class RecruitBoardResponse {
     private String content;
     private String imgSrc;
     private int views;
+    private int likeNum;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
+    private LocalDateTime createdAt;
     private List<BoardPositionResponse> positions;
     private List<BoardStackResponse> tags;
 
@@ -29,6 +34,8 @@ public class RecruitBoardResponse {
                 .content(recruitBoard.getContents())
                 .imgSrc(recruitBoard.getImgSrc())
                 .views(recruitBoard.getViews())
+                .likeNum(recruitBoard.getRecruitLikes().size())
+                .createdAt(recruitBoard.getCreateAt())
                 .positions(BoardPositionResponse.listOf(recruitBoard.getBoardPositions()))
                 .tags(BoardStackResponse.listOf(recruitBoard.getBoardStacks()))
                 .build();

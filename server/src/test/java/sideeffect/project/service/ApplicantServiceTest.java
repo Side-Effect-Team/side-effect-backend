@@ -138,7 +138,7 @@ class ApplicantServiceTest {
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
         when(recruitBoardRepository.getApplicantsByPosition(any(), any())).thenReturn(applicantListResponses);
 
-        Map<PositionType, ApplicantPositionResponse> applicants = applicantService.findApplicants(user.getId(), recruitBoard.getId(), ApplicantStatus.PENDING);
+        Map<String, ApplicantPositionResponse> applicants = applicantService.findApplicants(user.getId(), recruitBoard.getId(), ApplicantStatus.PENDING);
         AtomicInteger count = new AtomicInteger();
         applicants.forEach((key, value) -> count.addAndGet(value.getSize()));
 
@@ -324,11 +324,11 @@ class ApplicantServiceTest {
 
     private static Stream<Arguments> generateApplicantListTestAugments() {
         return Stream.of(
-                Arguments.arguments(generateApplicantListResponse(List.of(PositionType.FRONTEND, PositionType.BACKEND), 3), 2),
-                Arguments.arguments(generateApplicantListResponse(List.of(PositionType.FRONTEND, PositionType.BACKEND, PositionType.DESIGNER), 3), 3),
-                Arguments.arguments(generateApplicantListResponse(List.of(PositionType.FRONTEND, PositionType.BACKEND, PositionType.DESIGNER, PositionType.PM), 3), 4),
-                Arguments.arguments(generateApplicantListResponse(List.of(PositionType.FRONTEND, PositionType.BACKEND, PositionType.BACKEND), 3), 2),
-                Arguments.arguments(generateApplicantListResponse(List.of(PositionType.BACKEND, PositionType.BACKEND, PositionType.BACKEND), 3), 1)
+                Arguments.arguments(generateApplicantListResponse(List.of(PositionType.FRONTEND, PositionType.BACKEND), 3), 6),
+                Arguments.arguments(generateApplicantListResponse(List.of(PositionType.FRONTEND, PositionType.BACKEND, PositionType.DESIGNER), 3), 6),
+                Arguments.arguments(generateApplicantListResponse(List.of(PositionType.FRONTEND, PositionType.BACKEND, PositionType.DESIGNER, PositionType.PM), 3), 6),
+                Arguments.arguments(generateApplicantListResponse(List.of(PositionType.FRONTEND, PositionType.BACKEND, PositionType.BACKEND), 3), 6),
+                Arguments.arguments(generateApplicantListResponse(List.of(PositionType.BACKEND, PositionType.BACKEND, PositionType.BACKEND), 3), 6)
         );
     }
     private static List<ApplicantListResponse> generateApplicantListResponse(List<PositionType> positionTypes, int size) {

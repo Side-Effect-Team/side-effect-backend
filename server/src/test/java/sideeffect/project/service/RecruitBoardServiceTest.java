@@ -11,17 +11,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sideeffect.project.common.exception.AuthException;
+import sideeffect.project.common.exception.InvalidValueException;
 import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.position.PositionType;
+import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.stack.Stack;
 import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
-import sideeffect.project.dto.recruit.BoardPositionRequest;
-import sideeffect.project.dto.recruit.RecruitBoardRequest;
-import sideeffect.project.dto.recruit.RecruitBoardScrollRequest;
-import sideeffect.project.dto.recruit.RecruitBoardScrollResponse;
+import sideeffect.project.dto.recruit.*;
 import sideeffect.project.repository.RecruitBoardRepository;
 import sideeffect.project.repository.UserRepository;
 
@@ -123,16 +122,27 @@ class RecruitBoardServiceTest {
         );
     }
 
+    @DisplayName("모집 게시판을 전체 조회한다.")
+    @Test
+    void findAllRecruitBoard() {
+        List<RecruitBoard> recruitBoards = generateRecruitBoards(1L, 100);
+
+        when(recruitBoardRepository.findAll()).thenReturn(recruitBoards);
+
+        RecruitBoardAllResponse allRecruitBoard = recruitBoardService.findAllRecruitBoard();
+
+        assertAll(
+                () -> verify(recruitBoardRepository).findAll(),
+                () -> assertThat(allRecruitBoard.getRecruitBoards()).hasSize(100)
+        );
+    }
+
     @DisplayName("모집 게시판을 업데이트한다.")
     @Test
     public void updateRecruitBoard() {
-        RecruitBoardRequest request = RecruitBoardRequest.builder()
+        RecruitBoardUpdateRequest request = RecruitBoardUpdateRequest.builder()
                 .title("수정된 제목")
                 .content("수정된 내용")
-                .positions(List.of(
-                        new BoardPositionRequest(PositionType.FRONTEND, 3),
-                        new BoardPositionRequest(PositionType.BACKEND, 2)
-                ))
                 .tags(List.of(
                         StackType.SPRING,
                         StackType.JAVA
@@ -150,7 +160,7 @@ class RecruitBoardServiceTest {
                 () -> verify(recruitBoardRepository).findById(any()),
                 () -> assertThat(recruitBoard.getTitle()).isEqualTo(request.getTitle()),
                 () -> assertThat(recruitBoard.getContents()).isEqualTo(request.getContent()),
-                () -> assertThat(recruitBoard.getBoardPositions()).hasSize(2),
+                () -> assertThat(recruitBoard.getBoardPositions()).hasSize(0),
                 () -> assertThat(recruitBoard.getBoardStacks()).hasSize(2)
         );
     }
@@ -158,10 +168,9 @@ class RecruitBoardServiceTest {
     @DisplayName("모집 게시판 주인이 아닌자가 업데이트 시도 시 예외 발생")
     @Test
     void updateByNonOwner() {
-        RecruitBoardRequest request = RecruitBoardRequest.builder()
+        RecruitBoardUpdateRequest request = RecruitBoardUpdateRequest.builder()
                 .title("모집 게시판 제목")
                 .content("모집합니다.")
-                .positions(List.of(new BoardPositionRequest(PositionType.BACKEND, 3)))
                 .tags(List.of(StackType.SPRING))
                 .build();
 
@@ -172,6 +181,57 @@ class RecruitBoardServiceTest {
 
         assertThatThrownBy(() -> recruitBoardService.updateRecruitBoard(nonOwnerId, boardId, request))
                 .isInstanceOf(AuthException.class);
+    }
+
+    @DisplayName("모집 게시판에 포지션을 추가한다.")
+    @Test
+    public void addRecruitBoardPosition() {
+        BoardPositionRequest request = BoardPositionRequest.builder().positionType(PositionType.BACKEND).targetNumber(3).build();
+
+        Long boardId = 1L;
+        Long userId = 1L;
+        int beforeSize = recruitBoard.getBoardPositions().size();
+
+        when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
+
+        recruitBoardService.addRecruitBoardPosition(userId, boardId, request);
+
+        assertAll(
+                () -> verify(recruitBoardRepository).findById(any()),
+                () -> assertThat(recruitBoard.getBoardPositions()).hasSize(beforeSize + 1)
+        );
+    }
+
+    @DisplayName("모집 게시판 주인이 아닌자가 포지션을 추가하려고 할 시 예외 발생")
+    @Test
+    void addRecruitBoardPositionNonOwner() {
+        BoardPositionRequest request = BoardPositionRequest.builder().positionType(PositionType.BACKEND).targetNumber(3).build();
+
+        Long nonOwnerId = 2L;
+        Long boardId = 1L;
+
+        when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
+
+        assertThatThrownBy(() -> recruitBoardService.addRecruitBoardPosition(nonOwnerId, boardId, request))
+                .isInstanceOf(AuthException.class);
+    }
+
+    @DisplayName("모집 게시판에 이미 존재하는 포지션을 추가하려고 한다면 예외 발생")
+    @Test
+    void addRecruitBoardPositionExists() {
+        BoardPositionRequest request = BoardPositionRequest.builder().positionType(PositionType.BACKEND).targetNumber(3).build();
+        Position backEndPosition = Position.builder().id(1L).positionType(PositionType.BACKEND).build();
+        BoardPosition boardPositionBack = BoardPosition.builder().position(backEndPosition).targetNumber(3).build();
+        recruitBoard.addBoardPosition(boardPositionBack);
+
+        Long boardId = 1L;
+        Long userId = 1L;
+
+        when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
+        when(positionService.findByPositionType(any())).thenReturn(position);
+
+        assertThatThrownBy(() -> recruitBoardService.addRecruitBoardPosition(userId, boardId, request))
+                .isInstanceOf(InvalidValueException.class);
     }
 
     @DisplayName("모집 게시판을 삭제한다.")
