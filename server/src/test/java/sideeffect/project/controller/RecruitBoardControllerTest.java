@@ -169,7 +169,7 @@ class RecruitBoardControllerTest {
     @WithCustomUser
     @Test
     void updateBoard() throws Exception {
-        RecruitBoardRequest request = RecruitBoardRequest.builder().title("모집 게시판1").content("모집합니다1.").build();
+        RecruitBoardUpdateRequest request = RecruitBoardUpdateRequest.builder().title("모집 게시판1").content("모집합니다1.").build();
 
         mvc.perform(patch("/api/recruit-board/1")
                         .with(csrf())

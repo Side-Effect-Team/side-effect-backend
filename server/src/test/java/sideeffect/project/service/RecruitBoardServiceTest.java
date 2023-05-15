@@ -138,13 +138,9 @@ class RecruitBoardServiceTest {
     @DisplayName("모집 게시판을 업데이트한다.")
     @Test
     public void updateRecruitBoard() {
-        RecruitBoardRequest request = RecruitBoardRequest.builder()
+        RecruitBoardUpdateRequest request = RecruitBoardUpdateRequest.builder()
                 .title("수정된 제목")
                 .content("수정된 내용")
-                .positions(List.of(
-                        new BoardPositionRequest(PositionType.FRONTEND, 3),
-                        new BoardPositionRequest(PositionType.BACKEND, 2)
-                ))
                 .tags(List.of(
                         StackType.SPRING,
                         StackType.JAVA
@@ -162,7 +158,7 @@ class RecruitBoardServiceTest {
                 () -> verify(recruitBoardRepository).findById(any()),
                 () -> assertThat(recruitBoard.getTitle()).isEqualTo(request.getTitle()),
                 () -> assertThat(recruitBoard.getContents()).isEqualTo(request.getContent()),
-                () -> assertThat(recruitBoard.getBoardPositions()).hasSize(2),
+                () -> assertThat(recruitBoard.getBoardPositions()).hasSize(0),
                 () -> assertThat(recruitBoard.getBoardStacks()).hasSize(2)
         );
     }
@@ -170,10 +166,9 @@ class RecruitBoardServiceTest {
     @DisplayName("모집 게시판 주인이 아닌자가 업데이트 시도 시 예외 발생")
     @Test
     void updateByNonOwner() {
-        RecruitBoardRequest request = RecruitBoardRequest.builder()
+        RecruitBoardUpdateRequest request = RecruitBoardUpdateRequest.builder()
                 .title("모집 게시판 제목")
                 .content("모집합니다.")
-                .positions(List.of(new BoardPositionRequest(PositionType.BACKEND, 3)))
                 .tags(List.of(StackType.SPRING))
                 .build();
 

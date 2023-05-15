@@ -65,11 +65,10 @@ public class RecruitBoardService {
     }
 
     @Transactional
-    public void updateRecruitBoard(Long userId, Long boardId, RecruitBoardRequest request) {
+    public void updateRecruitBoard(Long userId, Long boardId, RecruitBoardUpdateRequest request) {
         RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
         validateOwner(userId, findRecruitBoard);
-        findRecruitBoard.updateBoardPositions(getBoardPositions(findRecruitBoard, request.getPositions()));
         findRecruitBoard.updateBoardStacks(getBoardStacks(findRecruitBoard, request.getTags()));
 
         findRecruitBoard.update(request.toRecruitBoard());

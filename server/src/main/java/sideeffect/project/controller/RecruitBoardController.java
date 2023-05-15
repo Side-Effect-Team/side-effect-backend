@@ -44,7 +44,7 @@ public class RecruitBoardController {
     public void updateRecruitBoard(
             @LoginUser User user,
             @PathVariable("id") Long boardId,
-            @RequestBody RecruitBoardRequest request
+            @RequestBody RecruitBoardUpdateRequest request
     ) {
         recruitBoardService.updateRecruitBoard(user.getId(), boardId, request);
     }
