@@ -6,6 +6,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+import sideeffect.project.common.exception.AuthException;
+import sideeffect.project.common.exception.ErrorCode;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -23,7 +25,6 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         final String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-        log.info("authorization: " + authorization);
         if (authorization == null || !authorization.startsWith("Bearer ")) {
             log.error("Authorization을 잘못 보냈습니다");
             filterChain.doFilter(request, response);
@@ -34,10 +35,8 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = authorization.split(" ")[1];
 
         //Token 만료여부
-        if(jwtTokenProvider.isExpired(token)){
-            log.error("Token이 만료 되었습니다.");
-            filterChain.doFilter(request, response);
-            return;
+        if(jwtTokenProvider.validateAccessToken(token)){
+            throw new AuthException(ErrorCode.TOKEN_EXPIRED);
         }
 
         //권한 부여
