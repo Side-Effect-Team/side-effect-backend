@@ -34,10 +34,10 @@ public class CommentService {
             .of(CommentResponse.listOf(commentRepository.findAllByFreeBoardIdOrderByIdDesc(boardId)));
     }
 
-    public void update(Long userId, Long commentId, CommentRequest request) {
+    public void update(Long userId, Long commentId, String updateComment) {
         Comment comment = findComment(commentId);
         validateOwner(userId, comment.getUser().getId());
-        comment.update(request.toComment().getContent());
+        comment.update(updateComment);
     }
 
     public void delete(Long userId, Long commentId) {
@@ -53,7 +53,7 @@ public class CommentService {
     }
 
     private FreeBoard findFreeBoard(CommentRequest request) {
-        return freeBoardRepository.findById(request.getFreeBoardId())
+        return freeBoardRepository.findById(request.getBoardId())
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.FREE_BOARD_NOT_FOUND));
     }
 

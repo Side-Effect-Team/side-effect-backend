@@ -1,5 +1,7 @@
 package sideeffect.project.controller;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,15 +26,15 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public CommentResponse registerComment(@RequestBody CommentRequest request, @LoginUser User user) {
+    public CommentResponse registerComment(@Valid @RequestBody CommentRequest request, @LoginUser User user) {
         return commentService.registerComment(request, user);
     }
 
     @PatchMapping("/{id}")
     public void updateComment(@PathVariable("id") Long commentId,
-        @RequestBody CommentRequest request,
+        @NotBlank @RequestBody String content,
         @LoginUser User user) {
-        commentService.update(user.getId(), commentId, request);
+        commentService.update(user.getId(), commentId, content);
     }
 
     @DeleteMapping("/{id}")

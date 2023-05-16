@@ -3,6 +3,7 @@ package sideeffect.project.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,7 +26,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
-import sideeffect.project.config.WebSecurityConfig;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.user.User;
@@ -37,7 +36,6 @@ import sideeffect.project.security.UserDetailsImpl;
 import sideeffect.project.security.UserDetailsServiceImpl;
 import sideeffect.project.service.CommentService;
 
-@Import(WebSecurityConfig.class)
 @ComponentScan(basePackages = "sideeffect/project/security")
 @WebMvcTest(CommentController.class)
 class CommentControllerTest {
@@ -87,12 +85,13 @@ class CommentControllerTest {
     void registerComment() throws Exception {
         generateToken();
         CommentRequest request = CommentRequest.builder()
-            .freeBoardId(freeBoard.getId()).comment("좋은 프로젝트네요.").build();
+            .boardId(freeBoard.getId()).content("좋은 프로젝트네요.").build();
         given(commentService.registerComment(any(), any())).willReturn(CommentResponse.of(comment));
 
         mvc.perform(post("/api/comments")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(objectMapper.writeValueAsString(request))
+                .with(csrf()))
             .andExpect(status().isOk())
             .andDo(print());
     }
@@ -101,11 +100,12 @@ class CommentControllerTest {
     @Test
     void updateComment() throws Exception {
         generateToken();
-        CommentRequest request = CommentRequest.builder().comment("감사합니다.").build();
+        String content = "감사합니다.";
 
         mvc.perform(patch("/api/comments/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(objectMapper.writeValueAsString(content))
+                .with(csrf()))
             .andExpect(status().isOk())
             .andDo(print());
     }
@@ -114,7 +114,7 @@ class CommentControllerTest {
     @Test
     void updateCommentByNonOwner() throws Exception {
         generateToken();
-        CommentRequest request = CommentRequest.builder().comment("감사합니다.").build();
+        CommentRequest request = CommentRequest.builder().content("감사합니다.").build();
         doThrow(new AuthException(ErrorCode.COMMENT_UNAUTHORIZED)).when(commentService).update(any(), any(), any());
 
         mvc.perform(patch("/api/comments/1")
@@ -129,7 +129,8 @@ class CommentControllerTest {
     void deleteComment() throws Exception {
         generateToken();
 
-        mvc.perform(delete("/api/comments/1"))
+        mvc.perform(delete("/api/comments/1")
+                .with(csrf()))
             .andExpect(status().isOk())
             .andDo(print());
     }
