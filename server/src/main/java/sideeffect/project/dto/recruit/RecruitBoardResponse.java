@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public class RecruitBoardResponse {
 
     private Long id;
+    private Long userId;
     private String title;
     private String projectName;
     private String content;
@@ -29,6 +30,7 @@ public class RecruitBoardResponse {
     public static RecruitBoardResponse of(RecruitBoard recruitBoard) {
         return RecruitBoardResponse.builder()
                 .id(recruitBoard.getId())
+                .userId(recruitBoard.getUser().getId())
                 .projectName(recruitBoard.getProjectName())
                 .title(recruitBoard.getTitle())
                 .content(recruitBoard.getContents())
