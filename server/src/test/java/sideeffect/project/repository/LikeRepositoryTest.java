@@ -43,24 +43,6 @@ class LikeRepositoryTest extends TestDataRepository {
         em.clear();
     }
 
-    @DisplayName("유저가 해당 게시판이 추천했으면 true 반환")
-    @Test
-    void existsLike() {
-        Like like = Like.like(user, freeBoard);
-        likeRepository.saveAndFlush(like);
-        em.clear();
-
-        boolean result = likeRepository.existsByUserIdAndFreeBoardId(user.getId(), freeBoard.getId());
-        assertThat(result).isTrue();
-    }
-
-    @DisplayName("유저가 해당 게시판을 추천하지 않았으면 false 반환")
-    @Test
-    void notExistsLike() {
-        boolean result = likeRepository.existsByUserIdAndFreeBoardId(user.getId(), freeBoard.getId());
-        assertThat(result).isFalse();
-    }
-
     @DisplayName("게시판과 연관관계가 끊기면 자동으로 삭제된다.")
     @Test
     void deleteLike() {

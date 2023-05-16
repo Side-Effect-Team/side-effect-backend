@@ -39,6 +39,7 @@ public class WebSecurityConfig{
                     .antMatchers("/api/user/join", "/api/user/mypage/**").permitAll()
                     .antMatchers(HttpMethod.POST, "/**").authenticated()
                     .antMatchers(HttpMethod.GET, "/api/free-boards/**").permitAll()
+                    .antMatchers(HttpMethod.POST, "/api/like/**").hasAnyRole("USER", "ADMIN")
                     //.antMatchers(HttpMethod.POST, "/api/oauth/**").permitAll()
                     .and()
                 .sessionManagement()

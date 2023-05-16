@@ -23,15 +23,11 @@ import sideeffect.project.dto.comment.CommentRequest;
 import sideeffect.project.dto.comment.FreeBoardCommentsResponse;
 import sideeffect.project.repository.CommentRepository;
 import sideeffect.project.repository.FreeBoardRepository;
-import sideeffect.project.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class CommentServiceTest {
 
     private CommentService commentService;
-
-    @Mock
-    private UserRepository userRepository;
 
     @Mock
     private FreeBoardRepository freeBoardRepository;
@@ -45,7 +41,7 @@ class CommentServiceTest {
 
     @BeforeEach
     void setUp() {
-        commentService = new CommentService(commentRepository, userRepository, freeBoardRepository);
+        commentService = new CommentService(commentRepository, freeBoardRepository);
 
         user = User.builder()
             .id(1L)
@@ -71,15 +67,13 @@ class CommentServiceTest {
     @Test
     void registerComment() {
         CommentRequest request = CommentRequest.builder()
-            .userId(user.getId()).freeBoardId(freeBoard.getId()).comment("hello").build();
-        when(userRepository.findById(any())).thenReturn(Optional.of(user));
+            .boardId(freeBoard.getId()).content("hello").build();
         when(freeBoardRepository.findById(any())).thenReturn(Optional.of(freeBoard));
         when(commentRepository.save(any())).thenReturn(comment);
 
-        commentService.registerComment(request);
+        commentService.registerComment(request, user);
 
         assertAll(
-            () -> verify(userRepository).findById(any()),
             () -> verify(freeBoardRepository).findById(any()),
             () -> verify(commentRepository).save(any())
         );
@@ -88,13 +82,13 @@ class CommentServiceTest {
     @DisplayName("댓글을 업데이트 한다.")
     @Test
     void updateComment() {
-        CommentRequest request = CommentRequest.builder().comment("updated").build();
+        String content = "updated";
         when(commentRepository.findById(any())).thenReturn(Optional.of(comment));
 
-        commentService.update(user.getId(), comment.getId(), request);
+        commentService.update(user.getId(), comment.getId(), content);
 
         assertAll(
-            () -> assertThat(comment.getContent()).isEqualTo(request.getComment()),
+            () -> assertThat(comment.getContent()).isEqualTo(content),
             () -> verify(commentRepository).findById(any())
         );
     }
@@ -104,10 +98,10 @@ class CommentServiceTest {
     void updateCommentByNonOwner() {
         Long nonOwnerId = 2L;
         Long commentId = comment.getId();
-        CommentRequest request = CommentRequest.builder().comment("updated").build();
+        String content = "updated";
         when(commentRepository.findById(any())).thenReturn(Optional.of(comment));
 
-        assertThatThrownBy(() -> commentService.update(nonOwnerId, commentId, request))
+        assertThatThrownBy(() -> commentService.update(nonOwnerId, commentId, content))
             .isInstanceOf(AuthException.class);
     }
 

@@ -17,19 +17,14 @@ import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.like.Like;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.like.LikeResult;
-import sideeffect.project.dto.like.LikeRequest;
 import sideeffect.project.dto.like.LikeResponse;
 import sideeffect.project.repository.FreeBoardRepository;
 import sideeffect.project.repository.LikeRepository;
-import sideeffect.project.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class LikeServiceTest {
 
     private LikeService likeService;
-
-    @Mock
-    private UserRepository userRepository;
 
     @Mock
     private FreeBoardRepository freeBoardRepository;
@@ -43,7 +38,7 @@ class LikeServiceTest {
 
     @BeforeEach
     void setUp() {
-        likeService = new LikeService(likeRepository, userRepository, freeBoardRepository);
+        likeService = new LikeService(likeRepository, freeBoardRepository);
 
         user = User.builder()
             .id(1L)
@@ -60,24 +55,21 @@ class LikeServiceTest {
             .content("test")
             .build();
 
-        like = like.like(user, freeBoard);
+        like = Like.like(user, freeBoard);
     }
 
     @DisplayName("유저가 게시판을 추천한다.")
     @Test
     void likeBoard() {
-        when(likeRepository.findByUserIdAndFreeBoardId(any(), any())).thenReturn(Optional.empty());
-        when(userRepository.findById(any())).thenReturn(Optional.of(user));
-        when(freeBoardRepository.findById(any())).thenReturn(Optional.of(freeBoard));
+        when(likeRepository.searchLike(any(), any())).thenReturn(Optional.empty());
+        when(freeBoardRepository.searchBoardFetchJoinLike(any())).thenReturn(Optional.of(freeBoard));
         when(likeRepository.save(any())).thenReturn(like);
-        LikeRequest request = new LikeRequest(user.getId(), freeBoard.getId());
 
-        LikeResponse response = likeService.toggleLike(request);
+        LikeResponse response = likeService.toggleLike(user, freeBoard.getId());
 
         assertAll(
-            () -> verify(likeRepository).findByUserIdAndFreeBoardId(any(), any()),
-            () -> verify(userRepository).findById(any()),
-            () -> verify(freeBoardRepository).findById(any()),
+            () -> verify(likeRepository).searchLike(any(), any()),
+            () -> verify(freeBoardRepository).searchBoardFetchJoinLike(any()),
             () -> verify(likeRepository).save(any()),
             () -> assertThat(response.getMessage()).isEqualTo(LikeResult.LIKE.getMessage())
         );
@@ -86,15 +78,14 @@ class LikeServiceTest {
     @DisplayName("유저가 게시판 추천을 취소한다.")
     @Test
     void cancelLike() {
-        when(likeRepository.findByUserIdAndFreeBoardId(any(), any())).thenReturn(Optional.of(like));
-        LikeRequest request = new LikeRequest(user.getId(), freeBoard.getId());
+        when(likeRepository.searchLike(any(), any())).thenReturn(Optional.of(like));
 
-        LikeResponse response = likeService.toggleLike(request);
+        LikeResponse response = likeService.toggleLike(user, freeBoard.getId());
 
         assertAll(
-            () -> verify(likeRepository).findByUserIdAndFreeBoardId(any(), any()),
+            () -> verify(likeRepository).searchLike(any(), any()),
             () -> assertThat(response.getMessage()).isEqualTo(LikeResult.CANCEL_LIKE.getMessage()),
-            () -> assertThat(freeBoard.getLikes()).doesNotContain(like)
+            () -> verify(likeRepository).delete(any())
         );
     }
 }
