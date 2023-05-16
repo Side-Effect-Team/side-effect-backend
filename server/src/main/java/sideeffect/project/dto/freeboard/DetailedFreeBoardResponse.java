@@ -1,5 +1,8 @@
 package sideeffect.project.dto.freeboard;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
@@ -25,6 +28,8 @@ public class DetailedFreeBoardResponse {
     private String imgUrl;
     private String projectName;
     private int likeNum;
+    @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
+    private LocalDateTime createdAt;
     private List<CommentResponse> comments;
 
     public static List<DetailedFreeBoardResponse> listOf(List<FreeBoard> freeBoards) {
@@ -44,6 +49,7 @@ public class DetailedFreeBoardResponse {
             .imgUrl(freeBoard.getImgUrl())
             .likeNum(freeBoard.getLikes().size())
             .comments(CommentResponse.listOf(freeBoard.getComments()))
+            .createdAt(freeBoard.getCreateAt())
             .build();
     }
 }
