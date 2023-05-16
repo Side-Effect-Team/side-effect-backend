@@ -19,20 +19,18 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
+import sideeffect.project.common.security.WithCustomUser;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.dto.comment.CommentRequest;
 import sideeffect.project.dto.comment.CommentResponse;
-import sideeffect.project.security.UserDetailsImpl;
 import sideeffect.project.security.UserDetailsServiceImpl;
 import sideeffect.project.service.CommentService;
 
@@ -81,9 +79,9 @@ class CommentControllerTest {
 
 
     @DisplayName("요청을 보내 댓글을 등록한다.")
+    @WithCustomUser
     @Test
     void registerComment() throws Exception {
-        generateToken();
         CommentRequest request = CommentRequest.builder()
             .boardId(freeBoard.getId()).content("좋은 프로젝트네요.").build();
         given(commentService.registerComment(any(), any())).willReturn(CommentResponse.of(comment));
@@ -97,9 +95,9 @@ class CommentControllerTest {
     }
 
     @DisplayName("요청을 보내 댓글을 수정한다.")
+    @WithCustomUser
     @Test
     void updateComment() throws Exception {
-        generateToken();
         String content = "감사합니다.";
 
         mvc.perform(patch("/api/comments/1")
@@ -111,9 +109,9 @@ class CommentControllerTest {
     }
 
     @DisplayName("댓글의 주인이 아닌자가 수정 요청을 하면 예외가 발생")
+    @WithCustomUser
     @Test
     void updateCommentByNonOwner() throws Exception {
-        generateToken();
         CommentRequest request = CommentRequest.builder().content("감사합니다.").build();
         doThrow(new AuthException(ErrorCode.COMMENT_UNAUTHORIZED)).when(commentService).update(any(), any(), any());
 
@@ -125,9 +123,9 @@ class CommentControllerTest {
     }
 
     @DisplayName("요청을 보내 댓글을 삭제한다.")
+    @WithCustomUser
     @Test
     void deleteComment() throws Exception {
-        generateToken();
 
         mvc.perform(delete("/api/comments/1")
                 .with(csrf()))
@@ -136,9 +134,9 @@ class CommentControllerTest {
     }
 
     @DisplayName("댓글의 주인이 아닌자가 삭제 요청을 하면 예외가 발생")
+    @WithCustomUser
     @Test
     void deleteCommentByNonOwner() throws Exception {
-        generateToken();
 
         doThrow(new AuthException(ErrorCode.COMMENT_UNAUTHORIZED)).when(commentService).delete(any(), any());
         mvc.perform(delete("/api/comments/1"))
@@ -146,10 +144,4 @@ class CommentControllerTest {
             .andDo(print());
     }
 
-    private void generateToken() {
-        UserDetailsImpl details = UserDetailsImpl.of(user);
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(details,
-            details.getPassword(), details.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(token);
-    }
 }
