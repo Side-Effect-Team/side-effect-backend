@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -17,7 +16,6 @@ import sideeffect.project.common.exception.EntityNotFoundException;
 import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.common.exception.InvalidValueException;
 import sideeffect.project.common.security.WithCustomUser;
-import sideeffect.project.config.WebSecurityConfig;
 import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.domain.applicant.ApplicantStatus;
 import sideeffect.project.domain.position.PositionType;
@@ -33,13 +31,13 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import(WebSecurityConfig.class)
 @ComponentScan(basePackages = "sideeffect.project.security")
 @WebMvcTest(ApplicantController.class)
 class ApplicantControllerTest {
@@ -90,6 +88,7 @@ class ApplicantControllerTest {
         given(applicantService.register(any(), any())).willReturn(applicantResponse);
 
         mvc.perform(post("/api/applicant")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -106,6 +105,7 @@ class ApplicantControllerTest {
                 .when(applicantService).register(any(), any());
 
         mvc.perform(post("/api/applicant")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
@@ -121,6 +121,7 @@ class ApplicantControllerTest {
                 .when(applicantService).register(any(), any());
 
         mvc.perform(post("/api/applicant")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
@@ -169,6 +170,7 @@ class ApplicantControllerTest {
                 .build();
 
         mvc.perform(patch("/api/applicant")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -189,6 +191,7 @@ class ApplicantControllerTest {
                 .when(applicantService).approveApplicant(any(), any());
 
         mvc.perform(patch("/api/applicant")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
@@ -208,6 +211,7 @@ class ApplicantControllerTest {
                 .when(applicantService).approveApplicant(any(), any());
 
         mvc.perform(patch("/api/applicant")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
@@ -227,6 +231,7 @@ class ApplicantControllerTest {
                 .when(applicantService).approveApplicant(any(), any());
 
         mvc.perform(patch("/api/applicant")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
@@ -243,6 +248,7 @@ class ApplicantControllerTest {
                 .build();
 
         mvc.perform(patch("/api/applicant")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -263,6 +269,7 @@ class ApplicantControllerTest {
                 .when(applicantService).rejectApplicant(any(), any());
 
         mvc.perform(patch("/api/applicant")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
@@ -278,6 +285,7 @@ class ApplicantControllerTest {
                 .build();
 
         mvc.perform(patch("/api/applicant/release")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -297,6 +305,7 @@ class ApplicantControllerTest {
                 .when(applicantService).releaseApplicant(any(), any());
 
         mvc.perform(patch("/api/applicant/release")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
@@ -315,6 +324,7 @@ class ApplicantControllerTest {
                 .when(applicantService).releaseApplicant(any(), any());
 
         mvc.perform(patch("/api/applicant/release")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
