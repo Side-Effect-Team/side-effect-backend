@@ -54,7 +54,7 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
             .where(filterByOrderType(scrollDto, filterNumber),
                 freeBoard.title.containsIgnoreCase(scrollDto.getKeyword())
                     .or(freeBoard.content.containsIgnoreCase(scrollDto.getKeyword())))
-            .orderBy(orderByType(scrollDto.getOrderType()));
+            .orderBy(orderByType(scrollDto.getOrderType()), freeBoard.id.desc());
         if (scrollDto.getSize() != null && scrollDto.getSize() > 0) {
             return queryResult.limit(scrollDto.getSize()).fetch();
         }
