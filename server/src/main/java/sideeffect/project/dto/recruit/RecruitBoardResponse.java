@@ -1,9 +1,8 @@
 package sideeffect.project.dto.recruit;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import sideeffect.project.domain.recruit.ProgressType;
 import sideeffect.project.domain.recruit.RecruitBoard;
-import sideeffect.project.domain.recruit.RecruitBoardType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,27 +16,28 @@ public class RecruitBoardResponse {
 
     private Long id;
     private String title;
-    private String contents;
+    private String projectName;
+    private String content;
+    private String imgSrc;
     private int views;
-    private RecruitBoardType recruitBoardType;
-    private ProgressType progressType;
-    private LocalDateTime deadline;
-    private String expectedPeriod;
+    private int likeNum;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
+    private LocalDateTime createdAt;
     private List<BoardPositionResponse> positions;
-    private List<BoardStackResponse> stacks;
+    private List<BoardStackResponse> tags;
 
     public static RecruitBoardResponse of(RecruitBoard recruitBoard) {
         return RecruitBoardResponse.builder()
                 .id(recruitBoard.getId())
+                .projectName(recruitBoard.getProjectName())
                 .title(recruitBoard.getTitle())
-                .contents(recruitBoard.getContents())
+                .content(recruitBoard.getContents())
+                .imgSrc(recruitBoard.getImgSrc())
                 .views(recruitBoard.getViews())
-                .recruitBoardType(recruitBoard.getRecruitBoardType())
-                .progressType(recruitBoard.getProgressType())
-                .deadline(recruitBoard.getDeadline())
-                .expectedPeriod(recruitBoard.getExpectedPeriod())
+                .likeNum(recruitBoard.getRecruitLikes().size())
+                .createdAt(recruitBoard.getCreateAt())
                 .positions(BoardPositionResponse.listOf(recruitBoard.getBoardPositions()))
-                .stacks(BoardStackResponse.listOf(recruitBoard.getBoardStacks()))
+                .tags(BoardStackResponse.listOf(recruitBoard.getBoardStacks()))
                 .build();
     }
 

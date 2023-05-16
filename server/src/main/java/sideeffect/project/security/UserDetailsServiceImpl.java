@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sideeffect.project.common.exception.JoinException;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.repository.UserRepository;
 
@@ -19,7 +20,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + email));
+        log.info("UserDetailsServiceImpl 진입");
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new JoinException(email));
 
         return UserDetailsImpl.of(user);
     }

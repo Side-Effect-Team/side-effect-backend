@@ -8,16 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.common.exception.IllegalStateException;
-import sideeffect.project.domain.position.Position;
-import sideeffect.project.domain.stack.Stack;
+import sideeffect.project.common.exception.InvalidValueException;
 import sideeffect.project.domain.user.User;
-import sideeffect.project.domain.user.UserPosition;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.domain.user.UserStack;
-import sideeffect.project.dto.user.UserPositionRequest;
+import sideeffect.project.dto.user.UserEditResponse;
 import sideeffect.project.dto.user.UserRequest;
 import sideeffect.project.dto.user.UserResponse;
-import sideeffect.project.dto.user.UserStackRequest;
 import sideeffect.project.repository.UserRepository;
 
 import java.util.Collections;
@@ -35,18 +32,17 @@ public class UserService {
     private final StackService stackService;
     private final BCryptPasswordEncoder encoder;
 
-    public void join(UserRequest request){
+    public Long join(UserRequest request){
 
         validateDuplicateUser(request.getEmail());
         User user = request.toUser();
         user.setPassword(encoder.encode(user.getPassword()));
         user.setUserRoleType(UserRoleType.ROLE_USER);
-        user.updateUserPosition(getUserPositions(user, request.getPositions()));
         user.updateUserStack(getUserStacks(user, request.getStacks()));
-        userRepository.save(user);
+        return userRepository.save(user).getId();
     }
 
-    private List<UserStack> getUserStacks(User user, List<UserStackRequest> stacks) {
+    private List<UserStack> getUserStacks(User user, List<String> stacks) {
         List<UserStack> userStacks = Collections.emptyList();
 
         if(stacks!=null && !stacks.isEmpty()){
@@ -57,35 +53,35 @@ public class UserService {
         return userStacks;
     }
 
-    private UserStack toUserStack(User user, UserStackRequest userStackRequest) {
-        Stack stack = stackService.findByStackType(userStackRequest.getStackType());
-        return userStackRequest.toUserStack(user, stack);
-    }
-
-    private List<UserPosition> getUserPositions(User user, List<UserPositionRequest> positions) {
-        List<UserPosition> userPositions = Collections.emptyList();
-
-        if(positions!=null && !positions.isEmpty()){
-            userPositions = positions.stream()
-                    .map(userPositionRequest -> toUserPosition(user, userPositionRequest))
-                    .collect(Collectors.toList());
-        }
-
-        return userPositions;
-    }
-
-    private UserPosition toUserPosition(User user, UserPositionRequest userPositionRequest) {
-        Position position = positionService.findByPositionType(userPositionRequest.getPositionType());
-        return userPositionRequest.toUserPosition(user, position);
+    private UserStack toUserStack(User user, String userStackRequest) {
+        return UserStack.builder()
+                .user(user)
+                .stack(userStackRequest)
+                .build();
     }
 
     public UserResponse findOne(User user, Long id){
-        if(user.getId()!=id) throw new AuthException(ErrorCode.USER_UNAUTHORIZED);
-        return UserResponse.of(user);
+        UserResponse userResponse;
+        if(user.getId()==id){
+            userResponse = UserResponse.ownerOf(user);
+            userResponse.setIsOwner(true);
+            return userResponse;
+        }
+        else{
+            User findUser = userRepository.findById(id).orElseThrow(() -> new InvalidValueException(ErrorCode.USER_NOT_FOUND));
+            userResponse = UserResponse.justOf(findUser);
+            userResponse.setIsOwner(false);
+            return userResponse;
+        }
+    }
+
+    public UserEditResponse findEditInfo(User user){
+        return UserEditResponse.of(user);
     }
     public void update(User user, Long id, UserRequest request){
         if(user.getId()!=id) throw new AuthException(ErrorCode.USER_UNAUTHORIZED);
         user.update(request.toUser());
+        user.updateUserStack(getUserStacks(user, request.getStacks()));
     }
 
     public void delete(User user, Long id){

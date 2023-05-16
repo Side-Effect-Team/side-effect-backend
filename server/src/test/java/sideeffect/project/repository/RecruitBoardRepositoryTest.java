@@ -2,14 +2,20 @@ package sideeffect.project.repository;
 
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Pageable;
+import sideeffect.project.domain.applicant.Applicant;
+import sideeffect.project.domain.applicant.ApplicantStatus;
+import sideeffect.project.common.jpa.TestDataRepository;
 import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.position.PositionType;
+import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.BoardStack;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.stack.Stack;
 import sideeffect.project.domain.stack.StackType;
+import sideeffect.project.domain.user.User;
+import sideeffect.project.domain.user.UserRoleType;
+import sideeffect.project.dto.applicant.ApplicantListResponse;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
@@ -21,11 +27,13 @@ import java.util.stream.LongStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@DataJpaTest
-class RecruitBoardRepositoryTest {
+class RecruitBoardRepositoryTest extends TestDataRepository {
 
     @Autowired
     RecruitBoardRepository recruitBoardRepository;
+
+    @Autowired
+    ApplicantRepository applicantRepository;
 
     @Autowired
     PositionRepository positionRepository;
@@ -34,12 +42,16 @@ class RecruitBoardRepositoryTest {
     StackRepository stackRepository;
 
     @Autowired
+    UserRepository userRepository;
+
+    @Autowired
     EntityManager em;
 
     private Position frontEndPosition;
     private Position backEndPosition;
     private Stack javascriptStack;
     private Stack javaStack;
+    private User user;
 
     @BeforeEach
     void setUp() {
@@ -51,6 +63,15 @@ class RecruitBoardRepositoryTest {
         javaStack = Stack.builder().stackType(StackType.JAVA).build();
         stackRepository.save(javascriptStack);
         stackRepository.save(javaStack);
+
+        user = User.builder()
+                .nickname("tester")
+                .password("1234")
+                .userRoleType(UserRoleType.ROLE_USER)
+                .email("test@naver.com")
+                .build();
+
+        userRepository.save(user);
 
         em.clear();
     }
@@ -247,6 +268,81 @@ class RecruitBoardRepositoryTest {
                 () -> assertThat(findRecruitBoards).containsExactly(boardInKeywordWithStacks1),
                 () -> assertThat(findRecruitBoards).doesNotContain(boardInKeywordWithStacks2),
                 () -> assertThat(findRecruitBoards).hasSize(1)
+        );
+    }
+
+    @DisplayName("게시판에 사용자의 중복지원을 확인한다.")
+    @Test
+    void existsApplicantByRecruitBoard() {
+        RecruitBoard recruitBoard = RecruitBoard.builder().title("모집 게시판").contents("내용").build();
+        BoardPosition boardPosition = BoardPosition.builder().position(backEndPosition).targetNumber(3).build();
+        recruitBoard.addBoardPosition(boardPosition);
+        RecruitBoard savedBoard = recruitBoardRepository.save(recruitBoard);
+
+        boolean first = recruitBoardRepository.existsApplicantByRecruitBoard(savedBoard.getId(), user.getId());
+
+        Applicant applicant = Applicant.builder().build();
+        applicant.associate(user, boardPosition);
+        applicantRepository.save(applicant);
+
+        boolean second = recruitBoardRepository.existsApplicantByRecruitBoard(savedBoard.getId(), user.getId());
+
+        assertAll(
+                () -> assertThat(first).isFalse(),
+                () -> assertThat(second).isTrue()
+        );
+    }
+
+    @DisplayName("게시판에 지원한 사용자의 목록을 조회한다.")
+    @Test
+    void getApplicantsByPosition() {
+        RecruitBoard recruitBoard = RecruitBoard.builder().title("모집 게시판").contents("내용").build();
+        BoardPosition boardPositionBack = BoardPosition.builder().position(backEndPosition).targetNumber(3).build();
+        BoardPosition boardPositionFront = BoardPosition.builder().position(frontEndPosition).targetNumber(3).build();
+        recruitBoard.addBoardPosition(boardPositionBack);
+        recruitBoard.addBoardPosition(boardPositionFront);
+        RecruitBoard savedBoard = recruitBoardRepository.save(recruitBoard);
+
+        Applicant applicant1 = Applicant.builder().build();
+        applicant1.associate(user, boardPositionBack);
+        applicantRepository.save(applicant1);
+
+        Applicant applicant2 = Applicant.builder().build();
+        applicant2.associate(user, boardPositionFront);
+        applicantRepository.save(applicant2);
+
+        List<ApplicantListResponse> applicantListResponses = recruitBoardRepository.getApplicantsByPosition(savedBoard.getId(), ApplicantStatus.PENDING);
+
+        assertAll(
+                () -> assertThat(applicantListResponses).hasSize(2)
+        );
+    }
+
+    @DisplayName("게시판에 모집된 지원자의 목록을 조회한다.")
+    @Test
+    void getApplicantsByPositionApproved() {
+        RecruitBoard recruitBoard = RecruitBoard.builder().title("모집 게시판").contents("내용").build();
+        BoardPosition boardPositionBack = BoardPosition.builder().position(backEndPosition).targetNumber(3).build();
+        BoardPosition boardPositionFront = BoardPosition.builder().position(frontEndPosition).targetNumber(3).build();
+        recruitBoard.addBoardPosition(boardPositionBack);
+        recruitBoard.addBoardPosition(boardPositionFront);
+        RecruitBoard savedBoard = recruitBoardRepository.save(recruitBoard);
+
+        Applicant applicant1 = Applicant.builder().build();
+        applicant1.associate(user, boardPositionBack);
+        applicantRepository.save(applicant1);
+
+        Applicant applicant2 = Applicant.builder().build();
+        applicant2.associate(user, boardPositionFront);
+        applicantRepository.save(applicant2);
+
+        applicant1.updateStatus(ApplicantStatus.APPROVED);
+        applicant2.updateStatus(ApplicantStatus.APPROVED);
+
+        List<ApplicantListResponse> applicantListResponses = recruitBoardRepository.getApplicantsByPosition(savedBoard.getId(), ApplicantStatus.APPROVED);
+
+        assertAll(
+                () -> assertThat(applicantListResponses).hasSize(2)
         );
     }
 

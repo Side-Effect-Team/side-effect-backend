@@ -10,6 +10,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? "
-        +"new sideeffect.project.domain.user.User() : User")
+        +"new sideeffect.project.security.EmptyUser() : User")
 public @interface LoginUser {
 }

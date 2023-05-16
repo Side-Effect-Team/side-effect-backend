@@ -1,7 +1,6 @@
 package sideeffect.project.dto.recruit;
 
 import lombok.*;
-import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.BoardPosition;
 
 import java.util.List;
@@ -13,13 +12,15 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class BoardPositionResponse {
 
-    private PositionType positionType;
+    private Long id;
+    private String positionType;
     private int targetNumber;
     private int currentNumber;
 
     public static BoardPositionResponse of(BoardPosition boardPosition) {
         return BoardPositionResponse.builder()
-                .positionType(boardPosition.getPosition().getPositionType())
+                .id(boardPosition.getId())
+                .positionType(boardPosition.getPosition().getPositionType().getValue())
                 .targetNumber(boardPosition.getTargetNumber())
                 .currentNumber(boardPosition.getCurrentNumber())
                 .build();

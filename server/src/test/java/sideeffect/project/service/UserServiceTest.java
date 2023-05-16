@@ -16,12 +16,12 @@ import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.dto.user.UserPositionRequest;
 import sideeffect.project.dto.user.UserRequest;
+import sideeffect.project.dto.user.UserResponse;
 import sideeffect.project.dto.user.UserStackRequest;
 import sideeffect.project.repository.UserPositionRepository;
 import sideeffect.project.repository.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -104,11 +104,12 @@ class UserServiceTest {
     @DisplayName("단일 회원 조회")
     @Test
     void findOne(){
-        when(userRepository.findById(any())).thenReturn(Optional.of(user));
-
-        userService.findOne(user, 1L);
-
-        verify(userRepository).findById(any());
+        UserResponse userResponse = userService.findOne(user, 1L);
+        assertAll(
+            ()->assertThat(userResponse.getEmail()).isEqualTo(user.getEmail()),
+            ()->assertThat(userResponse.getNickname()).isEqualTo(user.getNickname()),
+            ()->assertThat(userResponse.getUserRoleType()).isEqualTo(user.getUserRoleType())
+        );
     }
 
     @DisplayName("회원 업데이트")
@@ -120,12 +121,9 @@ class UserServiceTest {
                 .nickname("ABC")
                 .build();
 
-        when(userRepository.findById(any())).thenReturn(Optional.of(user));
-
         userService.update(user, 1L, request);
 
         assertAll(
-            () -> verify(userRepository).findById(any()),
             () -> assertThat(user.getEmail()).isEqualTo(request.getEmail()),
             () -> assertThat(encoder.matches(request.getPassword(), user.getPassword())).isTrue(),
             () -> assertThat(user.getNickname()).isEqualTo(request.getNickname())

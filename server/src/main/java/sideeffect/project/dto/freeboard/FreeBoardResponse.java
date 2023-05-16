@@ -1,5 +1,8 @@
 package sideeffect.project.dto.freeboard;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
@@ -7,24 +10,25 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import sideeffect.project.domain.freeboard.FreeBoard;
-import sideeffect.project.dto.comment.CommentResponse;
 
 @Getter
 @Builder
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FreeBoardResponse {
 
     private Long id;
-    private int views;
-    private Long userId;
+    private String headerImage;
     private String title;
     private String content;
-    private String projectUrl;
-    private String imgUrl;
-    private int recommendation;
-    private List<CommentResponse> comments;
+    @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
+    private LocalDateTime createdAt;
+    private boolean like;
+    private int likeNum;
+    private int commentNum;
 
     public static List<FreeBoardResponse> listOf(List<FreeBoard> freeBoards) {
         return freeBoards.stream()
@@ -35,14 +39,12 @@ public class FreeBoardResponse {
     public static FreeBoardResponse of(FreeBoard freeBoard) {
         return FreeBoardResponse.builder()
             .id(freeBoard.getId())
-            .views(freeBoard.getViews())
             .title(freeBoard.getTitle())
-            .userId(freeBoard.getUser().getId())
             .content(freeBoard.getContent())
-            .projectUrl(freeBoard.getProjectUrl())
-            .imgUrl(freeBoard.getImgUrl())
-            .recommendation(freeBoard.getRecommends().size())
-            .comments(CommentResponse.listOf(freeBoard.getComments()))
+            .headerImage(freeBoard.getImgUrl())
+            .likeNum(freeBoard.getLikes().size())
+            .commentNum(freeBoard.getComments().size())
+            .createdAt(freeBoard.getCreateAt())
             .build();
     }
 }
