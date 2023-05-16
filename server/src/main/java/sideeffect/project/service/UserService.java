@@ -64,13 +64,11 @@ public class UserService {
         UserResponse userResponse;
         if(user.getId()==id){
             userResponse = UserResponse.ownerOf(user);
-            userResponse.setIsOwner(true);
             return userResponse;
         }
         else{
             User findUser = userRepository.findById(id).orElseThrow(() -> new InvalidValueException(ErrorCode.USER_NOT_FOUND));
             userResponse = UserResponse.justOf(findUser);
-            userResponse.setIsOwner(false);
             return userResponse;
         }
     }

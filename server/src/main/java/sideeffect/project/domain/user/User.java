@@ -182,7 +182,9 @@ public class User extends BaseTimeEntity {
     }
 
     public void updateUserStack(List<UserStack> userStacks){
-        this.userStacks.clear();
-        this.userStacks.addAll(userStacks);
+        if(userStacks!=null && !userStacks.isEmpty()){
+            this.userStacks.clear();
+            this.userStacks.addAll(userStacks);
+        }
     }
 }

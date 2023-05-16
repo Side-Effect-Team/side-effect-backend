@@ -24,7 +24,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         //refactor: GlobalException Bean 주입해서 보내기
         String token = request.getHeader("Token");
-        String providerType = request.getHeader("Provider-Type");
+        String providerType = request.getHeader("ProviderType");
 
         try{
             filterChain.doFilter(request, response);
