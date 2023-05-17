@@ -62,14 +62,14 @@ class LikeServiceTest {
     @Test
     void likeBoard() {
         when(likeRepository.searchLike(any(), any())).thenReturn(Optional.empty());
-        when(freeBoardRepository.searchBoardFetchJoinLike(any())).thenReturn(Optional.of(freeBoard));
+        when(freeBoardRepository.findById(any())).thenReturn(Optional.of(freeBoard));
         when(likeRepository.save(any())).thenReturn(like);
 
         LikeResponse response = likeService.toggleLike(user, freeBoard.getId());
 
         assertAll(
             () -> verify(likeRepository).searchLike(any(), any()),
-            () -> verify(freeBoardRepository).searchBoardFetchJoinLike(any()),
+            () -> verify(freeBoardRepository).findById(any()),
             () -> verify(likeRepository).save(any()),
             () -> assertThat(response.getMessage()).isEqualTo(LikeResult.LIKE.getMessage())
         );

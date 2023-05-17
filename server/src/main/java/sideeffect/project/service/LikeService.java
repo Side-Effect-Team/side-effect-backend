@@ -35,7 +35,7 @@ public class LikeService {
     }
 
     private Like likeBoard(User user, Long boardId) {
-        FreeBoard board = freeBoardRepository.searchBoardFetchJoinLike(boardId)
+        FreeBoard board = freeBoardRepository.findById(boardId)
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.FREE_BOARD_NOT_FOUND));
         return likeRepository.save(Like.like(user, board));
     }
