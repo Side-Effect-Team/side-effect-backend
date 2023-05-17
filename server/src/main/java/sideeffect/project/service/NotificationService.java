@@ -10,7 +10,6 @@ import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.domain.notification.Notification;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.notification.NotificationResponse;
-import sideeffect.project.dto.notification.NotificationScrollResponse;
 import sideeffect.project.repository.NotificationRepository;
 
 import java.util.Collections;
@@ -50,10 +49,10 @@ public class NotificationService {
         return "delete success";
     }
 
-    public NotificationScrollResponse scroll(User user, Long lastId){
+    /*public NotificationScrollResponse scroll(User user, Long lastId){
 
         return null;
-    }
+    }*/
     private void validateOwner(User user, User findUser) {
         if(user.getId() != findUser.getId()) throw new AuthException(ErrorCode.USER_UNAUTHORIZED);
     }
