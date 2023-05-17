@@ -7,6 +7,7 @@ import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.like.Like;
 import sideeffect.project.domain.like.RecruitLike;
+import sideeffect.project.domain.notification.Notification;
 import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.RecruitBoard;
 
@@ -89,6 +90,10 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<UserStack> userStacks = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    private List<Notification> notifications = new ArrayList<>();
+
     @Builder
     public User(Long id, String email, String password, String nickname, String introduction, PositionType position, String career, UserRoleType userRoleType, ProviderType providerType, String imgUrl, String blogUrl, String githubUrl, String portfolioUrl) {
         this.id = id;
@@ -154,6 +159,13 @@ public class User extends BaseTimeEntity {
         this.recruitLikes.remove(recruitLike);
     }
 
+    public void addNotification(Notification notification){
+        this.notifications.add(notification);
+    }
+
+    public void deleteNotification(Notification notification){
+        this.notifications.remove(notification);
+    }
     public void update(User user){
         if(user.getNickname() != null) {
             this.nickname = user.getNickname();

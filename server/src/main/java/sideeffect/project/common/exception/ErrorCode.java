@@ -10,7 +10,7 @@ public enum ErrorCode {
 
     TOKEN_EXPIRED(401, "T_001", "토큰이 만료되었습니다"),
 
-    INVALID_HEADER(400, "H_001", "유효하지 않은 헤더입니다"),
+    NOTIFICATION_NOT_FOUND(400, "N_001", "해당 알림을 찾을 수 없습니다."),
 
     FREE_BOARD_NOT_FOUND(400, "FB_001", "해당 게시판을 찾을 수 없습니다."),
     FREE_BOARD_UNAUTHORIZED(403, "FB_002", "해당 게시판에 대한 권한이 없습니다."),
