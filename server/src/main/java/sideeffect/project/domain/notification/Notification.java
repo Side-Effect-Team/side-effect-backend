@@ -40,7 +40,7 @@ public class Notification {
         this.user = user;
     }
 
-    public void isWatched(Boolean flag){
-        this.watched = flag;
+    public void watched(){
+        this.watched = true;
     }
 }

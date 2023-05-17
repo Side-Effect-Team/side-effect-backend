@@ -39,7 +39,7 @@ public class NotificationService {
     public String watch(User user, Long id){
         Notification findNotification = notificationRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ErrorCode.NOTIFICATION_NOT_FOUND));
         validateOwner(user, findNotification.getUser());
-        findNotification.isWatched(true);
+        findNotification.watched();
         return "watched success";
     }
 
