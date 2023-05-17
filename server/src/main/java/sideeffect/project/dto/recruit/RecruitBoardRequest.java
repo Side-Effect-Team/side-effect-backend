@@ -15,7 +15,6 @@ public class RecruitBoardRequest {
     private String title;
     private String projectName;
     private String content;
-    private String imgSrc;
     private List<BoardPositionRequest> positions;
     private List<StackType> tags;
 
@@ -24,7 +23,6 @@ public class RecruitBoardRequest {
                 .title(title)
                 .projectName(projectName)
                 .contents(content)
-                .imgSrc(imgSrc)
                 .build();
     }
 

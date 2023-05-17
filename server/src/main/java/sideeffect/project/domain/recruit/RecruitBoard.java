@@ -94,6 +94,10 @@ public class RecruitBoard extends BaseTimeEntity {
         }
     }
 
+    public void updateImgSrc(String filePath) {
+        this.imgSrc = filePath;
+    }
+
     public void increaseViews() {
         this.views++;
     }
