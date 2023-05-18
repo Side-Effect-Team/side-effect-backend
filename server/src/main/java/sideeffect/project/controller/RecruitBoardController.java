@@ -70,9 +70,10 @@ public class RecruitBoardController {
     public void updateRecruitBoard(
             @LoginUser User user,
             @PathVariable("id") Long boardId,
-            @RequestBody RecruitBoardUpdateRequest request
+            @Valid @RequestPart RecruitBoardUpdateRequest request,
+            @ValidImageFile @RequestPart MultipartFile imgFile
     ) {
-        recruitBoardService.updateRecruitBoard(user.getId(), boardId, request);
+        recruitBoardService.updateRecruitBoard(user.getId(), boardId, request, imgFile);
     }
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")

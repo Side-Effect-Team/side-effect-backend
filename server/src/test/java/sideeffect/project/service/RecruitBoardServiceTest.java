@@ -148,7 +148,9 @@ class RecruitBoardServiceTest {
 
     @DisplayName("모집 게시판을 업데이트한다.")
     @Test
-    public void updateRecruitBoard() {
+    public void updateRecruitBoard() throws IOException {
+        String imgPath = "/test/test.png";
+        MockMultipartFile file = new MockMultipartFile("image", "test".getBytes());
         RecruitBoardUpdateRequest request = RecruitBoardUpdateRequest.builder()
                 .title("수정된 제목")
                 .content("수정된 내용")
@@ -162,11 +164,13 @@ class RecruitBoardServiceTest {
         Long userId = 1L;
 
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
+        when(recruitUploadService.storeFile(any())).thenReturn(imgPath);
 
-        recruitBoardService.updateRecruitBoard(userId, boardId, request);
+        recruitBoardService.updateRecruitBoard(userId, boardId, request, file);
 
         assertAll(
                 () -> verify(recruitBoardRepository).findById(any()),
+                () -> verify(recruitUploadService).storeFile(any()),
                 () -> assertThat(recruitBoard.getTitle()).isEqualTo(request.getTitle()),
                 () -> assertThat(recruitBoard.getContents()).isEqualTo(request.getContent()),
                 () -> assertThat(recruitBoard.getBoardPositions()).hasSize(0),
@@ -177,6 +181,7 @@ class RecruitBoardServiceTest {
     @DisplayName("모집 게시판 주인이 아닌자가 업데이트 시도 시 예외 발생")
     @Test
     void updateByNonOwner() {
+        MockMultipartFile file = new MockMultipartFile("image", "test".getBytes());
         RecruitBoardUpdateRequest request = RecruitBoardUpdateRequest.builder()
                 .title("모집 게시판 제목")
                 .content("모집합니다.")
@@ -188,7 +193,7 @@ class RecruitBoardServiceTest {
 
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
 
-        assertThatThrownBy(() -> recruitBoardService.updateRecruitBoard(nonOwnerId, boardId, request))
+        assertThatThrownBy(() -> recruitBoardService.updateRecruitBoard(nonOwnerId, boardId, request, file))
                 .isInstanceOf(AuthException.class);
     }
 
