@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sideeffect.project.common.exception.AuthException;
-import sideeffect.project.common.exception.EntityNotFoundException;
-import sideeffect.project.common.exception.ErrorCode;
-import sideeffect.project.common.exception.InvalidValueException;
+import org.springframework.web.multipart.MultipartFile;
+import sideeffect.project.common.exception.*;
+import sideeffect.project.common.fileupload.service.RecruitUploadService;
 import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.BoardStack;
@@ -17,8 +16,8 @@ import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.recruit.*;
 import sideeffect.project.repository.RecruitBoardRepository;
-import sideeffect.project.repository.UserRepository;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,16 +27,17 @@ import java.util.stream.Collectors;
 public class RecruitBoardService {
 
     private final RecruitBoardRepository recruitBoardRepository;
-    private final UserRepository userRepository;
     private final PositionService positionService;
     private final StackService stackService;
+    private final RecruitUploadService recruitUploadService;
 
     @Transactional
-    public RecruitBoardResponse register(User user, RecruitBoardRequest request) {
+    public RecruitBoardResponse register(User user, RecruitBoardRequest request, MultipartFile imgFile) {
         RecruitBoard recruitBoard = request.toRecruitBoard();
         recruitBoard.associateUser(user);
         recruitBoard.updateBoardPositions(getBoardPositions(recruitBoard, request.getPositions()));
         recruitBoard.updateBoardStacks(getBoardStacks(recruitBoard, request.getTags()));
+        saveImageFile(imgFile, recruitBoard);
 
         return RecruitBoardResponse.of(recruitBoardRepository.save(recruitBoard));
     }
@@ -66,11 +66,12 @@ public class RecruitBoardService {
     }
 
     @Transactional
-    public void updateRecruitBoard(Long userId, Long boardId, RecruitBoardUpdateRequest request) {
+    public void updateRecruitBoard(Long userId, Long boardId, RecruitBoardUpdateRequest request, MultipartFile imgFile) {
         RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
         validateOwner(userId, findRecruitBoard);
         findRecruitBoard.updateBoardStacks(getBoardStacks(findRecruitBoard, request.getTags()));
+        saveImageFile(imgFile, findRecruitBoard);
 
         findRecruitBoard.update(request.toRecruitBoard());
     }
@@ -93,6 +94,10 @@ public class RecruitBoardService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
         validateOwner(userId, findRecruitBoard);
         recruitBoardRepository.delete(findRecruitBoard);
+    }
+
+    public String getImageFullPath(String imagePath) {
+        return recruitUploadService.getFullPath(imagePath);
     }
 
     private List<BoardPosition> getBoardPositions(RecruitBoard recruitBoard, List<BoardPositionRequest> positionRequests) {
@@ -153,6 +158,15 @@ public class RecruitBoardService {
         if(recruitBoard.getBoardPositions().stream()
                 .anyMatch(boardPosition -> boardPosition.getPosition().getId().equals(targetBoardPosition.getPosition().getId()))) {
             throw new InvalidValueException(ErrorCode.BOARD_POSITION_ALREADY_EXISTS);
+        }
+    }
+
+    private void saveImageFile(MultipartFile file, RecruitBoard recruitBoard) {
+        try {
+            String filePath = recruitUploadService.storeFile(file);
+            recruitBoard.updateImgSrc(filePath);
+        } catch (IOException e) {
+            throw new BaseException(ErrorCode.RECRUIT_BOARD_FILE_UPLOAD_FAILED);
         }
     }
 

@@ -24,7 +24,6 @@ public class RecruitBoardRequest {
                 .title(title)
                 .projectName(projectName)
                 .contents(content)
-                .imgSrc(imgSrc)
                 .build();
     }
 

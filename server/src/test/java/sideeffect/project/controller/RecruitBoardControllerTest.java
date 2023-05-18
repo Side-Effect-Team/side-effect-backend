@@ -7,9 +7,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import sideeffect.project.common.exception.AuthException;
@@ -154,16 +159,20 @@ class RecruitBoardControllerTest {
     @WithCustomUser
     @Test
     void registerRecruitBoard() throws Exception {
+        MockMultipartFile image = new MockMultipartFile("imgFile", "filename.jpeg", MediaType.IMAGE_JPEG_VALUE, "<<jpeg data>>".getBytes());
         RecruitBoardRequest request = RecruitBoardRequest.builder().title("모집 게시판1").content("모집합니다1.").build();
         RecruitBoard recruitBoard = RecruitBoard.builder().id(10L).title("모집 게시판1").contents("모집합니다1.").build();
         recruitBoard.associateUser(user);
         RecruitBoardResponse response = RecruitBoardResponse.of(recruitBoard);
+        String dtoJson = objectMapper.writeValueAsString(request);
+        MockMultipartFile requestJson = new MockMultipartFile("request", "request", MediaType.APPLICATION_JSON_VALUE, dtoJson.getBytes());
 
-        given(recruitBoardService.register(any(), any())).willReturn(response);
-        mvc.perform(post("/api/recruit-board")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        given(recruitBoardService.register(any(), any(), any())).willReturn(response);
+
+        mvc.perform(multipart("/api/recruit-board")
+                        .file(requestJson)
+                        .file(image)
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -172,12 +181,25 @@ class RecruitBoardControllerTest {
     @WithCustomUser
     @Test
     void updateBoard() throws Exception {
+        MockMultipartFile image = new MockMultipartFile("imgFile", "filename.jpeg", MediaType.IMAGE_JPEG_VALUE, "<<jpeg data>>".getBytes());
         RecruitBoardUpdateRequest request = RecruitBoardUpdateRequest.builder().title("모집 게시판1").content("모집합니다1.").build();
+        String dtoJson = objectMapper.writeValueAsString(request);
+        MockMultipartFile requestJson = new MockMultipartFile("request", "request", MediaType.APPLICATION_JSON_VALUE, dtoJson.getBytes());
 
-        mvc.perform(patch("/api/recruit-board/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        MockMultipartHttpServletRequestBuilder builder = multipart("/api/recruit-board/1");
+
+        builder.with(new RequestPostProcessor() {
+            @Override
+            public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
+                request.setMethod(HttpMethod.PATCH.name());
+                return request;
+            }
+        });
+
+        mvc.perform(builder
+                        .file(requestJson)
+                        .file(image)
+                        .with(csrf()))
                 .andExpect(status().isOk());
     }
 
@@ -185,13 +207,28 @@ class RecruitBoardControllerTest {
     @WithCustomUser
     @Test
     void updateBoardByNotOwner() throws Exception {
+        MockMultipartFile image = new MockMultipartFile("imgFile", "filename.jpeg", MediaType.IMAGE_JPEG_VALUE, "<<jpeg data>>".getBytes());
         RecruitBoardRequest request = RecruitBoardRequest.builder().title("모집 게시판1").content("모집합니다1.").build();
+        String dtoJson = objectMapper.writeValueAsString(request);
+        MockMultipartFile requestJson = new MockMultipartFile("request", "request", MediaType.APPLICATION_JSON_VALUE, dtoJson.getBytes());
+
         doThrow(new AuthException(ErrorCode.RECRUIT_BOARD_UNAUTHORIZED))
-                .when(recruitBoardService).updateRecruitBoard(any(), any(), any());
-        mvc.perform(patch("/api/recruit-board/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .when(recruitBoardService).updateRecruitBoard(any(), any(), any(), any());
+
+        MockMultipartHttpServletRequestBuilder builder = multipart("/api/recruit-board/1");
+
+        builder.with(new RequestPostProcessor() {
+            @Override
+            public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
+                request.setMethod(HttpMethod.PATCH.name());
+                return request;
+            }
+        });
+
+        mvc.perform(builder
+                        .file(requestJson)
+                        .file(image)
+                        .with(csrf()))
                 .andExpect(status().isForbidden());
     }
 

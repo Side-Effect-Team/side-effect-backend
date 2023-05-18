@@ -1,8 +1,16 @@
 package sideeffect.project.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import sideeffect.project.common.annotation.ValidImageFile;
+import sideeffect.project.common.exception.BaseException;
+import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.like.RecruitLikeResponse;
 import sideeffect.project.dto.recruit.*;
@@ -10,6 +18,11 @@ import sideeffect.project.security.LoginUser;
 import sideeffect.project.service.RecruitBoardService;
 import sideeffect.project.service.RecruitLikeService;
 
+import javax.validation.Valid;
+import java.io.IOException;
+
+
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/recruit-board")
@@ -33,10 +46,23 @@ public class RecruitBoardController {
         return recruitBoardService.findRecruitBoards(request);
     }
 
+    @GetMapping(value = "/image/{filename}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public Resource downloadImage(@PathVariable String filename) {
+        try {
+            return new UrlResource("file:" + recruitBoardService.getImageFullPath(filename));
+        } catch (IOException e) {
+            throw new BaseException(ErrorCode.RECRUIT_BOARD_FILE_DOWNLOAD_FAILED);
+        }
+    }
+
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    @PostMapping
-    public RecruitBoardResponse registerRecruitBoard(@LoginUser User user, @RequestBody RecruitBoardRequest request) {
-        return recruitBoardService.register(user, request);
+    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public RecruitBoardResponse registerRecruitBoard(
+            @LoginUser User user,
+            @Valid @RequestPart RecruitBoardRequest request,
+            @ValidImageFile @RequestPart MultipartFile imgFile
+            ) {
+        return recruitBoardService.register(user, request, imgFile);
     }
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
@@ -44,9 +70,10 @@ public class RecruitBoardController {
     public void updateRecruitBoard(
             @LoginUser User user,
             @PathVariable("id") Long boardId,
-            @RequestBody RecruitBoardUpdateRequest request
+            @Valid @RequestPart RecruitBoardUpdateRequest request,
+            @ValidImageFile @RequestPart MultipartFile imgFile
     ) {
-        recruitBoardService.updateRecruitBoard(user.getId(), boardId, request);
+        recruitBoardService.updateRecruitBoard(user.getId(), boardId, request, imgFile);
     }
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
