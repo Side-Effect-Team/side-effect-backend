@@ -56,13 +56,18 @@ public class RecruitBoardController {
     }
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping("/image/{id}")
+    public void uploadImage(@LoginUser User user, @PathVariable("id") Long boardId, @ValidImageFile @RequestParam("file") MultipartFile file) {
+        recruitBoardService.uploadImage(user.getId(), boardId, file);
+    }
+
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PostMapping
     public RecruitBoardResponse registerRecruitBoard(
             @LoginUser User user,
-            @Valid @RequestPart RecruitBoardRequest request,
-            @ValidImageFile @RequestPart MultipartFile imgFile
+            @Valid @RequestBody RecruitBoardRequest request
             ) {
-        return recruitBoardService.register(user, request, imgFile);
+        return recruitBoardService.register(user, request);
     }
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
@@ -70,10 +75,9 @@ public class RecruitBoardController {
     public void updateRecruitBoard(
             @LoginUser User user,
             @PathVariable("id") Long boardId,
-            @Valid @RequestPart RecruitBoardUpdateRequest request,
-            @ValidImageFile @RequestPart MultipartFile imgFile
+            @Valid @RequestBody RecruitBoardUpdateRequest request
     ) {
-        recruitBoardService.updateRecruitBoard(user.getId(), boardId, request, imgFile);
+        recruitBoardService.updateRecruitBoard(user.getId(), boardId, request);
     }
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
