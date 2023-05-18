@@ -1,5 +1,8 @@
 package sideeffect.project.service;
 
+import static sideeffect.project.domain.applicant.ApplicantStatus.APPROVED;
+import static sideeffect.project.domain.applicant.ApplicantStatus.REJECTED;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,6 +34,7 @@ public class ApplicantService {
     private final ApplicantRepository applicantRepository;
     private final RecruitBoardRepository recruitBoardRepository;
     private final BoardPositionRepository boardPositionRepository;
+    private final MailService mailService;
 
     @Transactional
     public ApplicantResponse register(User user, ApplicantRequest request) {
@@ -80,6 +84,8 @@ public class ApplicantService {
 
         findApplicant.updateStatus(applicantUpdateRequest.getStatus());
         findBoardPosition.increaseCurrentNumber();
+
+        mailService.sendMail(findRecruitBoard.getProjectName(), findApplicant.getUser(), APPROVED);
     }
 
     @Transactional
@@ -93,6 +99,8 @@ public class ApplicantService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.APPLICANT_NOT_FOUND));
 
         findApplicant.updateStatus(applicantUpdateRequest.getStatus());
+
+        mailService.sendMail(findRecruitBoard.getProjectName(), findApplicant.getUser(), REJECTED);
     }
 
     @Transactional
@@ -112,7 +120,7 @@ public class ApplicantService {
         BoardPosition findBoardPosition = boardPositionRepository.findByApplicantId(findApplicant.getId())
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOARD_POSITION_NOT_FOUND));
 
-        findApplicant.updateStatus(ApplicantStatus.REJECTED);
+        findApplicant.updateStatus(REJECTED);
         findBoardPosition.decreaseCurrentNumber();
     }
 
@@ -134,8 +142,8 @@ public class ApplicantService {
         }
     }
 
-    private boolean checkIfApplicantIdExists(Long RecruitBoardId, Long targetApplicantId) {
-        List<ApplicantListResponse> applicantListResponses = recruitBoardRepository.getApplicantsByPosition(RecruitBoardId, ApplicantStatus.APPROVED);
+    private boolean checkIfApplicantIdExists(Long recruitBoardId, Long targetApplicantId) {
+        List<ApplicantListResponse> applicantListResponses = recruitBoardRepository.getApplicantsByPosition(recruitBoardId, ApplicantStatus.APPROVED);
         return applicantListResponses.stream().anyMatch(a -> a.getApplicantId().equals(targetApplicantId));
     }
 
