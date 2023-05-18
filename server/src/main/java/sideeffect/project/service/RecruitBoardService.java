@@ -32,12 +32,12 @@ public class RecruitBoardService {
     private final RecruitUploadService recruitUploadService;
 
     @Transactional
-    public RecruitBoardResponse register(User user, RecruitBoardRequest request, MultipartFile imgFile) {
+    public RecruitBoardResponse register(User user, RecruitBoardRequest request) {
         RecruitBoard recruitBoard = request.toRecruitBoard();
         recruitBoard.associateUser(user);
         recruitBoard.updateBoardPositions(getBoardPositions(recruitBoard, request.getPositions()));
         recruitBoard.updateBoardStacks(getBoardStacks(recruitBoard, request.getTags()));
-        saveImageFile(imgFile, recruitBoard);
+        saveImageFile(null, recruitBoard); //기본 이미지 사용
 
         return RecruitBoardResponse.of(recruitBoardRepository.save(recruitBoard));
     }
@@ -66,14 +66,21 @@ public class RecruitBoardService {
     }
 
     @Transactional
-    public void updateRecruitBoard(Long userId, Long boardId, RecruitBoardUpdateRequest request, MultipartFile imgFile) {
+    public void updateRecruitBoard(Long userId, Long boardId, RecruitBoardUpdateRequest request) {
         RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
         validateOwner(userId, findRecruitBoard);
         findRecruitBoard.updateBoardStacks(getBoardStacks(findRecruitBoard, request.getTags()));
-        saveImageFile(imgFile, findRecruitBoard);
 
         findRecruitBoard.update(request.toRecruitBoard());
+    }
+
+    @Transactional
+    public void uploadImage(Long userId, Long boardId, MultipartFile file) {
+        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
+        validateOwner(userId, findRecruitBoard);
+        saveImageFile(file, findRecruitBoard);
     }
 
     @Transactional
