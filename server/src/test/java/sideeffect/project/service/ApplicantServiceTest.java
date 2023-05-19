@@ -52,6 +52,9 @@ class ApplicantServiceTest {
     @Mock
     private ApplicantRepository applicantRepository;
 
+    @Mock
+    private MailService mailService;
+
     private User user;
     private RecruitBoard recruitBoard;
     private BoardPosition boardPosition;
@@ -145,8 +148,8 @@ class ApplicantServiceTest {
         assertAll(
                 () -> verify(recruitBoardRepository).findById(any()),
                 () -> verify(recruitBoardRepository).getApplicantsByPosition(any(), any()),
-                () -> assertThat(applicants.size()).isEqualTo(boardPositionSize),
-                () -> assertThat(applicantListResponses.size()).isEqualTo(count.intValue())
+                () -> assertThat(applicants).hasSize(boardPositionSize),
+                () -> assertThat(applicantListResponses).hasSize(count.intValue())
 
         );
     }
