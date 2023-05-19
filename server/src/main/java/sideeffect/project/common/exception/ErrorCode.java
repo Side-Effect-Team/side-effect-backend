@@ -36,6 +36,8 @@ public enum ErrorCode {
     APPLICANT_DUPLICATED(403, "AC_004", "하나의 게시물에는 한 번만 지원할 수 있습니다."),
     APPLICANT_EXISTS(409, "AC_005", "해당 지원자는 이미 팀원으로 합류가 되어있습니다."),
     APPLICANT_NOT_EXISTS(409, "AC_006", "해당 팀원은 존재하지 않습니다."),
+    APPLICANT_UNAUTHORIZED_CANCEL(403, "AC_007", "지원자 본인만 지원 취소할 수 있습니다."),
+    APPLICANT_REJECTED_CANCEL(409, "AC_008", "해당 지원자는 이미 거절이 되어있습니다."),
 
     POSITION_NOT_FOUND(400, "PS_001", "해당 포지션을 찾을 수 없습니다."),
 
