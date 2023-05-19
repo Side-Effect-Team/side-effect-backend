@@ -1,9 +1,9 @@
 package sideeffect.project.service;
 
 import java.io.IOException;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -58,8 +58,8 @@ public class FreeBoardService {
     }
 
     @Transactional(readOnly = true)
-    public List<FreeBoardResponse> findRankFreeBoards() {
-        return FreeBoardResponse.listOf(repository.findRankFreeBoard(Pageable.ofSize(RANK_NUMBER)));
+    public List<FreeBoardResponse> findRankFreeBoards(User user) {
+        return repository.searchRankBoard(RANK_NUMBER, 30, user.getId(), ChronoUnit.DAYS);
     }
 
     @Transactional(readOnly = true)

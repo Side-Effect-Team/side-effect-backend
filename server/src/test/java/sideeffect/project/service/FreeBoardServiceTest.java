@@ -225,9 +225,9 @@ class FreeBoardServiceTest {
     @DisplayName("랭킹 게시판 조회")
     @Test
     void findRankFreeBoards() {
-        freeBoardService.findRankFreeBoards();
+        freeBoardService.findRankFreeBoards(user);
 
-        verify(freeBoardRepository).findRankFreeBoard(any());
+        verify(freeBoardRepository).searchRankBoard(any(), any(), any(), any());
     }
 
     @DisplayName("이미지를 등록한다.")
