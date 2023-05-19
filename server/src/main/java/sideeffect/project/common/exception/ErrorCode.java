@@ -9,6 +9,8 @@ public enum ErrorCode {
     USER_UNAUTHENTICATION(400, "U_005", "유효하지 않은 이메일이거나 비밀번호가 틀립니다"),
 
     TOKEN_EXPIRED(401, "T_001", "토큰이 만료되었습니다"),
+    ACCESS_TOKEN_EXPIRED(401, "AT_001", "엑세스 토큰이 만료되었습니다"),
+    REFRESH_TOKEN_NOT_FOUND(401, "RT_001", "유효하지 않은 리프레쉬 토큰입니다"),
 
     NOTIFICATION_NOT_FOUND(400, "N_001", "해당 알림을 찾을 수 없습니다."),
 
