@@ -29,6 +29,7 @@ import sideeffect.project.repository.FreeBoardRepository;
 public class FreeBoardService {
 
     private static final int RANK_NUMBER = 6;
+    private static final int RANK_DAYS = 30;
 
     private final FreeBoardRepository repository;
     private final FreeBoardUploadService uploadService;
@@ -59,7 +60,7 @@ public class FreeBoardService {
 
     @Transactional(readOnly = true)
     public List<FreeBoardResponse> findRankFreeBoards(User user) {
-        return repository.searchRankBoard(RANK_NUMBER, 30, user.getId(), ChronoUnit.DAYS);
+        return repository.searchRankBoard(RANK_NUMBER, RANK_DAYS, user.getId(), ChronoUnit.DAYS);
     }
 
     @Transactional(readOnly = true)

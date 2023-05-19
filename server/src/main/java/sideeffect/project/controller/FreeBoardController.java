@@ -63,8 +63,8 @@ public class FreeBoardController {
     }
 
     @GetMapping("/rank")
-    public List<FreeBoardResponse> getRankBoard() {
-        return freeBoardService.findRankFreeBoards();
+    public List<FreeBoardResponse> getRankBoard(@LoginUser User user) {
+        return freeBoardService.findRankFreeBoards(user);
     }
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")

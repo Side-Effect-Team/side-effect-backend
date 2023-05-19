@@ -151,7 +151,7 @@ class FreeBoardControllerTest {
 
         mvc.perform(get("/api/free-boards/scroll")
                 .contentType(MediaType.APPLICATION_JSON)
-                .param("lastid", "101")
+                .param("lastId", "101")
                 .param("size", "10")
                 .param("keyword", "번째"))
             .andExpect(status().isOk())
@@ -167,7 +167,7 @@ class FreeBoardControllerTest {
     @Test
     void getRankBoard() throws Exception {
         List<FreeBoard> freeBoards = generateLikeBoards();
-        given(freeBoardService.findRankFreeBoards()).willReturn(FreeBoardResponse.listOf(freeBoards));
+        given(freeBoardService.findRankFreeBoards(any())).willReturn(FreeBoardResponse.listOf(freeBoards));
 
         mvc.perform(get("/api/free-boards/rank")
                 .contentType(MediaType.APPLICATION_JSON))
