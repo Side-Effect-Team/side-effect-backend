@@ -53,6 +53,9 @@ class RecruitBoardServiceTest {
     @Mock
     private RecruitUploadService recruitUploadService;
 
+    @Mock
+    private MailService mailService;
+
     private User user;
     private RecruitBoard recruitBoard;
     private Position position;
@@ -146,7 +149,7 @@ class RecruitBoardServiceTest {
 
     @DisplayName("모집 게시판을 업데이트한다.")
     @Test
-    public void updateRecruitBoard() throws IOException {
+    void updateRecruitBoard() {
         String imgPath = "/test/test.png";
         RecruitBoardUpdateRequest request = RecruitBoardUpdateRequest.builder()
                 .title("수정된 제목")

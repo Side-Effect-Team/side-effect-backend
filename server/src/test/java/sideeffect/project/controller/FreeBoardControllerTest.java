@@ -8,6 +8,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -25,16 +26,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.common.security.WithCustomUser;
-import sideeffect.project.config.WebSecurityConfig;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.like.Like;
@@ -49,7 +48,6 @@ import sideeffect.project.service.FreeBoardService;
 
 import java.util.List;
 
-@Import(WebSecurityConfig.class)
 @ComponentScan(basePackages = "sideeffect.project.security")
 @WebMvcTest(FreeBoardController.class)
 class FreeBoardControllerTest {
@@ -93,6 +91,7 @@ class FreeBoardControllerTest {
     }
 
     @DisplayName("특정 id의 게시판을 조회한다.")
+    @WithCustomUser
     @Test
     void findBoard() throws Exception {
         int recommendNumber = 20;
@@ -119,6 +118,7 @@ class FreeBoardControllerTest {
     }
 
     @DisplayName("게시판 스크롤 요청한다.")
+    @WithCustomUser
     @Test
     void scrollBoard() throws Exception {
         List<FreeBoard> freeBoards = generateFreeBoards(91L, 100L);
@@ -140,6 +140,7 @@ class FreeBoardControllerTest {
     }
 
     @DisplayName("검색 스크롤을 요청한다.")
+    @WithCustomUser
     @Test
     void scrollBoardWithKeyWord() throws Exception {
         List<FreeBoard> freeBoards = generateFreeBoards(91L, 100L);
@@ -162,7 +163,7 @@ class FreeBoardControllerTest {
     }
 
     @DisplayName("랭킹 게시판을 가져온다.")
-    @WithAnonymousUser
+    @WithCustomUser
     @Test
     void getRankBoard() throws Exception {
         List<FreeBoard> freeBoards = generateLikeBoards();
@@ -185,7 +186,8 @@ class FreeBoardControllerTest {
         mvc.perform(post("/api/free-boards")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(objectMapper.writeValueAsString(request))
+                .with(csrf()))
             .andExpect(status().isOk())
             .andDo(print());
     }
@@ -198,7 +200,8 @@ class FreeBoardControllerTest {
         mvc.perform(patch("/api/free-boards/1")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(objectMapper.writeValueAsString(request))
+                .with(csrf()))
             .andExpect(status().isOk());
     }
 
@@ -234,6 +237,18 @@ class FreeBoardControllerTest {
         mvc.perform(delete("/api/free-boards/1")
                 .with(csrf()))
             .andExpect(status().isForbidden());
+    }
+
+    @DisplayName("이미지를 업로드한다.")
+    @WithCustomUser
+    @Test
+    void uploadImage() throws Exception {
+        MockMultipartFile multipartFile =
+            new MockMultipartFile("file", "test.png", "image/png", "이미지".getBytes());
+        mvc.perform(multipart("/api/free-boards/image/1")
+                .file(multipartFile)
+                .with(csrf()))
+            .andExpect(status().isOk());
     }
 
     private List<FreeBoard> generateLikeBoards() {
