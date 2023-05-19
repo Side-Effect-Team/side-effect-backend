@@ -1,8 +1,5 @@
 package sideeffect.project.service;
 
-import static sideeffect.project.domain.applicant.ApplicantStatus.APPROVED;
-import static sideeffect.project.domain.applicant.ApplicantStatus.REJECTED;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +22,8 @@ import sideeffect.project.repository.RecruitBoardRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static sideeffect.project.domain.applicant.ApplicantStatus.*;
 
 @Slf4j
 @Service
@@ -124,6 +123,25 @@ public class ApplicantService {
         findBoardPosition.decreaseCurrentNumber();
     }
 
+    @Transactional
+    public void cancelApplicant(Long userId, Long applicantId) {
+        Applicant findApplicant = applicantRepository.findById(applicantId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.APPLICANT_NOT_FOUND));
+
+        validateCancelOwner(findApplicant, userId);
+        handleApplicantStatus(findApplicant);
+    }
+
+    private void handleApplicantStatus(Applicant findApplicant) {
+        if(findApplicant.getStatus() == PENDING) {
+            applicantRepository.delete(findApplicant);
+        }else if(findApplicant.getStatus() == REJECTED) {
+            throw new InvalidValueException(ErrorCode.APPLICANT_REJECTED_CANCEL);
+        }else if(findApplicant.getStatus() == APPROVED) {
+            throw new InvalidValueException(ErrorCode.APPLICANT_EXISTS);
+        }
+    }
+
     private void isDuplicateApplicant(Long recruitBoardId, Long userId) {
         if(recruitBoardRepository.existsApplicantByRecruitBoard(recruitBoardId, userId)) {
             throw new AuthException(ErrorCode.APPLICANT_DUPLICATED);
@@ -139,6 +157,12 @@ public class ApplicantService {
     private void validateOwner(RecruitBoard recruitBoard, Long userId) {
         if (!userId.equals(recruitBoard.getUser().getId())) {
             throw new AuthException(ErrorCode.APPLICANT_UNAUTHORIZED);
+        }
+    }
+
+    private void validateCancelOwner(Applicant applicant, Long userId) {
+        if (!userId.equals(applicant.getUser().getId())) {
+            throw new AuthException(ErrorCode.APPLICANT_UNAUTHORIZED_CANCEL);
         }
     }
 
