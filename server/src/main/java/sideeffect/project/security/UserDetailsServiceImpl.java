@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sideeffect.project.common.exception.JoinException;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.repository.UserRepository;
+import sideeffect.project.security.UserDetailsImpl;
 
 @Slf4j
 @Service
