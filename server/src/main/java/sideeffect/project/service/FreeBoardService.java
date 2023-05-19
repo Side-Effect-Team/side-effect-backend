@@ -1,14 +1,18 @@
 package sideeffect.project.service;
 
+import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import sideeffect.project.common.exception.AuthException;
+import sideeffect.project.common.exception.BaseException;
 import sideeffect.project.common.exception.EntityNotFoundException;
 import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.common.exception.InvalidValueException;
+import sideeffect.project.common.fileupload.service.FreeBoardUploadService;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.freeboard.FreeBoardKeyWordRequest;
@@ -27,6 +31,7 @@ public class FreeBoardService {
     private static final int RANK_NUMBER = 6;
 
     private final FreeBoardRepository repository;
+    private final FreeBoardUploadService uploadService;
 
     @Transactional
     public FreeBoard register(User user, FreeBoardRequest request) {
@@ -78,6 +83,22 @@ public class FreeBoardService {
         repository.delete(freeBoard);
     }
 
+    @Transactional
+    public void uploadImage(User user, Long boardId, MultipartFile file) {
+        FreeBoard freeBoard = findBoardById(boardId);
+        validateOwner(user.getId(), freeBoard);
+        saveImageFile(file, freeBoard);
+    }
+
+    public String getFreeBoardImageFullPath(String imagePath) {
+        return uploadService.getFullPath(imagePath);
+    }
+
+    private FreeBoard findBoardById(Long boardId) {
+        return repository.findById(boardId)
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.FREE_BOARD_NOT_FOUND));
+    }
+
     private FreeBoard findFreeBoard(Long boardId) {
         return repository.findById(boardId)
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.FREE_BOARD_NOT_FOUND));
@@ -110,5 +131,14 @@ public class FreeBoardService {
             return false;
         }
         return boardsSize >= requestSize;
+    }
+
+    private void saveImageFile(MultipartFile file, FreeBoard freeBoard) {
+        try {
+            String filePath = uploadService.storeFile(file);
+            freeBoard.changeImageUrl(filePath);
+        } catch (IOException e) {
+            throw new BaseException(ErrorCode.FREE_BOARD_FILE_UPLOAD_FAILED);
+        }
     }
 }
