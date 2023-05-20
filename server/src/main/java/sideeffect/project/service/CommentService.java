@@ -3,6 +3,7 @@ package sideeffect.project.service;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.EntityNotFoundException;
 import sideeffect.project.common.exception.ErrorCode;
@@ -22,6 +23,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final FreeBoardRepository freeBoardRepository;
 
+    @Transactional
     public CommentResponse registerComment(CommentRequest request, User user) {
         FreeBoard freeBoard = findFreeBoard(request);
         Comment comment = request.toComment();
@@ -29,17 +31,20 @@ public class CommentService {
         return CommentResponse.of(commentRepository.save(comment));
     }
 
+    @Transactional
     public FreeBoardCommentsResponse findBoardComments(Long boardId) {
         return FreeBoardCommentsResponse
             .of(CommentResponse.listOf(commentRepository.findAllByFreeBoardIdOrderByIdDesc(boardId)));
     }
 
+    @Transactional
     public void update(Long userId, Long commentId, String updateComment) {
         Comment comment = findComment(commentId);
         validateOwner(userId, comment.getUser().getId());
         comment.update(updateComment);
     }
 
+    @Transactional
     public void delete(Long userId, Long commentId) {
         Comment comment = findComment(commentId);
         validateOwner(userId, comment.getUser().getId());

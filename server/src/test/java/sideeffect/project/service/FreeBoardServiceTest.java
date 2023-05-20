@@ -7,6 +7,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +19,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import sideeffect.project.common.exception.AuthException;
+import sideeffect.project.common.fileupload.service.FreeBoardUploadService;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
@@ -41,12 +46,15 @@ class FreeBoardServiceTest {
     @Mock
     private FreeBoardRepository freeBoardRepository;
 
+    @Mock
+    private FreeBoardUploadService freeBoardUploadService;
+
     private FreeBoard freeBoard;
     private User user;
 
     @BeforeEach
     void setUp() {
-        freeBoardService = new FreeBoardService(freeBoardRepository);
+        freeBoardService = new FreeBoardService(freeBoardRepository, freeBoardUploadService);
 
         user = User.builder()
             .id(1L)
@@ -217,9 +225,44 @@ class FreeBoardServiceTest {
     @DisplayName("랭킹 게시판 조회")
     @Test
     void findRankFreeBoards() {
-        freeBoardService.findRankFreeBoards();
+        freeBoardService.findRankFreeBoards(user);
 
-        verify(freeBoardRepository).findRankFreeBoard(any());
+        verify(freeBoardRepository).searchRankBoard(any(), any(), any(), any());
+    }
+
+    @DisplayName("이미지를 등록한다.")
+    @Test
+    void uploadImage() throws IOException {
+        String filePath = "./test.png";
+        when(freeBoardRepository.findById(any())).thenReturn(Optional.of(freeBoard));
+        when(freeBoardUploadService.storeFile(any())).thenReturn(filePath);
+        MockMultipartFile multipartFile = createMultipartFile();
+
+        freeBoardService.uploadImage(user, freeBoard.getId(), multipartFile);
+
+        assertAll(
+            () -> verify(freeBoardRepository).findById(any()),
+            () -> verify(freeBoardUploadService).storeFile(any()),
+            () -> assertThat(freeBoard.getImgUrl()).isEqualTo(filePath)
+        );
+    }
+
+    @DisplayName("이미지를 경로를 가져온다.")
+    @Test
+    void getFreeBoardImageFullPath() {
+        String filePath = "test.png";
+        when(freeBoardUploadService.getFullPath(any())).thenReturn("./test.png");
+
+        freeBoardService.getFreeBoardImageFullPath(filePath);
+
+        verify(freeBoardUploadService).getFullPath(any());
+    }
+
+    private MockMultipartFile createMultipartFile() {
+        return new MockMultipartFile("image",
+            "test.png",
+            "image/png",
+            "테스트용 그림".getBytes());
     }
 
     private static Stream<Arguments> generateScrollTestAugments() {

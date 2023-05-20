@@ -17,6 +17,7 @@ public enum ErrorCode {
     FREE_BOARD_NOT_FOUND(400, "FB_001", "해당 게시판을 찾을 수 없습니다."),
     FREE_BOARD_UNAUTHORIZED(403, "FB_002", "해당 게시판에 대한 권한이 없습니다."),
     FREE_BOARD_DUPLICATE(400, "FB_003", "projectUrl이 중복되었습니다."),
+    FREE_BOARD_FILE_UPLOAD_FAILED(500, "FB_003", "이미지 업로드에 문제가 발생했습니다."),
 
     COMMENT_NOT_FOUND(400, "CM_001", "해당 댓글을 찾을 수 없습니다."),
     COMMENT_UNAUTHORIZED(403, "CM_002", "해당 댓글에 대한 권한이 없습니다."),
