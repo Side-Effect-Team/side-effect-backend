@@ -20,7 +20,7 @@ public class UserResponse {
     private int boards;
     private PositionType position;
     private String career;
-    private List<String> stacks;
+    private List<String> tags;
     private String imgUrl;
     private String blogUrl;
     private String githubUrl;
@@ -40,7 +40,7 @@ public class UserResponse {
                 .boards(getBoards(user))
                 .position(user.getPosition())
                 .career(user.getCareer())
-                .stacks(listOf(user.getUserStacks()))
+                .tags(listOf(user.getUserStacks()))
                 .imgUrl(user.getImgUrl())
                 .blogUrl(user.getBlogUrl())
                 .githubUrl(user.getGithubUrl())
@@ -60,7 +60,7 @@ public class UserResponse {
                 .boards(getBoards(user))
                 .position(user.getPosition())
                 .career(user.getCareer())
-                .stacks(listOf(user.getUserStacks()))
+                .tags(listOf(user.getUserStacks()))
                 .imgUrl(user.getImgUrl())
                 .blogUrl(user.getBlogUrl())
                 .githubUrl(user.getGithubUrl())

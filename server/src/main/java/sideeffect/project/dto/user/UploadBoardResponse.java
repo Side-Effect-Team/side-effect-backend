@@ -34,7 +34,7 @@ public class UploadBoardResponse {
     private int view;
     private int commentNum;
     private String imgUrl;
-    private List<StackType> stacks;
+    private List<StackType> tags;
 
     public static List<UploadBoardResponse> listOf(User user) {
         List<UploadBoardResponse> uploadBoardResponseList = new ArrayList<>();
@@ -71,7 +71,7 @@ public class UploadBoardResponse {
                 .likeNum(recruitBoard.getRecruitLikes().size())
                 .view(recruitBoard.getViews())
                 .imgUrl(recruitBoard.getImgSrc())
-                .stacks(getStackType(recruitBoard.getBoardStacks()))
+                .tags(getStackType(recruitBoard.getBoardStacks()))
                 .build();
     }
 
