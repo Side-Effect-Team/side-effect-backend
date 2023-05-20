@@ -30,7 +30,7 @@ public class OauthController {
         User user = oauthService.login(token, providerType);
         String access_token = jwtTokenProvider.createAccessToken2(user.getEmail(), user.getUserRoleType());
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + access_token);
+        headers.add("Authorization", access_token);
         return new ResponseEntity<>(user.getId(), headers, HttpStatus.OK);
     }
 }
