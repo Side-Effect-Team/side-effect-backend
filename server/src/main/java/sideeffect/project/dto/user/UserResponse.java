@@ -20,14 +20,14 @@ public class UserResponse {
     private int boards;
     private PositionType position;
     private String career;
-    private List<String> stacks;
+    private List<String> tags;
     private String imgUrl;
     private String blogUrl;
     private String githubUrl;
     private String portfolioUrl;
-    //private List<LikeBoardResponse> likeBoards;
+    private List<LikeBoardResponse> likeBoards;
     private List<UploadBoardResponse> uploadBoards;
-    //private List<ApplyBoardResponse> applyBoards;
+    private List<ApplyBoardResponse> applyBoards;
 
     private Boolean isOwner;
 
@@ -40,14 +40,14 @@ public class UserResponse {
                 .boards(getBoards(user))
                 .position(user.getPosition())
                 .career(user.getCareer())
-                .stacks(listOf(user.getUserStacks()))
+                .tags(listOf(user.getUserStacks()))
                 .imgUrl(user.getImgUrl())
                 .blogUrl(user.getBlogUrl())
                 .githubUrl(user.getGithubUrl())
                 .portfolioUrl(user.getPortfolioUrl())
+                .likeBoards(LikeBoardResponse.listOf(user))
                 .uploadBoards(UploadBoardResponse.listOf(user))
-                //.applyBoards(ApplyBoardResponse.listOf(user))
-
+                .applyBoards(ApplyBoardResponse.listOf(user))
                 .build();
     }
 
@@ -60,7 +60,7 @@ public class UserResponse {
                 .boards(getBoards(user))
                 .position(user.getPosition())
                 .career(user.getCareer())
-                .stacks(listOf(user.getUserStacks()))
+                .tags(listOf(user.getUserStacks()))
                 .imgUrl(user.getImgUrl())
                 .blogUrl(user.getBlogUrl())
                 .githubUrl(user.getGithubUrl())
