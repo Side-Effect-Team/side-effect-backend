@@ -16,12 +16,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-@AllArgsConstructor
-@Getter
 @Builder
-public class UploadBoardResponse {
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+public class LikeBoardResponse {
 
     private String category;
     private Long id;
@@ -36,52 +35,39 @@ public class UploadBoardResponse {
     private String imgUrl;
     private List<StackType> stacks;
 
-    public static List<UploadBoardResponse> listOf(User user) {
-        List<UploadBoardResponse> uploadBoardResponseList = new ArrayList<>();
-        List<FreeBoard> freeBoards = user.getFreeBoards();
-        List<RecruitBoard> recruitBoards = user.getRecruitBoards();
+    public static List<LikeBoardResponse> listOf(User user){
+        List<LikeBoardResponse> likeBoardResponses = new ArrayList<>();
+        Set<Like> likes = user.getLikes();
+        List<RecruitLike> recruitLikes = user.getRecruitLikes();
 
-        if(freeBoards!=null && !freeBoards.isEmpty()){
-            uploadBoardResponseList.addAll(
-                    freeBoards.stream()
-                            .map(freeBoard -> getUploadBoardOfFree(user, freeBoard))
-                            .collect(Collectors.toList())
-            );
+        if(likes!=null && !likes.isEmpty()){
+            likeBoardResponses.addAll(likes.stream()
+                    .map(like -> getLikeBoardOfFree(like))
+                    .collect(Collectors.toList()));
         }
 
-        if(recruitBoards!=null && !recruitBoards.isEmpty()){
-            uploadBoardResponseList.addAll(
-                    recruitBoards.stream()
-                            .map(recruitBoard -> getUploadBoardOfRecruit(user, recruitBoard))
-                            .collect(Collectors.toList())
-            );
+        if(recruitLikes!=null && !recruitLikes.isEmpty()){
+            likeBoardResponses.addAll(recruitLikes.stream()
+                    .map(recruitLike -> getLikeBoardOfRecruit(recruitLike))
+                    .collect(Collectors.toList()));
         }
-
-        return uploadBoardResponseList;
+        return likeBoardResponses;
     }
 
-    private static UploadBoardResponse getUploadBoardOfRecruit(User user, RecruitBoard recruitBoard) {
-        return UploadBoardResponse.builder()
-                .category("recruits")
+    private static LikeBoardResponse getLikeBoardOfRecruit(RecruitLike recruitLike) {
+        RecruitBoard recruitBoard = recruitLike.getRecruitBoard();
+        return LikeBoardResponse.builder()
+                .category("projects")
                 .id(recruitBoard.getId())
                 .title(recruitBoard.getTitle())
                 .content(recruitBoard.getContents())
                 .createdAt(recruitBoard.getCreateAt())
-                .like(isRecruitBoardLiked(user.getId(), recruitBoard.getRecruitLikes()))
+                .like(true)
                 .likeNum(recruitBoard.getRecruitLikes().size())
                 .view(recruitBoard.getViews())
                 .imgUrl(recruitBoard.getImgSrc())
                 .stacks(getStackType(recruitBoard.getBoardStacks()))
                 .build();
-    }
-
-    private static Boolean isRecruitBoardLiked(Long id, List<RecruitLike> recruitLikes) {
-        if(recruitLikes!=null && !recruitLikes.isEmpty()){
-            for (RecruitLike recruitLike : recruitLikes) {
-                if(recruitLike.getUser().getId()==id) return true;
-            }
-        }
-        return false;
     }
 
     private static List<StackType> getStackType(List<BoardStack> boardStacks) {
@@ -94,27 +80,21 @@ public class UploadBoardResponse {
         return stackTypes;
     }
 
-    private static UploadBoardResponse getUploadBoardOfFree(User user, FreeBoard freeBoard) {
-        return UploadBoardResponse.builder()
+    private static LikeBoardResponse getLikeBoardOfFree(Like like) {
+        FreeBoard freeBoard = like.getFreeBoard();
+        return LikeBoardResponse.builder()
                 .category("projects")
                 .id(freeBoard.getId())
                 .title(freeBoard.getTitle())
                 .content(freeBoard.getContent())
                 .createdAt(freeBoard.getCreateAt())
                 .commentNum(freeBoard.getComments().size())
-                .like(isFreeBoardLiked(user.getId(), freeBoard.getLikes()))
+                .like(true)
                 .likeNum(freeBoard.getLikes().size())
                 .view(freeBoard.getViews())
                 .imgUrl(freeBoard.getImgUrl())
                 .build();
     }
 
-    private static Boolean isFreeBoardLiked(Long id, Set<Like> likes) {
-        if(likes!=null && !likes.isEmpty()){
-            for (Like like : likes) {
-                if(like.getUser().getId()==id) return true;
-            }
-        }
-        return false;
-    }
+
 }

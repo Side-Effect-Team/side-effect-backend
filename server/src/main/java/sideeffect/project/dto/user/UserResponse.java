@@ -25,9 +25,9 @@ public class UserResponse {
     private String blogUrl;
     private String githubUrl;
     private String portfolioUrl;
-    //private List<LikeBoardResponse> likeBoards;
+    private List<LikeBoardResponse> likeBoards;
     private List<UploadBoardResponse> uploadBoards;
-    //private List<ApplyBoardResponse> applyBoards;
+    private List<ApplyBoardResponse> applyBoards;
 
     private Boolean isOwner;
 
@@ -45,9 +45,9 @@ public class UserResponse {
                 .blogUrl(user.getBlogUrl())
                 .githubUrl(user.getGithubUrl())
                 .portfolioUrl(user.getPortfolioUrl())
+                .likeBoards(LikeBoardResponse.listOf(user))
                 .uploadBoards(UploadBoardResponse.listOf(user))
-                //.applyBoards(ApplyBoardResponse.listOf(user))
-
+                .applyBoards(ApplyBoardResponse.listOf(user))
                 .build();
     }
 
