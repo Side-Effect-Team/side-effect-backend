@@ -49,12 +49,11 @@ public class RecruitBoard extends BaseTimeEntity {
     private List<RecruitLike> recruitLikes = new ArrayList<>();
 
     @Builder
-    public RecruitBoard(Long id, String title, String projectName, String contents, String imgSrc) {
+    public RecruitBoard(Long id, String title, String projectName, String contents) {
         this.id = id;
         this.title = title;
         this.projectName = projectName;
         this.contents = contents;
-        this.imgSrc = imgSrc;
         this.views = 0;
     }
 
