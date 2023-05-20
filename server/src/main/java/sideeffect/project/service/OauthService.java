@@ -4,8 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sideeffect.project.common.exception.AuthException;
-import sideeffect.project.common.exception.ErrorCode;
+import sideeffect.project.common.exception.JoinException;
 import sideeffect.project.domain.user.ProviderType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.user.ResponseUserInfo;
@@ -27,7 +26,7 @@ public class OauthService {
         ResponseUserInfo responseUserInfo = sendToAuthorizationServer(token, providerType);
         log.info("email: " + responseUserInfo.getEmail());
         log.info("imgUrl: " + responseUserInfo.getImgUrl());
-        return userRepository.findByEmailAndProvider(responseUserInfo.getEmail(), providerType).orElseThrow(() -> new AuthException(ErrorCode.USER_UNAUTHENTICATION));
+        return userRepository.findByEmailAndProvider(responseUserInfo.getEmail(), providerType).orElseThrow(() -> new JoinException(responseUserInfo.getEmail(), providerType));
     }
     public ResponseUserInfo sendToAuthorizationServer(String token, ProviderType providerType) {
         switch (providerType) {
