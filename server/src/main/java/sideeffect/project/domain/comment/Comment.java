@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.util.StringUtils;
+import sideeffect.project.common.domain.BaseTimeEntity;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.user.User;
 
@@ -24,7 +25,7 @@ import sideeffect.project.domain.user.User;
 @ToString
 @Table(name = "comments")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Comment {
+public class Comment extends BaseTimeEntity {
 
     @Id
     @Column(name = "comment_id")

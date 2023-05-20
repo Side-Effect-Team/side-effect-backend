@@ -18,6 +18,8 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,6 +61,18 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
             return queryResult.limit(scrollDto.getSize()).fetch();
         }
         return queryResult.fetch();
+    }
+
+    @Override
+    public List<FreeBoardResponse> searchRankBoard(Integer size, Integer days, Long userId, ChronoUnit chronoUnit) {
+        return jpaQueryFactory.select(getResponseConstructor(userId))
+            .from(freeBoard)
+            .leftJoin(freeBoard.likes, like)
+            .where(like.createAt.after(LocalDateTime.now().minus(days, chronoUnit)))
+            .orderBy(like.count().desc(), freeBoard.views.desc())
+            .groupBy(freeBoard.id)
+            .limit(size)
+            .fetch();
     }
 
     private BooleanExpression filterByOrderType(FreeBoardScrollDto scrollDto, Integer filterNumber) {

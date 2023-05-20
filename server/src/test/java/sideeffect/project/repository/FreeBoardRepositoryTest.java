@@ -8,6 +8,7 @@ import static sideeffect.project.dto.freeboard.OrderType.LATEST;
 import static sideeffect.project.dto.freeboard.OrderType.LIKE;
 import static sideeffect.project.dto.freeboard.OrderType.VIEWS;
 
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +17,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder.In;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -121,21 +124,22 @@ class FreeBoardRepositoryTest extends TestDataRepository {
         assertThat(boardIds).containsExactly(freeBoard2.getId(), freeBoard1.getId());
     }
 
-    @DisplayName("추천수가 많은 순으로 게시판이 조회된다.")
+    @DisplayName("랭킹 게시판을 조회한다.")
     @Test
-    void findRankFreeBoard() {
+    void findRankFreeBoard() throws InterruptedException {
         int rankSize = 6;
-        int boardsSize = 10;
-        List<Integer> recommendNumbers = List.of(11, 9, 11, 23, 21, 8, 6, 7, 2, 0);
-        saveFreeBoardsAndLike(boardsSize, recommendNumbers);
-        em.flush();
-        em.clear();
+        int boardsSize = 6;
+        List<Integer> beforeLikes = List.of(16, 14, 13, 12, 11, 0);
+        List<Integer> afterLikes = List.of(1, 2, 3, 5, 8, 10);
+        List<FreeBoard> freeBoards = generateFreeBoards(boardsSize);
+        associateLikesAndFreeBoards(freeBoards, beforeLikes);
+        Thread.sleep(2000);
+        associateLikesAndFreeBoards(freeBoards, afterLikes);
 
-        List<Integer> result = repository.findRankFreeBoard(Pageable.ofSize(rankSize))
-            .stream().map(FreeBoard::getLikes).map(Set::size).collect(Collectors.toList());
-        System.out.println("result = " + result);
-        System.out.println(repository.findRankFreeBoard(Pageable.ofSize(rankSize)));
-        assertThat(result).isEqualTo(List.of(23, 21, 11, 11, 9, 8));
+        List<FreeBoardResponse> freeBoardResponses =
+            repository.searchRankBoard(rankSize, 1, null, ChronoUnit.SECONDS);
+        List<Integer> result = freeBoardResponses.stream().map(FreeBoardResponse::getLikeNum).collect(Collectors.toList());
+        assertThat(result).isEqualTo(List.of(10, 19, 17, 16, 16, 17));
     }
 
     @DisplayName("댓글 순으로 스크롤을 진행한다.")

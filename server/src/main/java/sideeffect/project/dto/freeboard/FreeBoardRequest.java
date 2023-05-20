@@ -27,8 +27,6 @@ public class FreeBoardRequest {
     @NotBlank
     private String content;
 
-    private String imgSrc;
-
     @Size(min = 3, max = 20)
     private String projectName;
 

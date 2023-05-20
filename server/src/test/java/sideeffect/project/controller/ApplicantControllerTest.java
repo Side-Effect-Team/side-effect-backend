@@ -6,7 +6,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -38,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ComponentScan(basePackages = "sideeffect.project.security")
+
 @WebMvcTest(ApplicantController.class)
 class ApplicantControllerTest {
 
@@ -328,6 +327,15 @@ class ApplicantControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
+    }
+
+    @DisplayName("지원자가 지원 취소를 한다.")
+    @WithCustomUser
+    @Test
+    void cancelApplicant() throws Exception {
+        mvc.perform(delete("/api/applicant/1")
+                .with(csrf()))
+                .andExpect(status().isOk());
     }
 
     private static List<ApplicantListResponse> generateApplicantListResponse(List<PositionType> positionTypes, int size) {

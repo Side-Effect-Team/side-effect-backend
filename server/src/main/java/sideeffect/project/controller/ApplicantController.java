@@ -51,4 +51,10 @@ public class ApplicantController {
         applicantService.releaseApplicant(user.getId(), request);
     }
 
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public void cancelApplicant(@LoginUser User user, @PathVariable("id") Long applicantId) {
+        applicantService.cancelApplicant(user.getId(), applicantId);
+    }
+
 }

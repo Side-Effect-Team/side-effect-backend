@@ -14,7 +14,6 @@ import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.EntityNotFoundException;
 import sideeffect.project.common.exception.InvalidValueException;
 import sideeffect.project.domain.applicant.Applicant;
-import sideeffect.project.domain.applicant.ApplicantStatus;
 import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.RecruitBoard;
@@ -36,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.*;
+import static sideeffect.project.domain.applicant.ApplicantStatus.*;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicantServiceTest {
@@ -51,6 +51,9 @@ class ApplicantServiceTest {
 
     @Mock
     private ApplicantRepository applicantRepository;
+
+    @Mock
+    private MailService mailService;
 
     private User user;
     private RecruitBoard recruitBoard;
@@ -138,15 +141,15 @@ class ApplicantServiceTest {
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
         when(recruitBoardRepository.getApplicantsByPosition(any(), any())).thenReturn(applicantListResponses);
 
-        Map<String, ApplicantPositionResponse> applicants = applicantService.findApplicants(user.getId(), recruitBoard.getId(), ApplicantStatus.PENDING);
+        Map<String, ApplicantPositionResponse> applicants = applicantService.findApplicants(user.getId(), recruitBoard.getId(), PENDING);
         AtomicInteger count = new AtomicInteger();
         applicants.forEach((key, value) -> count.addAndGet(value.getSize()));
 
         assertAll(
                 () -> verify(recruitBoardRepository).findById(any()),
                 () -> verify(recruitBoardRepository).getApplicantsByPosition(any(), any()),
-                () -> assertThat(applicants.size()).isEqualTo(boardPositionSize),
-                () -> assertThat(applicantListResponses.size()).isEqualTo(count.intValue())
+                () -> assertThat(applicants).hasSize(boardPositionSize),
+                () -> assertThat(applicantListResponses).hasSize(count.intValue())
 
         );
     }
@@ -158,14 +161,14 @@ class ApplicantServiceTest {
 
         Long nonOwner = 2L;
 
-        assertThatThrownBy(() -> applicantService.findApplicants(nonOwner, recruitBoard.getId(), ApplicantStatus.PENDING))
+        assertThatThrownBy(() -> applicantService.findApplicants(nonOwner, recruitBoard.getId(), PENDING))
                 .isInstanceOf(AuthException.class);
     }
 
     @DisplayName("게시판의 포지션에 지원한 지원자를 승인한다.")
     @Test
     void approveApplicant() {
-        ApplicantUpdateRequest request = ApplicantUpdateRequest.builder().recruitBoardId(recruitBoard.getId()).applicantId(applicant.getId()).status(ApplicantStatus.APPROVED).build();
+        ApplicantUpdateRequest request = ApplicantUpdateRequest.builder().recruitBoardId(recruitBoard.getId()).applicantId(applicant.getId()).status(APPROVED).build();
 
         when(boardPositionRepository.findBoardPositionIfRecruitable(any())).thenReturn(Optional.of(boardPosition));
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
@@ -179,7 +182,7 @@ class ApplicantServiceTest {
                 () -> verify(boardPositionRepository).findBoardPositionIfRecruitable(any()),
                 () -> verify(recruitBoardRepository).findById(any()),
                 () -> verify(applicantRepository).findById(any()),
-                () -> assertThat(applicant.getStatus()).isEqualTo(ApplicantStatus.APPROVED),
+                () -> assertThat(applicant.getStatus()).isEqualTo(APPROVED),
                 () -> assertThat(boardPosition.getCurrentNumber()).isEqualTo(before + 1)
         );
     }
@@ -187,7 +190,7 @@ class ApplicantServiceTest {
     @DisplayName("게시판의 포지션에 모두 모집이 되었다면 지원자를 승인할 수 없다.")
     @Test
     void approveApplicantFullPosition() {
-        ApplicantUpdateRequest request = ApplicantUpdateRequest.builder().recruitBoardId(recruitBoard.getId()).applicantId(applicant.getId()).status(ApplicantStatus.APPROVED).build();
+        ApplicantUpdateRequest request = ApplicantUpdateRequest.builder().recruitBoardId(recruitBoard.getId()).applicantId(applicant.getId()).status(APPROVED).build();
 
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
         when(applicantRepository.findById(any())).thenReturn(Optional.of(applicant));
@@ -200,7 +203,7 @@ class ApplicantServiceTest {
     @DisplayName("글 작성자가 아니라면 게시판의 포지션에 지원한 지원자를 승인할 수 없다.")
     @Test
     void approveApplicantByNonOwner() {
-        ApplicantUpdateRequest request = ApplicantUpdateRequest.builder().recruitBoardId(recruitBoard.getId()).applicantId(applicant.getId()).status(ApplicantStatus.APPROVED).build();
+        ApplicantUpdateRequest request = ApplicantUpdateRequest.builder().recruitBoardId(recruitBoard.getId()).applicantId(applicant.getId()).status(APPROVED).build();
 
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
         when(applicantRepository.findById(any())).thenReturn(Optional.of(applicant));
@@ -215,7 +218,7 @@ class ApplicantServiceTest {
     @DisplayName("해당 지원자가 이미 팀원으로 합류가 되어 있다면 승인할 수 없다.")
     @Test
     void approveApplicantIfExists() {
-        ApplicantUpdateRequest request = ApplicantUpdateRequest.builder().recruitBoardId(recruitBoard.getId()).applicantId(applicant.getId()).status(ApplicantStatus.APPROVED).build();
+        ApplicantUpdateRequest request = ApplicantUpdateRequest.builder().recruitBoardId(recruitBoard.getId()).applicantId(applicant.getId()).status(APPROVED).build();
 
         List<ApplicantListResponse> responses = new ArrayList<>();
         ApplicantListResponse response = ApplicantListResponse.builder().applicantId(applicant.getId()).build();
@@ -233,7 +236,7 @@ class ApplicantServiceTest {
     @DisplayName("게시판의 포지션에 지원한 지원자를 거절한다.")
     @Test
     void rejectApplicant() {
-        ApplicantUpdateRequest request = ApplicantUpdateRequest.builder().recruitBoardId(recruitBoard.getId()).applicantId(applicant.getId()).status(ApplicantStatus.REJECTED).build();
+        ApplicantUpdateRequest request = ApplicantUpdateRequest.builder().recruitBoardId(recruitBoard.getId()).applicantId(applicant.getId()).status(REJECTED).build();
 
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
         when(applicantRepository.findById(any())).thenReturn(Optional.of(applicant));
@@ -243,14 +246,14 @@ class ApplicantServiceTest {
         assertAll(
                 () -> verify(recruitBoardRepository).findById(any()),
                 () -> verify(applicantRepository).findById(any()),
-                () -> assertThat(applicant.getStatus()).isEqualTo(ApplicantStatus.REJECTED)
+                () -> assertThat(applicant.getStatus()).isEqualTo(REJECTED)
         );
     }
 
     @DisplayName("글 작성자가 아니라면 게시판의 포지션에 지원한 지원자를 거절할 수 없다.")
     @Test
     void rejectApplicantByOwner() {
-        ApplicantUpdateRequest request = ApplicantUpdateRequest.builder().recruitBoardId(recruitBoard.getId()).applicantId(applicant.getId()).status(ApplicantStatus.REJECTED).build();
+        ApplicantUpdateRequest request = ApplicantUpdateRequest.builder().recruitBoardId(recruitBoard.getId()).applicantId(applicant.getId()).status(REJECTED).build();
 
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
         when(applicantRepository.findById(any())).thenReturn(Optional.of(applicant));
@@ -260,7 +263,7 @@ class ApplicantServiceTest {
         assertAll(
                 () -> verify(recruitBoardRepository).findById(any()),
                 () -> verify(applicantRepository).findById(any()),
-                () -> assertThat(applicant.getStatus()).isEqualTo(ApplicantStatus.REJECTED)
+                () -> assertThat(applicant.getStatus()).isEqualTo(REJECTED)
         );
     }
 
@@ -289,7 +292,7 @@ class ApplicantServiceTest {
                 () -> verify(applicantRepository).findById(any()),
                 () -> verify(recruitBoardRepository).getApplicantsByPosition(any(), any()),
                 () -> verify(boardPositionRepository).findByApplicantId(any()),
-                () -> assertThat(applicant.getStatus()).isEqualTo(ApplicantStatus.REJECTED),
+                () -> assertThat(applicant.getStatus()).isEqualTo(REJECTED),
                 () -> assertThat(boardPosition.getCurrentNumber()).isEqualTo(before - 1)
         );
     }
@@ -322,6 +325,65 @@ class ApplicantServiceTest {
                 .isInstanceOf(InvalidValueException.class);
     }
 
+    @DisplayName("지원자가 지원한 내역을 취소한다.")
+    @Test
+    void cancelApplicant() {
+        applicant.associate(user, boardPosition);
+        Long userId = user.getId();
+        Long applicantId = applicant.getId();
+
+        when(applicantRepository.findById(any())).thenReturn(Optional.of(applicant));
+
+        applicantService.cancelApplicant(userId, applicantId);
+
+        assertAll(
+                () -> verify(applicantRepository).findById(any()),
+                () -> verify(applicantRepository).delete(any())
+        );
+    }
+
+    @DisplayName("지원자가 지원을 취소할 때 본인이 아니라면 예외가 발생한다.")
+    @Test
+    void cancelApplicantNonOwner() {
+        applicant.associate(user, boardPosition);
+        Long nonOwner = 2L;
+        Long applicantId = applicant.getId();
+
+        when(applicantRepository.findById(any())).thenReturn(Optional.of(applicant));
+
+        assertThatThrownBy(() ->  applicantService.cancelApplicant(nonOwner, applicantId))
+                .isInstanceOf(AuthException.class);
+
+    }
+
+    @DisplayName("지원자가 지원을 취소할 때 지원이 이미 거절된 상태라면 예외를 반환한다.")
+    @Test
+    void cancelApplicantByRejected() {
+        applicant.associate(user, boardPosition);
+        Long userId = user.getId();
+        Long applicantId = applicant.getId();
+        applicant.updateStatus(REJECTED);
+
+        when(applicantRepository.findById(any())).thenReturn(Optional.of(applicant));
+
+        assertThatThrownBy(() ->  applicantService.cancelApplicant(userId, applicantId))
+                .isInstanceOf(InvalidValueException.class);
+    }
+
+    @DisplayName("지원자가 지원을 취소할 때 지원이 이미 승낙된 상태라면 예외를 반환한다.")
+    @Test
+    void cancelApplicantByApproved() {
+        applicant.associate(user, boardPosition);
+        Long userId = user.getId();
+        Long applicantId = applicant.getId();
+        applicant.updateStatus(APPROVED);
+
+        when(applicantRepository.findById(any())).thenReturn(Optional.of(applicant));
+
+        assertThatThrownBy(() ->  applicantService.cancelApplicant(userId, applicantId))
+                .isInstanceOf(InvalidValueException.class);
+    }
+    
     private static Stream<Arguments> generateApplicantListTestAugments() {
         return Stream.of(
                 Arguments.arguments(generateApplicantListResponse(List.of(PositionType.FRONTEND, PositionType.BACKEND), 3), 6),
