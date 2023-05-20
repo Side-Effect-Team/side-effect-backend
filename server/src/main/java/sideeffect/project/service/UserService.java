@@ -89,6 +89,10 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
+    public Boolean duplicateNickname(String nickname){
+        return userRepository.findByNickname(nickname).isPresent();
+    }
+
     public void validateDuplicateUser(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
             throw new IllegalStateException(ErrorCode.USER_ALREADY_EXIST);

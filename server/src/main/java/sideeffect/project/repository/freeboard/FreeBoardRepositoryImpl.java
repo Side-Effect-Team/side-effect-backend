@@ -139,6 +139,7 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
         return Projections.constructor(FreeBoardResponse.class,
             freeBoard.id,
             freeBoard.imgUrl,
+            freeBoard.views,
             freeBoard.title,
             freeBoard.content,
             freeBoard.createAt,

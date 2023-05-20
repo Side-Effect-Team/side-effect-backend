@@ -47,6 +47,11 @@ public class UserController {
         return "delete success";
     }
 
+    @GetMapping("/duple/{nickname}")
+    public Boolean duplicate(@PathVariable String nickname){
+        return userService.duplicateNickname(nickname);
+    }
+
 
 
 }

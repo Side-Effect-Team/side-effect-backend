@@ -22,6 +22,7 @@ public class FreeBoardResponse {
 
     private Long id;
     private String headerImage;
+    private Integer views;
     private String title;
     private String content;
     @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
@@ -41,6 +42,7 @@ public class FreeBoardResponse {
             .id(freeBoard.getId())
             .title(freeBoard.getTitle())
             .content(freeBoard.getContent())
+            .views(freeBoard.getViews())
             .headerImage(freeBoard.getImgUrl())
             .likeNum(freeBoard.getLikes().size())
             .commentNum(freeBoard.getComments().size())

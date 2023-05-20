@@ -29,7 +29,7 @@ public class WebSecurityConfig{
                 .csrf().disable()
                 .cors().and()
                 .authorizeRequests()
-                .antMatchers("/api/user/join", "/api/user/mypage/**", "/api/social/login").permitAll()
+                .antMatchers("/api/user/join", "/api/user/mypage/**", "/api/user/duple/**", "/api/social/login").permitAll()
                 .antMatchers(HttpMethod.POST, "/**").authenticated()
                 .antMatchers(HttpMethod.GET, "/api/free-boards/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/like/**").hasAnyRole("USER", "ADMIN")
