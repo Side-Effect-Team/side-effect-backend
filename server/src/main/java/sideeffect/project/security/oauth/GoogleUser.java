@@ -1,4 +1,4 @@
-package sideeffect.project.dto.user;
+package sideeffect.project.security.oauth;
 
 import lombok.*;
 

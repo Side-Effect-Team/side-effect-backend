@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
+import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.service.RefreshTokenService;
 
 import java.util.Date;
@@ -64,6 +65,23 @@ public class JwtTokenProvider {
         //access token
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
+                .claim("auth", authorities)
+                .setExpiration(new Date(now + 1000 * 60 * 60 * 24 * 3))
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .compact();
+
+        return accessToken;
+    }
+
+    public String createAccessToken2(String email, UserRoleType userRoleType){
+        //권한 가져오기
+        String authorities = userRoleType.name();
+
+        long now = System.currentTimeMillis();
+
+        //access token
+        String accessToken = Jwts.builder()
+                .setSubject(email)
                 .claim("auth", authorities)
                 .setExpiration(new Date(now + 1000 * 60 * 60 * 24 * 3))
                 .signWith(SignatureAlgorithm.HS256, secretKey)

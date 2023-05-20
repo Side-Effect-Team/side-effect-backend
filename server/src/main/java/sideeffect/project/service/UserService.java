@@ -34,7 +34,7 @@ public class UserService {
 
     public Long join(UserRequest request){
 
-        validateDuplicateUser(request.getEmail());
+        //validateDuplicateUser(request.getEmail());
         User user = request.toUser();
         user.setPassword(encoder.encode(user.getPassword()));
         user.setUserRoleType(UserRoleType.ROLE_USER);
