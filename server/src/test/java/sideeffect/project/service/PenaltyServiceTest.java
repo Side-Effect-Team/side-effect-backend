@@ -14,9 +14,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.domain.penalty.Penalty;
+import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.user.User;
+import sideeffect.project.repository.BoardPositionRepository;
 import sideeffect.project.repository.PenaltyRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +32,8 @@ class PenaltyServiceTest {
 
     private User user;
     private RecruitBoard recruitBoard;
+    private BoardPosition boardPosition;
+    private Applicant applicant;
 
     @BeforeEach
     void setUp() {
@@ -46,14 +51,26 @@ class PenaltyServiceTest {
             .contents("내용")
             .title("제목")
             .build();
+
+        boardPosition = BoardPosition.builder()
+            .id(1L)
+            .targetNumber(3)
+            .recruitBoard(recruitBoard)
+            .build();
+
+        applicant = new Applicant(1L);
+        applicant.associate(user, boardPosition);
+
     }
 
     @DisplayName("패널티를 부과한다.")
     @Test
     void penalize() {
-        penaltyService.penalize(user, recruitBoard);
+        penaltyService.penalize(user, applicant);
 
-        verify(penaltyRepository).save(any());
+        assertAll(
+            () -> verify(penaltyRepository).save(any())
+        );
     }
 
     @DisplayName("해당 유저가 모집 게시판에 대해 패널티가 부과되었다.")

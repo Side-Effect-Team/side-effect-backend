@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.domain.penalty.Penalty;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.user.User;
@@ -15,7 +16,8 @@ public class PenaltyService {
 
     private final PenaltyRepository penaltyRepository;
 
-    public void penalize(User user, RecruitBoard recruitBoard) {
+    public void penalize(User user, Applicant applicant) {
+        RecruitBoard recruitBoard = applicant.getBoardPosition().getRecruitBoard();
         penaltyRepository.save(Penalty.penalize(user, recruitBoard));
     }
 

@@ -55,6 +55,9 @@ class ApplicantServiceTest {
     @Mock
     private MailService mailService;
 
+    @Mock
+    private PenaltyService penaltyService;
+
     private User user;
     private RecruitBoard recruitBoard;
     private BoardPosition boardPosition;
@@ -97,6 +100,7 @@ class ApplicantServiceTest {
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
         when(boardPositionRepository.findById(any())).thenReturn(Optional.of(boardPosition));
         when(recruitBoardRepository.existsApplicantByRecruitBoard(any(), any())).thenReturn(false);
+        when(penaltyService.isPenalized(any(), any())).thenReturn(false);
         when(applicantRepository.save(any())).thenReturn(applicant);
 
         applicantService.register(otherUser, request);
@@ -105,6 +109,20 @@ class ApplicantServiceTest {
                 () -> verify(boardPositionRepository).findById(any()),
                 () -> verify(applicantRepository).save(any())
         );
+    }
+
+    @DisplayName("패널티가 부과된 지원자는 지원할 수 없다.")
+    @Test
+    void penalize() {
+        ApplicantRequest request = ApplicantRequest.builder().recruitBoardId(recruitBoard.getId()).boardPositionId(boardPosition.getId()).build();
+        User applicant = recruitBoard.getUser();
+
+        when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
+        when(boardPositionRepository.findById(any())).thenReturn(Optional.of(boardPosition));
+        when(penaltyService.isPenalized(any(), any())).thenReturn(true);
+
+        assertThatThrownBy(() -> applicantService.register(applicant, request))
+            .isInstanceOf(AuthException.class);
     }
 
     @DisplayName("게시판의 주인은 자신의 글에 지원할 수 없다.")
@@ -337,8 +355,9 @@ class ApplicantServiceTest {
         applicantService.cancelApplicant(userId, applicantId);
 
         assertAll(
-                () -> verify(applicantRepository).findById(any()),
-                () -> verify(applicantRepository).delete(any())
+            () -> verify(applicantRepository).findById(any()),
+            () -> verify(applicantRepository).delete(any()),
+            () -> verify(penaltyService).penalize(any(), any())
         );
     }
 
