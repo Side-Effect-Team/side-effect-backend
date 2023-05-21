@@ -12,6 +12,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -19,12 +21,14 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.user.User;
 
+@Builder
 @Entity
 @Getter
 @Table(name = "penalties",
     indexes = @Index(name = "board_user_index", columnList = "recruit_board_id, user_id", unique = true)
 )
 @EntityListeners(value = AuditingEntityListener.class)
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Penalty {
 
