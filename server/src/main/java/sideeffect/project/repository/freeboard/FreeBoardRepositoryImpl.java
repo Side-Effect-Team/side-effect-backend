@@ -68,7 +68,7 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
         return jpaQueryFactory.select(getResponseConstructor(userId))
             .from(freeBoard)
             .leftJoin(freeBoard.likes, like)
-            .where(like.createAt.after(LocalDateTime.now().minus(days, chronoUnit)))
+            .where(like.createdAt.after(LocalDateTime.now().minus(days, chronoUnit)))
             .orderBy(like.count().desc(), freeBoard.views.desc())
             .groupBy(freeBoard.id)
             .limit(size)

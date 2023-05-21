@@ -1,6 +1,8 @@
 package sideeffect.project.domain.like;
 
+import java.time.LocalDateTime;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -13,7 +15,8 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import sideeffect.project.common.domain.BaseTimeEntity;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.user.User;
 
@@ -22,12 +25,13 @@ import sideeffect.project.domain.user.User;
 @Table(
     name = "likes",
     indexes = {
-        @Index(name = "board_index", columnList = "free_board_id")
+        @Index(name = "board_user_index", columnList = "free_board_id, user_id", unique = true)
     }
 )
 @AllArgsConstructor
+@EntityListeners(value = AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Like extends BaseTimeEntity {
+public class Like {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,6 +44,9 @@ public class Like extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "free_board_id")
     private FreeBoard freeBoard;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
 
     public static Like like(User user, FreeBoard freeBoard) {
         Like like = new Like();
