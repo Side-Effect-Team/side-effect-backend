@@ -13,18 +13,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder.In;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import sideeffect.project.common.jpa.TestDataRepository;
 import sideeffect.project.domain.comment.Comment;
 import sideeffect.project.domain.freeboard.FreeBoard;
@@ -192,19 +188,6 @@ class FreeBoardRepositoryTest extends TestDataRepository {
         return responses1;
     }
 
-    private void saveFreeBoardsAndLike(int boardSize, List<Integer> recommendNumbers) {
-        for (int i = 0; i < boardSize; i++) {
-            User user = User.builder().nickname("유저" + i).build();
-            em.persist(user);
-            FreeBoard freeBoard = FreeBoard.builder().title("게시판" + i).build();
-            freeBoard.associateUser(user);
-            repository.save(freeBoard);
-            like(freeBoard, recommendNumbers.get(i));
-        }
-        em.flush();
-        System.out.println("getLastBoardId() = " + getLastUserId());
-    }
-
     private List<FreeBoard> generateFreeBoards(int size) {
         List<FreeBoard> freeBoards = new ArrayList<>();
         for (int i = 0; i < size; i++) {
@@ -267,15 +250,6 @@ class FreeBoardRepositoryTest extends TestDataRepository {
     private Long getLastBoardId() {
         List<FreeBoard> boards = repository.findAll();
         return boards.get(boards.size() - 1).getId();
-    }
-
-    private Long getLastUserId() {
-        List<User> users = em.createQuery("select u from User u order by u.id desc", User.class)
-            .setMaxResults(1)
-            .getResultList();
-        Optional<Long> lastId = users.stream().findFirst().map(User::getId);
-
-        return lastId.orElse(0L);
     }
 
     private User generateUser() {
