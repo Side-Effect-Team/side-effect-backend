@@ -17,7 +17,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -31,15 +30,10 @@ import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.dto.comment.CommentRequest;
 import sideeffect.project.dto.comment.CommentResponse;
-import sideeffect.project.security.UserDetailsServiceImpl;
 import sideeffect.project.service.CommentService;
 
-@ComponentScan(basePackages = "sideeffect/project/security")
 @WebMvcTest(CommentController.class)
 class CommentControllerTest {
-
-    @MockBean
-    private UserDetailsServiceImpl userDetailsService;
 
     @MockBean
     private CommentService commentService;
