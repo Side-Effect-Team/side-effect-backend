@@ -1,6 +1,7 @@
 package sideeffect.project.repository;
 
-import org.assertj.core.api.Assertions;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,20 @@ class UserRepositoryTest extends TestDataRepository {
 
         User finduser = userRepository.findByEmail("google@google.com").orElse(null);
 
-        Assertions.assertThat(user).isEqualTo(finduser);
+        assertThat(user).isEqualTo(finduser);
+    }
+
+    @DisplayName("유저 id로 이메일 조회")
+    @Test
+    void findEmailByUserId() {
+        String email = "google@google.com";
+        User user = User.builder()
+            .email(email)
+            .build();
+        userRepository.save(user);
+
+        String result = userRepository.findEmailByUserId(user.getId()).orElse(null);
+
+        assertThat(result).isEqualTo(email);
     }
 }
