@@ -2,7 +2,7 @@ package sideeffect.project.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import sideeffect.project.service.RefreshTokenService;
+import sideeffect.project.security.RefreshTokenService;
 
 @RestController
 @RequiredArgsConstructor

@@ -1,4 +1,4 @@
-package sideeffect.project.service;
+package sideeffect.project.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -37,13 +37,12 @@ public class RefreshTokenService {
 
         long now = System.currentTimeMillis();
 
-        String accessToken = Jwts.builder()
+        return Jwts.builder()
                 .setSubject(findUser.getEmail())
                 .claim("auth", UserRoleType.ROLE_USER)
                 .setExpiration(new Date(now + 1000 * 60 * 60 * 24 * 3))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
-        return accessToken;
     }
 
     public String issueRefreshToken(Authentication authentication){

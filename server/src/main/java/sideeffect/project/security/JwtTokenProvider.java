@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.domain.user.UserRoleType;
-import sideeffect.project.service.RefreshTokenService;
 
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -28,15 +27,13 @@ public class JwtTokenProvider {
     private String expired;
 
     private final UserDetailsServiceImpl userDetailsService;
-    private final RefreshTokenService refreshTokenService;
 
     public String getUserName(String token, String secretKey){
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token)
                 .getBody().get("name", String.class);
     }
+
     public boolean validateAccessToken(String accessToken){
-//        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token)
-//                .getBody().getExpiration().before(new Date());
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(accessToken);
             return false;
@@ -63,14 +60,12 @@ public class JwtTokenProvider {
         long now = System.currentTimeMillis();
 
         //access token
-        String accessToken = Jwts.builder()
+        return Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
                 .setExpiration(new Date(now + 1000 * 60 * 60 * 24 * 3))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
-
-        return accessToken;
     }
 
     public String createAccessToken2(String email, UserRoleType userRoleType){
@@ -80,14 +75,12 @@ public class JwtTokenProvider {
         long now = System.currentTimeMillis();
 
         //access token
-        String accessToken = Jwts.builder()
+        return Jwts.builder()
                 .setSubject(email)
                 .claim("auth", authorities)
                 .setExpiration(new Date(now + 1000 * 60 * 60 * 24 * 3))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
-
-        return accessToken;
     }
 
     public Authentication getAuthentication(String token){
