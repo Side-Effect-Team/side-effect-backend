@@ -1,4 +1,4 @@
-package sideeffect.project.domain.like;
+package sideeffect.project.domain.penalty;
 
 import java.time.LocalDateTime;
 import javax.persistence.Entity;
@@ -13,25 +13,24 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import sideeffect.project.domain.freeboard.FreeBoard;
+import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.user.User;
 
-@Getter
+@Builder
 @Entity
-@Table(
-    name = "likes",
-    indexes = {
-        @Index(name = "board_user_index", columnList = "free_board_id, user_id", unique = true)
-    }
+@Getter
+@Table(name = "penalties",
+    indexes = @Index(name = "board_user_index", columnList = "recruit_board_id, user_id", unique = true)
 )
-@AllArgsConstructor
 @EntityListeners(value = AuditingEntityListener.class)
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Like {
+public class Penalty {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,26 +41,26 @@ public class Like {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "free_board_id")
-    private FreeBoard freeBoard;
+    @JoinColumn(name = "recruit_board_id")
+    private RecruitBoard recruitBoard;
 
     @CreatedDate
     private LocalDateTime createdAt;
 
-    public static Like like(User user, FreeBoard freeBoard) {
-        Like like = new Like();
-        like.setUser(user);
-        like.setFreeBoard(freeBoard);
-        return like;
+    public static Penalty penalize(User user, RecruitBoard recruitBoard) {
+        Penalty penalty = new Penalty();
+        penalty.setUser(user);
+        penalty.setRecruitBoard(recruitBoard);
+        return penalty;
     }
 
-    public void setUser(User user) {
+    private void setUser(User user) {
         this.user = user;
-        user.addLike(this);
+        this.user.addPenalty(this);
     }
 
-    public void setFreeBoard(FreeBoard freeBoard) {
-        this.freeBoard = freeBoard;
-        freeBoard.addLike(this);
+    private void setRecruitBoard(RecruitBoard recruitBoard) {
+        this.recruitBoard = recruitBoard;
+        this.recruitBoard.addPenalty(this);
     }
 }

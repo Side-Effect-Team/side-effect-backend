@@ -39,6 +39,7 @@ public enum ErrorCode {
     APPLICANT_NOT_EXISTS(409, "AC_006", "해당 팀원은 존재하지 않습니다."),
     APPLICANT_UNAUTHORIZED_CANCEL(403, "AC_007", "지원자 본인만 지원 취소할 수 있습니다."),
     APPLICANT_REJECTED_CANCEL(409, "AC_008", "해당 지원자는 이미 거절이 되어있습니다."),
+    APPLICANT_PENALTY(403, "AC_009", "패널티가 부과되어 지원할 수 없습니다."),
 
     POSITION_NOT_FOUND(400, "PS_001", "해당 포지션을 찾을 수 없습니다."),
 
