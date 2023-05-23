@@ -10,10 +10,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import sideeffect.project.domain.like.RecruitLike;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.user.User;
-import sideeffect.project.dto.like.*;
+import sideeffect.project.dto.like.LikeResult;
+import sideeffect.project.dto.like.RecruitLikeResponse;
 import sideeffect.project.repository.RecruitBoardRepository;
 import sideeffect.project.repository.RecruitLikeRepository;
-import sideeffect.project.repository.UserRepository;
 
 import java.util.Optional;
 
@@ -31,9 +31,6 @@ public class RecruitLikeServiceTest {
 
     @Mock
     RecruitLikeRepository recruitLikeRepository;
-
-    @Mock
-    UserRepository userRepository;
 
     @Mock
     RecruitBoardRepository recruitBoardRepository;
@@ -65,15 +62,13 @@ public class RecruitLikeServiceTest {
     @Test
     void recruitBoardLike() {
         when(recruitLikeRepository.findByUserIdAndRecruitBoardId(any(), any())).thenReturn(Optional.empty());
-        when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
         when(recruitLikeRepository.save(any())).thenReturn(recruitLike);
 
-        RecruitLikeResponse response = recruitLikeService.toggleLike(user.getId(), recruitBoard.getId());
+        RecruitLikeResponse response = recruitLikeService.toggleLike(user, recruitBoard.getId());
 
         assertAll(
                 () -> verify(recruitLikeRepository).findByUserIdAndRecruitBoardId(any(), any()),
-                () -> verify(userRepository).findById(any()),
                 () -> verify(recruitBoardRepository).findById(any()),
                 () -> verify(recruitLikeRepository).save(any()),
                 () -> assertThat(response.getMessage()).isEqualTo(LikeResult.LIKE.getMessage()),
@@ -86,7 +81,7 @@ public class RecruitLikeServiceTest {
     void cancelLike() {
         when(recruitLikeRepository.findByUserIdAndRecruitBoardId(any(), any())).thenReturn(Optional.of(recruitLike));
 
-        RecruitLikeResponse response = recruitLikeService.toggleLike(user.getId(), recruitBoard.getId());
+        RecruitLikeResponse response = recruitLikeService.toggleLike(user, recruitBoard.getId());
 
         assertAll(
                 () -> verify(recruitLikeRepository).findByUserIdAndRecruitBoardId(any(), any()),
