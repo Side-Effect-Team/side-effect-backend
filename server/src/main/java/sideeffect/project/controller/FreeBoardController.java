@@ -76,7 +76,7 @@ public class FreeBoardController {
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @PostMapping("/image/{id}")
     public void uploadImage(@LoginUser User user, @PathVariable("id") Long boardId,
-        @ValidImageFile @RequestParam("file") MultipartFile file) {
+        @ValidImageFile @RequestParam(value = "file", required = false) MultipartFile file) {
         freeBoardService.uploadImage(user, boardId, file);
     }
 

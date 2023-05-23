@@ -33,19 +33,26 @@ public class ApplicantService {
     private final ApplicantRepository applicantRepository;
     private final RecruitBoardRepository recruitBoardRepository;
     private final BoardPositionRepository boardPositionRepository;
+    private final PenaltyService penaltyService;
     private final MailService mailService;
 
     @Transactional
-    public ApplicantResponse register(User user, ApplicantRequest request) {
-        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(request.getRecruitBoardId())
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
-        BoardPosition findBoardPosition = boardPositionRepository.findById(request.getBoardPositionId())
+    public ApplicantResponse register(User user, Long boardPositionId) {
+        BoardPosition findBoardPosition = boardPositionRepository.findByIdWithRecruitBoard(boardPositionId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOARD_POSITION_NOT_FOUND));
 
-        isOwnedByUser(findRecruitBoard, user.getId());
-        isDuplicateApplicant(request.getRecruitBoardId(), user.getId());
+        if(findBoardPosition.getRecruitBoard() == null) {
+            throw new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND);
+        }
 
-        Applicant applicant = request.toApplicant();
+        if (penaltyService.isPenalized(user, findBoardPosition.getRecruitBoard())) {
+            throw new AuthException(ErrorCode.APPLICANT_PENALTY);
+        }
+
+        isOwnedByUser(findBoardPosition.getRecruitBoard(), user.getId());
+        isDuplicateApplicant(findBoardPosition.getRecruitBoard().getId(), user.getId());
+
+        Applicant applicant = Applicant.builder().build();
         applicant.associate(user, findBoardPosition);
 
         return ApplicantResponse.of(applicantRepository.save(applicant));
@@ -130,6 +137,7 @@ public class ApplicantService {
 
         validateCancelOwner(findApplicant, userId);
         handleApplicantStatus(findApplicant);
+        penaltyService.penalize(findApplicant.getUser(), findApplicant);
     }
 
     private void handleApplicantStatus(Applicant findApplicant) {

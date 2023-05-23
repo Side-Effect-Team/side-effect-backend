@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface RecruitBoardCustomRepository {
     List<RecruitBoard> findWithSearchConditions(Long lastId, String keyword, List<StackType> stackTypes, Pageable pageable);
+
+    boolean existsApplicantByRecruitBoard(Long boardId, Long userId);
 }

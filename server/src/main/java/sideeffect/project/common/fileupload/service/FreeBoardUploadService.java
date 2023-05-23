@@ -2,12 +2,16 @@ package sideeffect.project.common.fileupload.service;
 
 import java.io.File;
 import java.io.IOException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import sideeffect.project.common.fileupload.ImageType;
 
 @Service
 public class FreeBoardUploadService extends FileUploadService {
+
+    @Value("${file.free-base-img}")
+    private String baseImg;
 
     public FreeBoardUploadService(FilePathService filePathService) {
         super(filePathService, ImageType.FREE);
@@ -22,6 +26,6 @@ public class FreeBoardUploadService extends FileUploadService {
             multipartFile.transferTo(new File(getFullPath(storeFileName)));
             return storeFileName;
         }
-        return getFullPath("");
+        return baseImg;
     }
 }

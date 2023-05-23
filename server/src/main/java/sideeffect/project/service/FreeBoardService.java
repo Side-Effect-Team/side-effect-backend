@@ -63,7 +63,7 @@ public class FreeBoardService {
         return repository.searchRankBoard(RANK_NUMBER, RANK_DAYS, user.getId(), ChronoUnit.DAYS);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public DetailedFreeBoardResponse findBoard(Long boardId) {
         FreeBoard freeBoard = findFreeBoard(boardId);
         freeBoard.increaseViews();

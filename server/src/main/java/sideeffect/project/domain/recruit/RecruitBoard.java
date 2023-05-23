@@ -1,11 +1,14 @@
 package sideeffect.project.domain.recruit;
 
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sideeffect.project.common.domain.BaseTimeEntity;
 import sideeffect.project.domain.like.RecruitLike;
+import sideeffect.project.domain.penalty.Penalty;
 import sideeffect.project.domain.user.User;
 
 import javax.persistence.*;
@@ -48,6 +51,9 @@ public class RecruitBoard extends BaseTimeEntity {
     @OneToMany(mappedBy = "recruitBoard", cascade = {CascadeType.REMOVE})
     private List<RecruitLike> recruitLikes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "recruitBoard", cascade = {CascadeType.REMOVE})
+    private Set<Penalty> penalties = new HashSet<>();
+
     @Builder
     public RecruitBoard(Long id, String title, String projectName, String contents) {
         this.id = id;
@@ -79,6 +85,10 @@ public class RecruitBoard extends BaseTimeEntity {
 
     public void addRecruitLike(RecruitLike recruitLike) {
         this.recruitLikes.add(recruitLike);
+    }
+
+    public void addPenalty(Penalty penalty) {
+        this.penalties.add(penalty);
     }
 
     public void update(RecruitBoard recruitBoard) {

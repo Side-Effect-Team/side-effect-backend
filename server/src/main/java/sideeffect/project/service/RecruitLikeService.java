@@ -12,7 +12,6 @@ import sideeffect.project.dto.like.LikeResult;
 import sideeffect.project.dto.like.RecruitLikeResponse;
 import sideeffect.project.repository.RecruitBoardRepository;
 import sideeffect.project.repository.RecruitLikeRepository;
-import sideeffect.project.repository.UserRepository;
 
 import java.util.Optional;
 
@@ -21,12 +20,11 @@ import java.util.Optional;
 public class RecruitLikeService {
 
     private final RecruitLikeRepository recruitLikeRepository;
-    private final UserRepository userRepository;
     private final RecruitBoardRepository recruitBoardRepository;
 
     @Transactional
-    public RecruitLikeResponse toggleLike(Long userId, Long boardId) {
-        Optional<RecruitLike> recruitLike = recruitLikeRepository.findByUserIdAndRecruitBoardId(userId, boardId);
+    public RecruitLikeResponse toggleLike(User user, Long boardId) {
+        Optional<RecruitLike> recruitLike = recruitLikeRepository.findByUserIdAndRecruitBoardId(user.getId(), boardId);
 
         if (recruitLike.isPresent()) {
             RecruitLike findRecruitLike = recruitLike.get();
@@ -34,16 +32,14 @@ public class RecruitLikeService {
             return RecruitLikeResponse.of(findRecruitLike, LikeResult.CANCEL_LIKE);
         }
 
-        return RecruitLikeResponse.of(likeBoard(userId, boardId), LikeResult.LIKE);
+        return RecruitLikeResponse.of(likeBoard(user, boardId), LikeResult.LIKE);
     }
 
-    private RecruitLike likeBoard(Long userId, Long boardId) {
-        User findUser = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+    private RecruitLike likeBoard(User user, Long boardId) {
         RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
 
-        return recruitLikeRepository.save(RecruitLike.createRecruitLike(findUser, findRecruitBoard));
+        return recruitLikeRepository.save(RecruitLike.createRecruitLike(user, findRecruitBoard));
     }
 
 

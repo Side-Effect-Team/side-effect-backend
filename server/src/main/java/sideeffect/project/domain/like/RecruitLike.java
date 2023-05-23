@@ -11,7 +11,10 @@ import javax.persistence.*;
 @Getter
 @Entity
 @Table(
-        name = "RECRUIT_LIKES"
+        name = "RECRUIT_LIKES",
+        indexes = {
+                @Index(name = "recruit_user_index", columnList = "recruit_board_id, user_id", unique = true)
+        }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RecruitLike {

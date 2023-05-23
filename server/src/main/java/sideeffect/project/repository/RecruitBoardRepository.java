@@ -11,14 +11,6 @@ import java.util.List;
 
 public interface RecruitBoardRepository extends JpaRepository<RecruitBoard, Long>, RecruitBoardCustomRepository {
 
-    @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END " +
-            "FROM RecruitBoard rb " +
-            "JOIN rb.boardPositions bp " +
-            "JOIN bp.applicants a " +
-            "WHERE rb.id = :boardId " +
-            "AND a.user.id = :userId")
-    boolean  existsApplicantByRecruitBoard(@Param("boardId") Long boardId, @Param("userId") Long userId);
-
     @Query("SELECT new sideeffect.project.dto.applicant.ApplicantListResponse(a.user.id, a.id, u.nickname, u.email, p.positionType, a.createAt) " +
             "FROM RecruitBoard rb " +
             "INNER JOIN rb.boardPositions bp " +

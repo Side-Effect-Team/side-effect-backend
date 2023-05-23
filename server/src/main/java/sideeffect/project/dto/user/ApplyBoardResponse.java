@@ -28,7 +28,7 @@ public class ApplyBoardResponse {
     private LocalDateTime createdAt;
     private Boolean like;
     private int likeNum;
-    private int view;
+    private int views;
     private int commentNum;
     private String imgUrl;
     private List<StackType> tags;
@@ -55,7 +55,7 @@ public class ApplyBoardResponse {
                 .createdAt(recruitBoard.getCreateAt())
                 .like(isLiked(user.getId(), recruitBoard.getRecruitLikes()))
                 .likeNum(recruitBoard.getRecruitLikes().size())
-                .view(recruitBoard.getViews())
+                .views(recruitBoard.getViews())
                 .imgUrl(recruitBoard.getImgSrc())
                 .tags(getStackTypes(recruitBoard.getBoardStacks()))
                 .build();
