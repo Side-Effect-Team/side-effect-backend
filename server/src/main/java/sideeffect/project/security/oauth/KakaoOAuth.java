@@ -8,7 +8,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import sideeffect.project.common.exception.ErrorCode;
+import sideeffect.project.common.exception.InvalidValueException;
 import sideeffect.project.dto.user.ResponseUserInfo;
 
 @Component
@@ -35,8 +38,13 @@ public class KakaoOAuth implements Oauth{
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(headers);
-
-        return restTemplate.exchange(KAKAO_REQUEST_URL, HttpMethod.GET, httpEntity, String.class);
+        ResponseEntity<String> responseEntity;
+        try {
+            responseEntity = restTemplate.exchange(KAKAO_REQUEST_URL, HttpMethod.GET, httpEntity, String.class);
+        }catch (HttpClientErrorException e){
+            throw new InvalidValueException(ErrorCode.USER_SOCIAL_ACCESS_TOKEN_EXPIRED);
+        }
+        return responseEntity;
     }
 
 }
