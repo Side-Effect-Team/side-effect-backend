@@ -1,5 +1,6 @@
 package sideeffect.project.repository;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -12,10 +13,15 @@ import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.List;
 
+import static sideeffect.project.domain.applicant.QApplicant.applicant;
+import static sideeffect.project.domain.recruit.QBoardPosition.boardPosition;
+import static sideeffect.project.domain.recruit.QRecruitBoard.recruitBoard;
+
 @Slf4j
 @RequiredArgsConstructor
 public class RecruitBoardCustomRepositoryImpl implements RecruitBoardCustomRepository{
 
+    private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager em;
 
     @Override
@@ -65,5 +71,18 @@ public class RecruitBoardCustomRepositoryImpl implements RecruitBoardCustomRepos
         }
 
         return query.setMaxResults(pageable.getPageSize()).getResultList();
+    }
+
+    @Override
+    public boolean existsApplicantByRecruitBoard(Long boardId, Long userId) {
+        Integer fetchOne = jpaQueryFactory
+                .selectOne()
+                .from(recruitBoard)
+                .innerJoin(recruitBoard.boardPositions, boardPosition)
+                .innerJoin(boardPosition.applicants, applicant)
+                .where(recruitBoard.id.eq(boardId), applicant.user.id.eq(userId))
+                .fetchFirst();
+
+        return fetchOne != null;
     }
 }
