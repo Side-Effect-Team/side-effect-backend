@@ -19,7 +19,7 @@ public class UserEditResponse {
     private String introduction;
     private PositionType position;
     private String career;
-    private List<String> stacks;
+    private List<String> tags;
     private String imgUrl;
     private String blogUrl;
     private String githubUrl;
@@ -31,7 +31,7 @@ public class UserEditResponse {
                 .introduction(user.getIntroduction())
                 .position(user.getPosition())
                 .career(user.getCareer())
-                .stacks(getStackType(user.getUserStacks()))
+                .tags(getStackType(user.getUserStacks()))
                 .imgUrl(user.getImgUrl())
                 .blogUrl(user.getBlogUrl())
                 .githubUrl(user.getGithubUrl())
