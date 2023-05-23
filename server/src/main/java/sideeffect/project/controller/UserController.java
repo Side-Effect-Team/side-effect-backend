@@ -2,9 +2,13 @@ package sideeffect.project.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import sideeffect.project.common.annotation.ValidImageFile;
+import sideeffect.project.common.exception.BaseException;
 import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.common.exception.InvalidValueException;
 import sideeffect.project.domain.user.User;
@@ -13,6 +17,8 @@ import sideeffect.project.dto.user.UserRequest;
 import sideeffect.project.dto.user.UserResponse;
 import sideeffect.project.security.LoginUser;
 import sideeffect.project.service.UserService;
+
+import java.io.IOException;
 
 @Slf4j
 @RestController
@@ -57,6 +63,15 @@ public class UserController {
     @PostMapping("/image")
     public void uploadImage(@LoginUser User user, @ValidImageFile @RequestParam("file") MultipartFile file){
         userService.uploadImage(user, file);
+    }
+
+    @GetMapping(value = "/image/{filename}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public Resource downloadImage(@PathVariable String filename) {
+        try {
+            return new UrlResource("file:" + userService.getImageFullPath(filename));
+        } catch (IOException e) {
+            throw new BaseException(ErrorCode.RECRUIT_BOARD_FILE_DOWNLOAD_FAILED);
+        }
     }
 
 }

@@ -100,6 +100,11 @@ public class UserService {
             throw new BaseException(ErrorCode.USER_FILE_UPLOAD_FAILED);
         }
     }
+
+    public String getImageFullPath(String imagePath) {
+        return userUploadService.getFullPath(imagePath);
+    }
+
     public void validateDuplicateUser(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
             throw new IllegalStateException(ErrorCode.USER_ALREADY_EXIST);
