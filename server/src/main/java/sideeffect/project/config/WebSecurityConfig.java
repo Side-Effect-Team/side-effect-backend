@@ -22,6 +22,8 @@ public class WebSecurityConfig{
     @Value("${jwt.secret}")
     private String secretKey;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenProvider refreshTokenProvider;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         return http
@@ -30,7 +32,8 @@ public class WebSecurityConfig{
                 .cors().and()
                 .authorizeRequests()
                 .antMatchers("/api/user/join", "/api/user/mypage/**", "/api/user/duple/**", "/api/social/login").permitAll()
-                .antMatchers(HttpMethod.POST, "/**").authenticated()
+            .antMatchers(HttpMethod.POST, "/api/token/at-issue/**").permitAll()
+            .antMatchers(HttpMethod.POST, "/**").authenticated()
                 .antMatchers(HttpMethod.GET, "/api/free-boards/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/like/**").hasAnyRole("USER", "ADMIN")
                 .and()
@@ -42,7 +45,7 @@ public class WebSecurityConfig{
                 .formLogin()
                     .loginProcessingUrl("/api/user/login")
                     .usernameParameter("email")
-                    .successHandler(new LoginSuccessHandler(jwtTokenProvider))
+                    .successHandler(new LoginSuccessHandler(refreshTokenProvider))
                     .failureHandler(new LoginFailureHandler())
                     .and()
                 .build();
