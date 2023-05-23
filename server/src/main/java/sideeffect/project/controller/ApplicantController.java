@@ -20,9 +20,9 @@ public class ApplicantController {
     private final ApplicantService applicantService;
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    @PostMapping
-    public ApplicantResponse registerApplicant(@LoginUser User user, @Valid @RequestBody ApplicantRequest request) {
-        return applicantService.register(user, request);
+    @PostMapping("/{id}")
+    public ApplicantResponse registerApplicant(@LoginUser User user, @PathVariable("id") Long boardPositionId) {
+        return applicantService.register(user, boardPositionId);
     }
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")

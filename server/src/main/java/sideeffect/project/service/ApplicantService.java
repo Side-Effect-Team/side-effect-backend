@@ -37,20 +37,22 @@ public class ApplicantService {
     private final MailService mailService;
 
     @Transactional
-    public ApplicantResponse register(User user, ApplicantRequest request) {
-        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(request.getRecruitBoardId())
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
-        BoardPosition findBoardPosition = boardPositionRepository.findById(request.getBoardPositionId())
+    public ApplicantResponse register(User user, Long boardPositionId) {
+        BoardPosition findBoardPosition = boardPositionRepository.findByIdWithRecruitBoard(boardPositionId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.BOARD_POSITION_NOT_FOUND));
 
-        if (penaltyService.isPenalized(user, findRecruitBoard)) {
+        if(findBoardPosition.getRecruitBoard() == null) {
+            throw new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND);
+        }
+
+        if (penaltyService.isPenalized(user, findBoardPosition.getRecruitBoard())) {
             throw new AuthException(ErrorCode.APPLICANT_PENALTY);
         }
 
-        isOwnedByUser(findRecruitBoard, user.getId());
-        isDuplicateApplicant(request.getRecruitBoardId(), user.getId());
+        isOwnedByUser(findBoardPosition.getRecruitBoard(), user.getId());
+        isDuplicateApplicant(findBoardPosition.getRecruitBoard().getId(), user.getId());
 
-        Applicant applicant = request.toApplicant();
+        Applicant applicant = Applicant.builder().build();
         applicant.associate(user, findBoardPosition);
 
         return ApplicantResponse.of(applicantRepository.save(applicant));
