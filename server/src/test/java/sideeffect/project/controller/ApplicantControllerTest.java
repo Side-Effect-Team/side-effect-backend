@@ -81,15 +81,12 @@ class ApplicantControllerTest {
     @WithCustomUser
     @Test
     void registerApplicant() throws Exception {
-        ApplicantRequest request = ApplicantRequest.builder().recruitBoardId(recruitBoard.getId()).boardPositionId(boardPosition.getId()).build();
         ApplicantResponse applicantResponse = ApplicantResponse.of(applicant);
 
         given(applicantService.register(any(), any())).willReturn(applicantResponse);
 
-        mvc.perform(post("/api/applicant")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mvc.perform(post("/api/applicant/1")
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -98,15 +95,11 @@ class ApplicantControllerTest {
     @WithCustomUser
     @Test
     void registerIsOwnedByUser() throws Exception {
-        ApplicantRequest request = ApplicantRequest.builder().recruitBoardId(recruitBoard.getId()).boardPositionId(boardPosition.getId()).build();
-
         doThrow(new AuthException(ErrorCode.APPLICANT_SELF_UNAUTHORIZED))
                 .when(applicantService).register(any(), any());
 
-        mvc.perform(post("/api/applicant")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mvc.perform(post("/api/applicant/1")
+                        .with(csrf()))
                 .andExpect(status().isForbidden());
     }
 
@@ -114,15 +107,11 @@ class ApplicantControllerTest {
     @WithCustomUser
     @Test
     void registerIsDuplicateApplicant() throws Exception {
-        ApplicantRequest request = ApplicantRequest.builder().recruitBoardId(recruitBoard.getId()).boardPositionId(boardPosition.getId()).build();
-
         doThrow(new AuthException(ErrorCode.APPLICANT_DUPLICATED))
                 .when(applicantService).register(any(), any());
 
-        mvc.perform(post("/api/applicant")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mvc.perform(post("/api/applicant/1")
+                        .with(csrf()))
                 .andExpect(status().isForbidden());
     }
 

@@ -99,7 +99,7 @@ public class RecruitBoardController {
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @PostMapping("/likes/{id}")
     public RecruitLikeResponse recruitBoardLikes(@LoginUser User user, @PathVariable("id") Long boardId) {
-        return recruitLikeService.toggleLike(user.getId(), boardId);
+        return recruitLikeService.toggleLike(user, boardId);
     }
 
 }

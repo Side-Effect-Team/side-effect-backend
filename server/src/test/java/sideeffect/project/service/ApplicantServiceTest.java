@@ -19,7 +19,10 @@ import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
-import sideeffect.project.dto.applicant.*;
+import sideeffect.project.dto.applicant.ApplicantListResponse;
+import sideeffect.project.dto.applicant.ApplicantPositionResponse;
+import sideeffect.project.dto.applicant.ApplicantReleaseRequest;
+import sideeffect.project.dto.applicant.ApplicantUpdateRequest;
 import sideeffect.project.repository.ApplicantRepository;
 import sideeffect.project.repository.BoardPositionRepository;
 import sideeffect.project.repository.RecruitBoardRepository;
@@ -86,6 +89,8 @@ class ApplicantServiceTest {
                 .targetNumber(3)
                 .build();
 
+        boardPosition.setRecruitBoard(recruitBoard);
+
         applicant = Applicant.builder()
                 .id(1L)
                 .build();
@@ -94,19 +99,19 @@ class ApplicantServiceTest {
     @DisplayName("모집 게시판의 포지션에 지원한다.")
     @Test
     void registerApplicant() {
-        ApplicantRequest request = ApplicantRequest.builder().recruitBoardId(recruitBoard.getId()).boardPositionId(boardPosition.getId()).build();
         User otherUser = User.builder().id(2L).nickname("test2").email("test2@naver.com").build();
 
-        when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
-        when(boardPositionRepository.findById(any())).thenReturn(Optional.of(boardPosition));
+        when(boardPositionRepository.findByIdWithRecruitBoard(any())).thenReturn(Optional.of(boardPosition));
         when(recruitBoardRepository.existsApplicantByRecruitBoard(any(), any())).thenReturn(false);
         when(penaltyService.isPenalized(any(), any())).thenReturn(false);
         when(applicantRepository.save(any())).thenReturn(applicant);
 
-        applicantService.register(otherUser, request);
+        applicantService.register(otherUser, boardPosition.getId());
 
         assertAll(
-                () -> verify(boardPositionRepository).findById(any()),
+                () -> verify(boardPositionRepository).findByIdWithRecruitBoard(any()),
+                () -> verify(penaltyService).isPenalized(any(),any()),
+                () -> verify(recruitBoardRepository).existsApplicantByRecruitBoard(any(), any()),
                 () -> verify(applicantRepository).save(any())
         );
     }
@@ -114,26 +119,21 @@ class ApplicantServiceTest {
     @DisplayName("패널티가 부과된 지원자는 지원할 수 없다.")
     @Test
     void penalize() {
-        ApplicantRequest request = ApplicantRequest.builder().recruitBoardId(recruitBoard.getId()).boardPositionId(boardPosition.getId()).build();
         User applicant = recruitBoard.getUser();
 
-        when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
-        when(boardPositionRepository.findById(any())).thenReturn(Optional.of(boardPosition));
+        when(boardPositionRepository.findByIdWithRecruitBoard(any())).thenReturn(Optional.of(boardPosition));
         when(penaltyService.isPenalized(any(), any())).thenReturn(true);
 
-        assertThatThrownBy(() -> applicantService.register(applicant, request))
+        assertThatThrownBy(() -> applicantService.register(applicant, boardPosition.getId()))
             .isInstanceOf(AuthException.class);
     }
 
     @DisplayName("게시판의 주인은 자신의 글에 지원할 수 없다.")
     @Test
     void registerIsOwnedByUser() {
-        ApplicantRequest request = ApplicantRequest.builder().recruitBoardId(recruitBoard.getId()).boardPositionId(boardPosition.getId()).build();
+        when(boardPositionRepository.findByIdWithRecruitBoard(any())).thenReturn(Optional.of(boardPosition));
 
-        when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
-        when(boardPositionRepository.findById(any())).thenReturn(Optional.of(boardPosition));
-
-        assertThatThrownBy(() -> applicantService.register(recruitBoard.getUser(), request))
+        assertThatThrownBy(() -> applicantService.register(recruitBoard.getUser(), boardPosition.getId()))
                 .isInstanceOf(AuthException.class);
     }
 
@@ -141,14 +141,12 @@ class ApplicantServiceTest {
     @DisplayName("하나의 게시판에 중복 지원은 할 수 없다.")
     @Test
     void registerIsDuplicateApplicant() {
-        ApplicantRequest request = ApplicantRequest.builder().recruitBoardId(recruitBoard.getId()).boardPositionId(boardPosition.getId()).build();
         User otherUser = User.builder().id(2L).nickname("test2").email("test2@naver.com").build();
 
-        when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
-        when(boardPositionRepository.findById(any())).thenReturn(Optional.of(boardPosition));
+        when(boardPositionRepository.findByIdWithRecruitBoard(any())).thenReturn(Optional.of(boardPosition));
         when(recruitBoardRepository.existsApplicantByRecruitBoard(any(), any())).thenReturn(true);
 
-        assertThatThrownBy(() -> applicantService.register(otherUser, request))
+        assertThatThrownBy(() -> applicantService.register(otherUser, boardPosition.getId()))
                 .isInstanceOf(AuthException.class);
     }
 

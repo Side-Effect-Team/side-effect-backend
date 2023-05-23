@@ -21,4 +21,8 @@ public interface BoardPositionRepository extends JpaRepository<BoardPosition, Lo
             "INNER JOIN bp.applicants a " +
             "ON a.id = :applicantId")
     Optional<BoardPosition> findByApplicantId(@Param("applicantId") Long applicantId);
+
+    @Query("SELECT bp FROM BoardPosition bp JOIN FETCH bp.recruitBoard WHERE bp.id = :boardPositionId")
+    Optional<BoardPosition> findByIdWithRecruitBoard(@Param("boardPositionId") Long boardPositionId);
+
 }
