@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.notification.NotificationResponse;
+import sideeffect.project.dto.notification.NotificationScrollResponse;
 import sideeffect.project.security.LoginUser;
 import sideeffect.project.service.NotificationService;
 
@@ -32,8 +33,9 @@ public class NotificationController {
         return notificationService.delete(user, id);
     }
 
-   /* @GetMapping("/scroll")
-    public NotificationScrollResponse scroll(@LoginUser User user, @RequestParam Long lastId){
+    @GetMapping("/scroll/{lastId}")
+    public NotificationScrollResponse scroll(@LoginUser User user, @PathVariable Long lastId){
         return notificationService.scroll(user, lastId);
-    }*/
+    }
+
 }

@@ -4,6 +4,8 @@ import lombok.*;
 import sideeffect.project.domain.notification.Notification;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Builder
@@ -27,5 +29,11 @@ public class NotificationResponse {
                 .watched(notification.getWatched())
                 .createdAt(notification.getCreatedAt())
                 .build();
+    }
+
+    public static List<NotificationResponse> listOf(List<Notification> notifications){
+        return notifications.stream()
+                .map(notification -> of(notification))
+                .collect(Collectors.toList());
     }
 }
