@@ -31,7 +31,7 @@ public class UploadBoardResponse {
     private LocalDateTime createdAt;
     private Boolean like;
     private int likeNum;
-    private int view;
+    private int views;
     private int commentNum;
     private String imgUrl;
     private List<StackType> tags;
@@ -69,7 +69,7 @@ public class UploadBoardResponse {
                 .createdAt(recruitBoard.getCreateAt())
                 .like(isRecruitBoardLiked(user.getId(), recruitBoard.getRecruitLikes()))
                 .likeNum(recruitBoard.getRecruitLikes().size())
-                .view(recruitBoard.getViews())
+                .views(recruitBoard.getViews())
                 .imgUrl(recruitBoard.getImgSrc())
                 .tags(getStackType(recruitBoard.getBoardStacks()))
                 .build();
@@ -104,7 +104,7 @@ public class UploadBoardResponse {
                 .commentNum(freeBoard.getComments().size())
                 .like(isFreeBoardLiked(user.getId(), freeBoard.getLikes()))
                 .likeNum(freeBoard.getLikes().size())
-                .view(freeBoard.getViews())
+                .views(freeBoard.getViews())
                 .imgUrl(freeBoard.getImgUrl())
                 .build();
     }

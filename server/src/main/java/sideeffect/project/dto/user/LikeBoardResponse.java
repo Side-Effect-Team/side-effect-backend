@@ -30,7 +30,7 @@ public class LikeBoardResponse {
     private LocalDateTime createdAt;
     private Boolean like;
     private int likeNum;
-    private int view;
+    private int views;
     private int commentNum;
     private String imgUrl;
     private List<StackType> tags;
@@ -57,14 +57,14 @@ public class LikeBoardResponse {
     private static LikeBoardResponse getLikeBoardOfRecruit(RecruitLike recruitLike) {
         RecruitBoard recruitBoard = recruitLike.getRecruitBoard();
         return LikeBoardResponse.builder()
-                .category("projects")
+                .category("recruits")
                 .id(recruitBoard.getId())
                 .title(recruitBoard.getTitle())
                 .content(recruitBoard.getContents())
                 .createdAt(recruitBoard.getCreateAt())
                 .like(true)
                 .likeNum(recruitBoard.getRecruitLikes().size())
-                .view(recruitBoard.getViews())
+                .views(recruitBoard.getViews())
                 .imgUrl(recruitBoard.getImgSrc())
                 .tags(getStackType(recruitBoard.getBoardStacks()))
                 .build();
@@ -91,7 +91,7 @@ public class LikeBoardResponse {
                 .commentNum(freeBoard.getComments().size())
                 .like(true)
                 .likeNum(freeBoard.getLikes().size())
-                .view(freeBoard.getViews())
+                .views(freeBoard.getViews())
                 .imgUrl(freeBoard.getImgUrl())
                 .build();
     }
