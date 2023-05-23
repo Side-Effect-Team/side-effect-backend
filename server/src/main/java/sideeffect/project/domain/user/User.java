@@ -203,6 +203,9 @@ public class User extends BaseTimeEntity {
         }
     }
 
+    public void updateImgUrl(String filepath){
+        this.imgUrl = filepath;
+    }
     public void updateUserStack(List<UserStack> userStacks){
         if(userStacks!=null && !userStacks.isEmpty()){
             this.userStacks.clear();

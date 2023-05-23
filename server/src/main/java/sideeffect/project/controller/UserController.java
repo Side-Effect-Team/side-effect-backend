@@ -3,6 +3,8 @@ package sideeffect.project.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import sideeffect.project.common.annotation.ValidImageFile;
 import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.common.exception.InvalidValueException;
 import sideeffect.project.domain.user.User;
@@ -52,6 +54,9 @@ public class UserController {
         return userService.duplicateNickname(nickname);
     }
 
-
+    @PostMapping("/image")
+    public void uploadImage(@LoginUser User user, @ValidImageFile @RequestParam("file") MultipartFile file){
+        userService.uploadImage(user, file);
+    }
 
 }

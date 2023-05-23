@@ -5,10 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sideeffect.project.common.exception.AuthException;
-import sideeffect.project.common.exception.ErrorCode;
+import org.springframework.web.multipart.MultipartFile;
+import sideeffect.project.common.exception.*;
 import sideeffect.project.common.exception.IllegalStateException;
-import sideeffect.project.common.exception.InvalidValueException;
+import sideeffect.project.common.fileupload.service.UserUploadService;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.domain.user.UserStack;
@@ -17,6 +17,7 @@ import sideeffect.project.dto.user.UserRequest;
 import sideeffect.project.dto.user.UserResponse;
 import sideeffect.project.repository.UserRepository;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,10 +29,8 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PositionService positionService;
-    private final StackService stackService;
     private final BCryptPasswordEncoder encoder;
-
+    private final UserUploadService userUploadService;
     public Long join(UserRequest request){
 
         //validateDuplicateUser(request.getEmail());
@@ -93,6 +92,14 @@ public class UserService {
         return userRepository.findByNickname(nickname).isPresent();
     }
 
+    public void uploadImage(User user, MultipartFile file){
+        try {
+            String filePath = userUploadService.storeFile(file);
+            user.updateImgUrl(filePath);
+        } catch (IOException e) {
+            throw new BaseException(ErrorCode.USER_FILE_UPLOAD_FAILED);
+        }
+    }
     public void validateDuplicateUser(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
             throw new IllegalStateException(ErrorCode.USER_ALREADY_EXIST);
