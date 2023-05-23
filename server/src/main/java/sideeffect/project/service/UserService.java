@@ -93,6 +93,7 @@ public class UserService {
     }
 
     public void uploadImage(User user, MultipartFile file){
+        if(user.getId() == null) throw new AuthException(ErrorCode.USER_UNAUTHORIZED);
         try {
             String filePath = userUploadService.storeFile(file);
             user.updateImgUrl(filePath);
