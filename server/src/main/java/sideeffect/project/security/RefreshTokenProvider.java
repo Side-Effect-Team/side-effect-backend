@@ -23,7 +23,9 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class RefreshTokenService {
+public class RefreshTokenProvider {
+
+    private static final int EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 3;
 
     @Value("${jwt.secret}")
     private String secretKey;
@@ -32,33 +34,40 @@ public class RefreshTokenService {
     private final UserRepository userRepository;
 
     public String issueAccessToken(String refreshToken){
-        RefreshToken findRefreshToken = refreshTokenRepository.findById(refreshToken)
+        RefreshToken token = refreshTokenRepository.findById(refreshToken)
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
-        User user = userRepository.findById(findRefreshToken.getUserId())
+        String email = userRepository.findEmailByUserId(token.getUserId())
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
 
-        long now = System.currentTimeMillis();
-
         return Jwts.builder()
-                .setSubject(user.getEmail())
+                .setSubject(email)
                 .claim("auth", UserRoleType.ROLE_USER)
-                .setExpiration(new Date(now + 1000 * 60 * 60 * 24 * 3))
+                .setExpiration(createExpiration())
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 
-    public String createRefreshToken(Authentication authentication){
-        UUID uuid = UUID.randomUUID();
-        User user = (User) authentication.getPrincipal();
-        RefreshToken refreshToken = RefreshToken.builder()
-                .refreshToken(uuid.toString())
-                .userId(user.getId())
-                .build();
+    public String createRefreshToken(Authentication authentication) {
+        User user = getUserFromAuthentication(authentication);
+        RefreshToken refreshToken = generateRefreshToken(user);
         refreshTokenRepository.save(refreshToken);
-        return uuid.toString();
+        return refreshToken.getRefreshToken();
     }
 
-    public boolean validateRefreshToken(String token) {
-        return  refreshTokenRepository.existsByRefreshToken(token);
+    private Date createExpiration() {
+        return new Date(System.currentTimeMillis() + EXPIRATION_TIME);
+    }
+
+    private User getUserFromAuthentication(Authentication authentication) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        return userDetails.getUser();
+    }
+
+    private RefreshToken generateRefreshToken(User user) {
+        String token = UUID.randomUUID().toString();
+        return RefreshToken.builder()
+            .refreshToken(token)
+            .userId(user.getId())
+            .build();
     }
 }

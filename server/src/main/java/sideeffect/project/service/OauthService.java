@@ -21,13 +21,14 @@ import java.util.Map;
 public class OauthService {
     private final Map<String, Oauth> oAuthMap;
     private final UserRepository userRepository;
-    private final JwtTokenProvider jwtTokenProvider;
+
     public User login(String token, ProviderType providerType){
         ResponseUserInfo responseUserInfo = sendToAuthorizationServer(token, providerType);
         log.info("email: " + responseUserInfo.getEmail());
         log.info("imgUrl: " + responseUserInfo.getImgUrl());
         return userRepository.findByEmailAndProvider(responseUserInfo.getEmail(), providerType).orElseThrow(() -> new JoinException(responseUserInfo.getEmail(), providerType));
     }
+
     public ResponseUserInfo sendToAuthorizationServer(String token, ProviderType providerType) {
         switch (providerType) {
             case GOOGLE: return oAuthMap.get("googleOAuth").getUserInfo(token);
