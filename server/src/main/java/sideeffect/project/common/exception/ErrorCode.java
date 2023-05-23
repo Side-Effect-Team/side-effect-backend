@@ -7,6 +7,7 @@ public enum ErrorCode {
     USER_ALREADY_EXIST(400, "U_003", "이미 존재하는 이메일입니다"),
     USER_NOT_NULL(400, "U_004", "유저 ID에 Null값이 들어올 수 없습니다"),
     USER_UNAUTHENTICATION(400, "U_005", "유효하지 않은 이메일이거나 비밀번호가 틀립니다"),
+    USER_FILE_UPLOAD_FAILED(500, "U_006", "이미지 업로드에 문제가 발생했습니다."),
 
     TOKEN_EXPIRED(401, "T_001", "토큰이 만료되었습니다"),
     ACCESS_TOKEN_EXPIRED(401, "AT_001", "엑세스 토큰이 만료되었습니다"),
