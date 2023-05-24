@@ -1,5 +1,6 @@
 package sideeffect.project.dto.notification;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import sideeffect.project.domain.notification.Notification;
 
@@ -18,6 +19,7 @@ public class NotificationResponse {
     private String contents;
     private String link;
     private Boolean watched;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
 
     public static NotificationResponse of(Notification notification){
