@@ -54,6 +54,15 @@ public class NotificationService {
         List<Notification> notifications = notificationRepository.findByLastId(user, lastId);
         return NotificationScrollResponse.of(NotificationResponse.listOf(notifications));
     }
+
+    public int getViewCount(User user){
+        int count = 0;
+        List<Notification> notifications = user.getNotifications();
+        for (Notification notification : notifications) {
+            if(!notification.getWatched()) count++;
+        }
+        return count;
+    }
     private void validateOwner(User user, User findUser) {
         if(user.getId() != findUser.getId()) throw new AuthException(ErrorCode.USER_UNAUTHORIZED);
     }

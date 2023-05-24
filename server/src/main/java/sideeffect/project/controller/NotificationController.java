@@ -3,9 +3,12 @@ package sideeffect.project.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import sideeffect.project.common.exception.AuthException;
+import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.notification.NotificationResponse;
 import sideeffect.project.dto.notification.NotificationScrollResponse;
+import sideeffect.project.security.EmptyUser;
 import sideeffect.project.security.LoginUser;
 import sideeffect.project.service.NotificationService;
 
@@ -38,4 +41,9 @@ public class NotificationController {
         return notificationService.scroll(user, lastId);
     }
 
+    @GetMapping("/view-count")
+    public int viewCount(@LoginUser User user){
+        if(user instanceof EmptyUser) throw new AuthException(ErrorCode.USER_UNAUTHORIZED);
+        return notificationService.getViewCount(user);
+    }
 }
