@@ -1,7 +1,6 @@
 package sideeffect.project.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,10 +58,10 @@ public class RecruitBoardService {
     }
 
     @Transactional(readOnly = true)
-    public RecruitBoardScrollResponse findRecruitBoards(RecruitBoardScrollRequest request) {
-        List<RecruitBoard> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(request.getLastId(), request.getKeyword(), request.validateStackTypes(), Pageable.ofSize(request.getSize() + 1));
+    public RecruitBoardScrollResponse findRecruitBoards(RecruitBoardScrollRequest request, User user) {
+        List<RecruitBoardAndLikeDto> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(user.getId(), request.getLastId(), request.getKeyword(), request.validateStackTypes(), request.getSize() + 1);
         boolean hasNext = hasNextRecruitBoards(findRecruitBoards, request.getSize());
-        return RecruitBoardScrollResponse.of(RecruitBoardResponse.listOf(findRecruitBoards), hasNext);
+        return RecruitBoardScrollResponse.of(RecruitBoardResponse.listOfLike(findRecruitBoards), hasNext);
     }
 
     @Transactional
@@ -150,7 +149,7 @@ public class RecruitBoardService {
         }
     }
 
-    private boolean hasNextRecruitBoards(List<RecruitBoard> recruitBoards, int requestSize) {
+    private boolean hasNextRecruitBoards(List<RecruitBoardAndLikeDto> recruitBoards, int requestSize) {
         boolean hasNext = false;
 
         if(recruitBoards.size() > requestSize) {

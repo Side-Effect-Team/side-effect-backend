@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -135,9 +136,10 @@ class RecruitBoardServiceTest {
     @DisplayName("모집 게시판을 전체 조회한다.")
     @Test
     void findAllRecruitBoard() {
-        List<RecruitBoard> recruitBoards = generateRecruitBoards(1L, 100);
+        List<RecruitBoardAndLikeDto> recruitBoards = generateRecruitBoards(1L, 100);
+        List<RecruitBoard> findRecruitBoardsOfList = recruitBoards.stream().map(RecruitBoardAndLikeDto::getRecruitBoard).collect(Collectors.toList());
 
-        when(recruitBoardRepository.findAll()).thenReturn(recruitBoards);
+        when(recruitBoardRepository.findAll()).thenReturn(findRecruitBoardsOfList);
 
         RecruitBoardAllResponse allRecruitBoard = recruitBoardService.findAllRecruitBoard();
 
@@ -270,14 +272,15 @@ class RecruitBoardServiceTest {
     @DisplayName("모집 게시판 목록을 스크롤 조회한다.")
     @MethodSource("generateScrollTestAugments")
     @ParameterizedTest
-    void findBoardsWithLastId(RecruitBoardScrollRequest request, List<RecruitBoard> recruitBoards, boolean hasNext) {
-        when(recruitBoardRepository.findWithSearchConditions(any(), any(), any(), any())).thenReturn(recruitBoards);
+    void findBoardsWithLastId(RecruitBoardScrollRequest request, List<RecruitBoardAndLikeDto> recruitBoards, boolean hasNext) {
+        when(recruitBoardRepository.findWithSearchConditions(any(), any(), any(), any(), any())).thenReturn(recruitBoards);
 
-        RecruitBoardScrollResponse scrollResponse = recruitBoardService.findRecruitBoards(request);
+        RecruitBoardScrollResponse scrollResponse = recruitBoardService.findRecruitBoards(request, user);
+        List<RecruitBoard> findRecruitBoardsOfList = recruitBoards.stream().map(RecruitBoardAndLikeDto::getRecruitBoard).collect(Collectors.toList());
 
         assertAll(
-                () -> verify(recruitBoardRepository).findWithSearchConditions(any(), any(), any(), any()),
-                () -> assertThat(scrollResponse.getLastId()).isEqualTo(recruitBoards.get(recruitBoards.size() - 1).getId()),
+                () -> verify(recruitBoardRepository).findWithSearchConditions(any(), any(), any(), any(), any()),
+                () -> assertThat(scrollResponse.getLastId()).isEqualTo(findRecruitBoardsOfList.get(recruitBoards.size() - 1).getId()),
                 () -> assertThat(scrollResponse.isHasNext()).isEqualTo(hasNext)
         );
     }
@@ -287,17 +290,19 @@ class RecruitBoardServiceTest {
     void findBoardWithKeyword() {
         String searchContents = "검색할 컨텐츠";
         RecruitBoard recruitBoard1 = RecruitBoard.builder().id(10L).title("모집 게시판" + searchContents).contents("!@#$%").build();
+        RecruitBoardAndLikeDto likeDto1 = RecruitBoardAndLikeDto.builder().recruitBoard(recruitBoard1).build();
         RecruitBoard recruitBoard2 = RecruitBoard.builder().id(1L).title("모집 게시판").contents("!@#$%" + searchContents).build();
+        RecruitBoardAndLikeDto likeDto2 = RecruitBoardAndLikeDto.builder().recruitBoard(recruitBoard2).build();
         recruitBoard1.associateUser(user);
         recruitBoard2.associateUser(user);
         RecruitBoardScrollRequest request = RecruitBoardScrollRequest.builder().keyword(searchContents).size(2).build();
 
-        when(recruitBoardRepository.findWithSearchConditions(any(), any(), any(), any())).thenReturn(List.of(recruitBoard1, recruitBoard2));
+        when(recruitBoardRepository.findWithSearchConditions(any(), any(), any(), any(), any())).thenReturn(List.of(likeDto1, likeDto2));
 
-        RecruitBoardScrollResponse scrollResponse = recruitBoardService.findRecruitBoards(request);
+        RecruitBoardScrollResponse scrollResponse = recruitBoardService.findRecruitBoards(request, user);
 
         assertAll(
-                () -> verify(recruitBoardRepository).findWithSearchConditions(any(), any(), any(), any()),
+                () -> verify(recruitBoardRepository).findWithSearchConditions(any(), any(), any(), any(), any()),
                 () -> assertThat(scrollResponse.getLastId()).isEqualTo(1L),
                 () -> assertThat(scrollResponse.isHasNext()).isFalse()
         );
@@ -323,13 +328,14 @@ class RecruitBoardServiceTest {
         );
     }
 
-    private static List<RecruitBoard> generateRecruitBoards(Long startId, int size) {
+    private static List<RecruitBoardAndLikeDto> generateRecruitBoards(Long startId, int size) {
         User owner = User.builder().id(1L).email("test1234@naver.com").password("qwer1234!").build();
-        List<RecruitBoard> recruitBoards = new ArrayList<>();
+        List<RecruitBoardAndLikeDto> recruitBoards = new ArrayList<>();
         for (Long i = startId; i < startId + size; i++) {
             RecruitBoard recruitBoard = RecruitBoard.builder().id(i).title("모집 게시판" + i).contents("모집합니다." + i).build();
             recruitBoard.associateUser(owner);
-            recruitBoards.add(recruitBoard);
+            RecruitBoardAndLikeDto dto = RecruitBoardAndLikeDto.builder().recruitBoard(recruitBoard).build();
+            recruitBoards.add(dto);
         }
         return recruitBoards;
     }
