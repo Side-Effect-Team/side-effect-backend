@@ -42,8 +42,8 @@ public class RecruitBoardController {
     }
 
     @GetMapping("/scroll")
-    public RecruitBoardScrollResponse findScrollRecruitBoard(@ModelAttribute RecruitBoardScrollRequest request) {
-        return recruitBoardService.findRecruitBoards(request);
+    public RecruitBoardScrollResponse findScrollRecruitBoard(@Valid @ModelAttribute RecruitBoardScrollRequest request, @LoginUser User user) {
+        return recruitBoardService.findRecruitBoards(request, user);
     }
 
     @GetMapping(value = "/image/{filename}", produces = MediaType.IMAGE_JPEG_VALUE)

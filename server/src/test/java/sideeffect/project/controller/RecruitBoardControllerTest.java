@@ -97,7 +97,7 @@ class RecruitBoardControllerTest {
     }
 
     @DisplayName("모집게시글 목록을 조회한다.")
-    @WithMockUser
+    @WithCustomUser
     @Test
     void findScrollRecruitBoard() throws Exception {
         RecruitBoard recruitBoard1 = RecruitBoard.builder().id(10L).title("모집 게시판1").contents("모집합니다1.").build();
@@ -107,7 +107,7 @@ class RecruitBoardControllerTest {
         List<RecruitBoardResponse> recruitBoardResponses = RecruitBoardResponse.listOf(List.of(recruitBoard1, recruitBoard2));
         RecruitBoardScrollResponse scrollResponse = RecruitBoardScrollResponse.of(recruitBoardResponses, false);
 
-        given(recruitBoardService.findRecruitBoards(any())).willReturn(scrollResponse);
+        given(recruitBoardService.findRecruitBoards(any(), any())).willReturn(scrollResponse);
 
         mvc.perform(get("/api/recruit-board/scroll")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -119,7 +119,7 @@ class RecruitBoardControllerTest {
                 .andExpect(jsonPath("$.hasNext").value(false))
                 .andDo(print());
 
-        verify(recruitBoardService).findRecruitBoards(any());
+        verify(recruitBoardService).findRecruitBoards(any(), any());
     }
 
     @DisplayName("모집게시글 전체를 조회한다.")
