@@ -1,19 +1,25 @@
 package sideeffect.project.controller;
 
+import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import sideeffect.project.service.RefreshTokenService;
+import sideeffect.project.security.RefreshTokenProvider;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/token")
 public class RefreshTokenController {
 
-    private final RefreshTokenService refreshTokenService;
+    private final RefreshTokenProvider refreshTokenProvider;
 
     @PostMapping("/at-issue")
-    public String issue(@RequestHeader(value = "Refresh") String refreshToken){
-        return refreshTokenService.issueAccessToken(refreshToken);
+    public void issue(@RequestHeader(name = "cookie") String refreshToken,
+        HttpServletResponse response){
+        String accessToken = refreshTokenProvider.issueAccessToken(getToken(refreshToken));
+        response.addHeader("Authorization", accessToken);
     }
 
+    private String getToken(String refreshToken) {
+        return refreshToken.substring(6);
+    }
 }

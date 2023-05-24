@@ -21,7 +21,6 @@ import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.like.LikeResult;
 import sideeffect.project.dto.like.RecruitLikeResponse;
 import sideeffect.project.dto.recruit.*;
-import sideeffect.project.security.UserDetailsServiceImpl;
 import sideeffect.project.service.RecruitBoardService;
 import sideeffect.project.service.RecruitLikeService;
 
@@ -40,9 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(RecruitBoardController.class)
 class RecruitBoardControllerTest {
-
-    @MockBean
-    private UserDetailsServiceImpl userDetailsService;
 
     @MockBean
     private RecruitBoardService recruitBoardService;

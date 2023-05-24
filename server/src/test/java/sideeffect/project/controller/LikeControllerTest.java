@@ -14,9 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -27,18 +25,10 @@ import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.like.LikeResponse;
 import sideeffect.project.dto.like.LikeResult;
 import sideeffect.project.security.UserDetailsImpl;
-import sideeffect.project.security.UserDetailsServiceImpl;
 import sideeffect.project.service.LikeService;
 
-@ComponentScan(basePackages = "sideeffect.project.security")
 @WebMvcTest(LikeController.class)
 class LikeControllerTest {
-
-    @MockBean
-    private UserDetailsServiceImpl userDetailsService;
-
-    @MockBean
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @MockBean
     private LikeService likeService;
