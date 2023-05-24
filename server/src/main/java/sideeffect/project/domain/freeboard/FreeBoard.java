@@ -11,9 +11,11 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import lombok.AccessLevel;
@@ -31,6 +33,7 @@ import sideeffect.project.domain.user.User;
 @Getter
 @Table(
     name = "free_boards",
+    indexes = {@Index(name = "user_index", columnList = "user_id", unique = true)},
     uniqueConstraints = {
         @UniqueConstraint(
             name = "unique_project_url",
@@ -67,6 +70,7 @@ public class FreeBoard extends BaseTimeEntity {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "freeBoard", orphanRemoval = true,
         cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OrderBy("id desc")
     private List<Comment> comments;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "freeBoard", orphanRemoval = true,
