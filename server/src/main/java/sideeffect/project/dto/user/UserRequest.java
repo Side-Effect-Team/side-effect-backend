@@ -18,7 +18,7 @@ public class UserRequest {
     private String introduction;
     private PositionType position;
     private String career;
-    private List<String> stacks;
+    private List<String> tags;
     private ProviderType providerType;
     private String blogUrl;
     private String githubUrl;

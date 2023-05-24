@@ -37,7 +37,7 @@ public class UserService {
         User user = request.toUser();
         user.setPassword(encoder.encode(user.getPassword()));
         user.setUserRoleType(UserRoleType.ROLE_USER);
-        user.updateUserStack(getUserStacks(user, request.getStacks()));
+        user.updateUserStack(getUserStacks(user, request.getTags()));
         return userRepository.save(user).getId();
     }
 
@@ -80,7 +80,7 @@ public class UserService {
     public void update(User user, Long id, UserRequest request){
         if(user.getId()!=id) throw new AuthException(ErrorCode.USER_UNAUTHORIZED);
         user.update(request.toUser());
-        user.updateUserStack(getUserStacks(user, request.getStacks()));
+        user.updateUserStack(getUserStacks(user, request.getTags()));
     }
 
     public void delete(User user, Long id){
