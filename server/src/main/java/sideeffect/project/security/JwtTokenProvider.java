@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
+import sideeffect.project.domain.user.ProviderType;
 import sideeffect.project.domain.user.UserRoleType;
 
 import java.util.Date;
@@ -85,7 +86,8 @@ public class JwtTokenProvider {
 
     public Authentication getAuthentication(String token){
         String name = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
-        UserDetails userDetails = userDetailsService.loadUserByUsername(name);
+        ProviderType providerType = ProviderType.valueOf((String) Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("providerType"));
+        UserDetails userDetails = userDetailsService.loadUserByUsernameAndProviderType(name, providerType);
 
         return new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
     }

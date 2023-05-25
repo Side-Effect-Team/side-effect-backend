@@ -31,7 +31,6 @@ public class KakaoOAuth implements Oauth{
         }
         return ResponseUserInfo.builder()
                 .email(kakaoUser.getKakao_account().getEmail())
-                .imgUrl(kakaoUser.getProperties().getProfile_image())
                 .build();
     }
     public ResponseEntity<String> sendToServer(String token) {
