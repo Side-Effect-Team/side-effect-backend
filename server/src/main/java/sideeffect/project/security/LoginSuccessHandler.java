@@ -1,7 +1,10 @@
 package sideeffect.project.security;
 
-import javax.servlet.http.Cookie;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import sideeffect.project.dto.user.RefreshTokenResponse;
 
 @RequiredArgsConstructor
 @Transactional
@@ -19,19 +23,18 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
         Authentication authentication) throws IOException{
 
-        String refreshToken = refreshTokenProvider.createRefreshToken(authentication);
-        String accessToken = refreshTokenProvider.issueAccessToken(refreshToken);
+        RefreshTokenResponse refreshTokenResponse = refreshTokenProvider.createRefreshToken(authentication);
+        String accessToken = refreshTokenProvider.issueAccessToken(refreshTokenResponse.getRefreshToken());
         response.addHeader("Authorization", accessToken);
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        response.getWriter().write(String.valueOf(userDetails.getUser().getId()));
-        response.addCookie(createCookie(refreshToken));
+        response.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(new ObjectMapper().writeValueAsString(refreshTokenResponse));
     }
 
-    private Cookie createCookie(String refreshToken) {
-        Cookie cookie = new Cookie("token", refreshToken);
-        cookie.setPath("/api/token/at-issue");
-        cookie.setHttpOnly(true);
-        return cookie;
+    private ResponseCookie createCookie(String refreshToken) {
+        return ResponseCookie.from("token", refreshToken)
+            .sameSite("None")
+            .path("/api/token/at-issue")
+            .httpOnly(true)
+            .build();
     }
-
 }

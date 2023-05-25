@@ -13,6 +13,7 @@ import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.domain.token.RefreshToken;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
+import sideeffect.project.dto.user.RefreshTokenResponse;
 import sideeffect.project.redis.RefreshTokenRepository;
 import sideeffect.project.repository.UserRepository;
 
@@ -47,11 +48,11 @@ public class RefreshTokenProvider {
                 .compact();
     }
 
-    public String createRefreshToken(Authentication authentication) {
+    public RefreshTokenResponse createRefreshToken(Authentication authentication) {
         User user = getUserFromAuthentication(authentication);
         RefreshToken refreshToken = generateRefreshToken(user);
         refreshTokenRepository.save(refreshToken);
-        return refreshToken.getRefreshToken();
+        return RefreshTokenResponse.of(refreshToken);
     }
 
     private Date createExpiration() {

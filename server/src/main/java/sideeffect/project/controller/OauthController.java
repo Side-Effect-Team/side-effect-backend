@@ -1,11 +1,10 @@
 package sideeffect.project.controller;
 
-import javax.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sideeffect.project.domain.user.ProviderType;
 import sideeffect.project.domain.user.User;
+import sideeffect.project.dto.user.RefreshTokenResponse;
 import sideeffect.project.security.JwtTokenProvider;
 import sideeffect.project.security.RefreshTokenProvider;
 import sideeffect.project.security.UserDetailsImpl;
@@ -33,29 +33,22 @@ public class OauthController {
     private final RefreshTokenProvider refreshTokenProvider;
 
     @PostMapping("/login")
-    public ResponseEntity<Long> login(@RequestHeader(value = "token") String token,
+    public ResponseEntity<RefreshTokenResponse> login(@RequestHeader(value = "token") String token,
                                 @RequestHeader(value = "providerType") String provider){
         log.info("test={}", token);
         ProviderType providerType = ProviderType.valueOf(provider.toUpperCase());
         User user = oauthService.login(token, providerType);
-        String refreshToken = refreshTokenProvider.createRefreshToken(createToken(user));
-        String accessToken = refreshTokenProvider.issueAccessToken(refreshToken);
+        RefreshTokenResponse refreshToken = refreshTokenProvider.createRefreshToken(createToken(user));
+        String accessToken = refreshTokenProvider.issueAccessToken(refreshToken.getRefreshToken());
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", accessToken);
-        headers.add(HttpHeaders.SET_COOKIE, createCookie(refreshToken).toString());
-        return new ResponseEntity<>(user.getId(), headers, HttpStatus.OK);
+        headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        return new ResponseEntity<>(refreshToken, headers, HttpStatus.OK);
     }
 
     private Authentication createToken(User user) {
         UserDetailsImpl userDetails = UserDetailsImpl.of(user);
         return new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(),
             userDetails.getAuthorities());
-    }
-
-    private ResponseCookie createCookie(String refreshToken) {
-        return ResponseCookie.from("token", refreshToken)
-            .httpOnly(true)
-            .path("/api/token/at-issue")
-            .build();
     }
 }
