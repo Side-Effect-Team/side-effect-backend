@@ -30,6 +30,7 @@ import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.dto.comment.CommentRequest;
 import sideeffect.project.dto.comment.CommentResponse;
+import sideeffect.project.dto.comment.CommentUpdateRequest;
 import sideeffect.project.service.CommentService;
 
 @WebMvcTest(CommentController.class)
@@ -93,10 +94,11 @@ class CommentControllerTest {
     @Test
     void updateComment() throws Exception {
         String content = "감사합니다.";
+        CommentUpdateRequest request = new CommentUpdateRequest(content);
 
         mvc.perform(patch("/api/comments/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(content))
+                .content(objectMapper.writeValueAsString(request))
                 .with(csrf()))
             .andExpect(status().isOk())
             .andDo(print());

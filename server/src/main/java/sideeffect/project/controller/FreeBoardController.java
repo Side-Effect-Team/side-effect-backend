@@ -42,8 +42,8 @@ public class FreeBoardController {
     private final FreeBoardService freeBoardService;
 
     @GetMapping("/{id}")
-    public DetailedFreeBoardResponse findBoard(@PathVariable Long id) {
-        return freeBoardService.findBoard(id);
+    public DetailedFreeBoardResponse findBoard(@PathVariable Long id, @LoginUser User user) {
+        return freeBoardService.findBoard(id, user);
     }
 
     @GetMapping("/scroll")

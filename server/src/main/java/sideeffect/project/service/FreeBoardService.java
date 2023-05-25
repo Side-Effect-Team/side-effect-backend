@@ -23,6 +23,7 @@ import sideeffect.project.dto.freeboard.FreeBoardScrollDto;
 import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
 import sideeffect.project.repository.FreeBoardRepository;
+import sideeffect.project.repository.LikeRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class FreeBoardService {
 
     private final FreeBoardRepository repository;
     private final FreeBoardUploadService uploadService;
+    private final LikeRepository likeRepository;
 
     @Transactional
     public FreeBoard register(User user, FreeBoardRequest request) {
@@ -64,22 +66,27 @@ public class FreeBoardService {
     }
 
     @Transactional
-    public DetailedFreeBoardResponse findBoard(Long boardId) {
+    public DetailedFreeBoardResponse findBoard(Long boardId, User user) {
         FreeBoard freeBoard = findFreeBoard(boardId);
         freeBoard.increaseViews();
-        return DetailedFreeBoardResponse.of(freeBoard);
+
+        if (User.isEmpty(user)) {
+            return DetailedFreeBoardResponse.of(freeBoard, false);
+        }
+
+        return DetailedFreeBoardResponse.of(freeBoard, likeRepository.existsByUserIdAndFreeBoardId(user.getId(), boardId));
     }
 
     @Transactional
     public void updateBoard(Long userId, Long boardId, FreeBoardRequest request) {
-        FreeBoard freeBoard = findFreeBoard(boardId);
+        FreeBoard freeBoard = findBoardById(boardId);
         validateOwner(userId, freeBoard);
         freeBoard.update(request.toFreeBoard());
     }
 
     @Transactional
     public void deleteBoard(Long userId, Long boardId) {
-        FreeBoard freeBoard = findFreeBoard(boardId);
+        FreeBoard freeBoard = findBoardById(boardId);
         validateOwner(userId, freeBoard);
         repository.delete(freeBoard);
     }
@@ -101,7 +108,7 @@ public class FreeBoardService {
     }
 
     private FreeBoard findFreeBoard(Long boardId) {
-        return repository.findById(boardId)
+        return repository.searchBoardFetchJoin(boardId)
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.FREE_BOARD_NOT_FOUND));
     }
 

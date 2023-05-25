@@ -10,4 +10,6 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 
     @Query("SELECT l from Like l join fetch l.freeBoard where l.user.id = :userId and l.freeBoard.id = :freeBoardId")
     Optional<Like> searchLike(@Param("userId") Long userId,@Param("freeBoardId") Long freeBoardId);
+
+    boolean existsByUserIdAndFreeBoardId(Long userId, Long boardId);
 }
