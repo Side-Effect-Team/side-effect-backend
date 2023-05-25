@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import sideeffect.project.common.jpa.TestDataRepository;
 import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.domain.applicant.ApplicantStatus;
+import sideeffect.project.domain.like.RecruitLike;
 import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.BoardPosition;
@@ -355,6 +356,23 @@ class RecruitBoardRepositoryTest extends TestDataRepository {
         );
     }
 
+    @DisplayName("게시글 상세 조회할 때 좋아요 여부 확인")
+    @Test
+    void detailRecruitBoardWithLike() {
+        RecruitBoard recruitBoard = RecruitBoard.builder().title("모집 게시판").contents("내용").build();
+        RecruitBoard savedRecruitboard = recruitBoardRepository.save(recruitBoard);
+
+        RecruitLike recruitLike = RecruitLike.createRecruitLike(user, recruitBoard);
+        em.persist(recruitLike);
+
+        RecruitBoardAndLikeDto likeDto = recruitBoardRepository.findByBoardIdAndUserId(savedRecruitboard.getId(), user.getId()).orElse(null);
+
+        assertAll(
+                () -> assertThat(likeDto.isLike()).isTrue(),
+                () -> assertThat(likeDto.getRecruitBoard().getRecruitLikes()).hasSize(1)
+        );
+    }
+
     private Long getLastId() {
         List<RecruitBoard> recruitBoards = recruitBoardRepository.findAll();
         return recruitBoards.get(recruitBoards.size() - 1).getId();
@@ -367,6 +385,15 @@ class RecruitBoardRepositoryTest extends TestDataRepository {
             recruitBoards.add(recruitBoard);
         }
         return recruitBoards;
+    }
+
+    private void like(RecruitBoard recruitBoard, Integer likeNum) {
+        for (int i = 0; i < likeNum; i++) {
+            User user = User.builder().nickname("추천한 유저" + i).build();
+            em.persist(user);
+            RecruitLike recruitLike = RecruitLike.createRecruitLike(user, recruitBoard);
+            em.persist(recruitLike);
+        }
     }
 
 }

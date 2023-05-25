@@ -16,6 +16,7 @@ import sideeffect.project.dto.recruit.RecruitBoardAndLikeDto;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.util.StringUtils.hasText;
 import static sideeffect.project.domain.applicant.QApplicant.applicant;
@@ -43,6 +44,16 @@ public class RecruitBoardCustomRepositoryImpl implements RecruitBoardCustomRepos
         return query.where(lastIdLt(lastId), addKeywordCondition(keyword), addStackTypeCondition(stackTypes))
                 .orderBy(recruitBoard.id.desc())
                 .limit(size).fetch();
+    }
+
+    @Override
+    public Optional<RecruitBoardAndLikeDto> findByBoardIdAndUserId(Long boardId, Long userId) {
+        RecruitBoardAndLikeDto recruitBoardAndLikeDto = jpaQueryFactory.select(getResponseConstructor(userId))
+                .from(recruitBoard)
+                .where(recruitBoard.id.eq(boardId))
+                .fetchOne();
+
+        return Optional.ofNullable(recruitBoardAndLikeDto);
     }
 
     private ConstructorExpression<RecruitBoardAndLikeDto> getResponseConstructor(Long userId) {
