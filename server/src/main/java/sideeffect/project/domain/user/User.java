@@ -116,6 +116,10 @@ public class User extends BaseTimeEntity {
         this.portfolioUrl = portfolioUrl;
     }
 
+    public static boolean isEmpty(User user) {
+        return user == null || user.getId() == null;
+    }
+
     public void addFreeBoard(FreeBoard freeBoard) {
         this.freeBoards.add(freeBoard);
     }
@@ -206,7 +210,7 @@ public class User extends BaseTimeEntity {
     public void updateImgUrl(String filepath){
         this.imgUrl = filepath;
     }
-    public void updateUserStack(List<UserStack> userStacks){
+    public void updateUserStack(List<UserStack> userStacks) {
         if(userStacks!=null && !userStacks.isEmpty()){
             this.userStacks.clear();
             this.userStacks.addAll(userStacks);

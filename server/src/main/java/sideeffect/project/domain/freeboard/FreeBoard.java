@@ -33,7 +33,7 @@ import sideeffect.project.domain.user.User;
 @Getter
 @Table(
     name = "free_boards",
-    indexes = {@Index(name = "user_index", columnList = "user_id", unique = true)},
+    indexes = {@Index(name = "user_index", columnList = "user_id")},
     uniqueConstraints = {
         @UniqueConstraint(
             name = "unique_project_url",

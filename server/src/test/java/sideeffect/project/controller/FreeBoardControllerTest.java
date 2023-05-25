@@ -92,8 +92,8 @@ class FreeBoardControllerTest {
         List<Comment> freeBoards = generateComments(1L, 10L);
         freeBoards.forEach(comment -> comment.associate(user, freeBoard));
         like(recommendNumber, freeBoard);
-        DetailedFreeBoardResponse response = DetailedFreeBoardResponse.of(freeBoard);
-        given(freeBoardService.findBoard(any())).willReturn(response);
+        DetailedFreeBoardResponse response = DetailedFreeBoardResponse.of(freeBoard, false);
+        given(freeBoardService.findBoard(any(), any())).willReturn(response);
 
         mvc.perform(get("/api/free-boards/1")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -102,13 +102,15 @@ class FreeBoardControllerTest {
             .andExpect(jsonPath("$.views").value(response.getViews()))
             .andExpect(jsonPath("$.userId").value(response.getUserId()))
             .andExpect(jsonPath("$.title").value(response.getTitle()))
+            .andExpect(jsonPath("$.writer").value(user.getNickname()))
             .andExpect(jsonPath("$.content").value(response.getContent()))
             .andExpect(jsonPath("$.projectUrl").value(response.getProjectUrl()))
-            .andExpect(jsonPath("$.imgUrl").value(response.getImgUrl()))
+            .andExpect(jsonPath("$.headerImage").value(response.getHeaderImage()))
             .andExpect(jsonPath("$.comments.size()").value(10))
             .andExpect(jsonPath("$.likeNum").value(recommendNumber))
+            .andExpect(jsonPath("$.like").value(false))
             .andDo(print());
-        verify(freeBoardService).findBoard(any());
+        verify(freeBoardService).findBoard(any(), any());
     }
 
     @DisplayName("게시판 스크롤 요청한다.")

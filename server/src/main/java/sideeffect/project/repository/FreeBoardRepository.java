@@ -11,6 +11,8 @@ public interface FreeBoardRepository extends JpaRepository<FreeBoard, Long>, Fre
 
     boolean existsByProjectUrl(String projectUrl);
 
-    @Query("SELECT b from FreeBoard b join fetch b.likes where b.id = :boardId")
-    Optional<FreeBoard> searchBoardFetchJoinLike(@Param("boardId") Long boardId);
+    @Query("SELECT distinct b from FreeBoard b "
+        + "join fetch b.likes "
+        + "where b.id = :boardId ")
+    Optional<FreeBoard> searchBoardFetchJoin(@Param("boardId") Long boardId);
 }

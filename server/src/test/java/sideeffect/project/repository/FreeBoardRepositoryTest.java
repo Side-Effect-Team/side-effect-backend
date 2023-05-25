@@ -164,7 +164,7 @@ class FreeBoardRepositoryTest extends TestDataRepository {
         assertThat(likeNumbers).isEqualTo(result);
     }
 
-    @DisplayName("댓글 순으로 스크롤을 진행한다.")
+    @DisplayName("조회 순으로 스크롤을 진행한다.")
     @Test
     void scrollOrderByView() {
         List<Integer> viewsNumbers = List.of(11, 11, 11, 11, 11, 8, 7, 6, 5, 4);

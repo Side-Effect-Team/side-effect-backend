@@ -7,8 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,11 +30,11 @@ import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
 import sideeffect.project.repository.FreeBoardRepository;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import sideeffect.project.repository.LikeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class FreeBoardServiceTest {
@@ -49,12 +47,15 @@ class FreeBoardServiceTest {
     @Mock
     private FreeBoardUploadService freeBoardUploadService;
 
+    @Mock
+    private LikeRepository likeRepository;
+
     private FreeBoard freeBoard;
     private User user;
 
     @BeforeEach
     void setUp() {
-        freeBoardService = new FreeBoardService(freeBoardRepository, freeBoardUploadService);
+        freeBoardService = new FreeBoardService(freeBoardRepository, freeBoardUploadService, likeRepository);
 
         user = User.builder()
             .id(1L)
@@ -120,12 +121,12 @@ class FreeBoardServiceTest {
     @Test
     void findBoard() {
         int beforeViews = freeBoard.getViews();
-        when(freeBoardRepository.findById(any())).thenReturn(Optional.of(freeBoard));
+        when(freeBoardRepository.searchBoardFetchJoin(any())).thenReturn(Optional.of(freeBoard));
 
-        freeBoardService.findBoard(1L);
+        freeBoardService.findBoard(1L, null);
 
         assertAll(
-            () -> verify(freeBoardRepository).findById(any()),
+            () -> verify(freeBoardRepository).searchBoardFetchJoin(any()),
             () -> assertThat(freeBoard.getViews()).isEqualTo(beforeViews + 1)
         );
     }
