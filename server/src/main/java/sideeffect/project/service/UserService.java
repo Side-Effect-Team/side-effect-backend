@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import sideeffect.project.common.exception.*;
 import sideeffect.project.common.exception.IllegalStateException;
 import sideeffect.project.common.fileupload.service.UserUploadService;
+import sideeffect.project.domain.user.ProviderType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.domain.user.UserStack;
@@ -33,7 +34,7 @@ public class UserService {
     private final UserUploadService userUploadService;
     public Long join(UserRequest request){
 
-        //validateDuplicateUser(request.getEmail());
+        validateDuplicateUser(request.getEmail(), request.getProviderType());
         User user = request.toUser();
         user.setPassword(encoder.encode(user.getPassword()));
         user.setUserRoleType(UserRoleType.ROLE_USER);
@@ -106,8 +107,8 @@ public class UserService {
         return userUploadService.getFullPath(imagePath);
     }
 
-    public void validateDuplicateUser(String email) {
-        userRepository.findByEmail(email).ifPresent(user -> {
+    public void validateDuplicateUser(String email, ProviderType providerType) {
+        userRepository.findByEmailAndProvider(email, providerType).ifPresent(user -> {
             throw new IllegalStateException(ErrorCode.USER_ALREADY_EXIST);
         });
     }
