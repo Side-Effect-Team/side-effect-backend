@@ -32,18 +32,18 @@ public class RecruitBoardController {
     private final RecruitLikeService recruitLikeService;
 
     @GetMapping("/{id}")
-    public RecruitBoardResponse findRecruitBoard(@PathVariable Long id) {
-        return recruitBoardService.findRecruitBoard(id);
+    public RecruitBoardResponse findRecruitBoard(@PathVariable Long id, @LoginUser User user) {
+        return recruitBoardService.findRecruitBoard(id, user);
     }
 
     @GetMapping("/all")
-    public RecruitBoardAllResponse findAllRecruitBoard() {
-        return recruitBoardService.findAllRecruitBoard();
+    public RecruitBoardAllResponse findAllRecruitBoard(@LoginUser User user) {
+        return recruitBoardService.findAllRecruitBoard(user);
     }
 
     @GetMapping("/scroll")
-    public RecruitBoardScrollResponse findScrollRecruitBoard(@ModelAttribute RecruitBoardScrollRequest request) {
-        return recruitBoardService.findRecruitBoards(request);
+    public RecruitBoardScrollResponse findScrollRecruitBoard(@Valid @ModelAttribute RecruitBoardScrollRequest request, @LoginUser User user) {
+        return recruitBoardService.findRecruitBoards(request, user);
     }
 
     @GetMapping(value = "/image/{filename}", produces = MediaType.IMAGE_JPEG_VALUE)

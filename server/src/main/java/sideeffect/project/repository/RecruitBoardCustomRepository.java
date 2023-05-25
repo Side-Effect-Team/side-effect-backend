@@ -1,13 +1,17 @@
 package sideeffect.project.repository;
 
-import org.springframework.data.domain.Pageable;
-import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.stack.StackType;
+import sideeffect.project.dto.recruit.RecruitBoardAndLikeDto;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RecruitBoardCustomRepository {
-    List<RecruitBoard> findWithSearchConditions(Long lastId, String keyword, List<StackType> stackTypes, Pageable pageable);
 
+    List<RecruitBoardAndLikeDto> findWithSearchConditions(Long userId, Long lastId, String keyword, List<StackType> stackTypes, Integer size);
+
+    Optional<RecruitBoardAndLikeDto> findByBoardIdAndUserId(Long boardId, Long userId);
+
+    List<RecruitBoardAndLikeDto> findByAllWithLike(Long userId);
     boolean existsApplicantByRecruitBoard(Long boardId, Long userId);
 }

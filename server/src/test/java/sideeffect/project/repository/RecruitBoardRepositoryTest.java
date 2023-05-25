@@ -1,11 +1,13 @@
 package sideeffect.project.repository;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
+import sideeffect.project.common.jpa.TestDataRepository;
 import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.domain.applicant.ApplicantStatus;
-import sideeffect.project.common.jpa.TestDataRepository;
+import sideeffect.project.domain.like.RecruitLike;
 import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.BoardPosition;
@@ -16,6 +18,7 @@ import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.dto.applicant.ApplicantListResponse;
+import sideeffect.project.dto.recruit.RecruitBoardAndLikeDto;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
@@ -85,8 +88,8 @@ class RecruitBoardRepositoryTest extends TestDataRepository {
         List<Long> answerBoardIds = LongStream.rangeClosed(lastId - 29, lastId - 20).sorted().boxed().collect(Collectors.toList());
         Collections.reverse(answerBoardIds);
 
-        List<RecruitBoard> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(lastId - 19, "", null, Pageable.ofSize(10));
-        List<Long> returnBoardIds = findRecruitBoards.stream().map(RecruitBoard::getId).collect(Collectors.toList());
+        List<RecruitBoardAndLikeDto> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(user.getId(),lastId - 19, "", null, 10);
+        List<Long> returnBoardIds = findRecruitBoards.stream().map(RecruitBoardAndLikeDto::getRecruitBoard).map(RecruitBoard::getId).collect(Collectors.toList());
 
         assertAll(
                 () -> assertThat(findRecruitBoards).hasSize(10),
@@ -103,11 +106,12 @@ class RecruitBoardRepositoryTest extends TestDataRepository {
         recruitBoardRepository.save(recruitBoardInSearchTitle);
         recruitBoardRepository.save(recruitBoardNotInSearchTitle);
 
-        List<RecruitBoard> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(null, searchTitle, null, Pageable.ofSize(5));
+        List<RecruitBoardAndLikeDto> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(user.getId(),null, searchTitle, null, 5);
+        List<RecruitBoard> findRecruitBoardsOfList = findRecruitBoards.stream().map(RecruitBoardAndLikeDto::getRecruitBoard).collect(Collectors.toList());
 
         assertAll(
-                () -> assertThat(findRecruitBoards).containsExactly(recruitBoardInSearchTitle),
-                () -> assertThat(findRecruitBoards).doesNotContain(recruitBoardNotInSearchTitle)
+                () -> assertThat(findRecruitBoardsOfList).containsExactly(recruitBoardInSearchTitle),
+                () -> assertThat(findRecruitBoardsOfList).doesNotContain(recruitBoardNotInSearchTitle)
         );
     }
 
@@ -120,11 +124,12 @@ class RecruitBoardRepositoryTest extends TestDataRepository {
         recruitBoardRepository.save(recruitBoardInSearchContents);
         recruitBoardRepository.save(recruitBoardNotInSearchContents);
 
-        List<RecruitBoard> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(null, searchContents, null, Pageable.ofSize(5));
+        List<RecruitBoardAndLikeDto> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(user.getId(), null, searchContents, null, 5);
+        List<RecruitBoard> findRecruitBoardsOfList = findRecruitBoards.stream().map(RecruitBoardAndLikeDto::getRecruitBoard).collect(Collectors.toList());
 
         assertAll(
-                () -> assertThat(findRecruitBoards).containsExactly(recruitBoardInSearchContents),
-                () -> assertThat(findRecruitBoards).doesNotContain(recruitBoardNotInSearchContents)
+                () -> assertThat(findRecruitBoardsOfList).containsExactly(recruitBoardInSearchContents),
+                () -> assertThat(findRecruitBoardsOfList).doesNotContain(recruitBoardNotInSearchContents)
         );
     }
 
@@ -137,12 +142,13 @@ class RecruitBoardRepositoryTest extends TestDataRepository {
         recruitBoardRepository.save(recruitBoard1);
         recruitBoardRepository.save(recruitBoard2);
 
-        List<RecruitBoard> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(recruitBoard2.getId(), searchContents, null, Pageable.ofSize(5));
+        List<RecruitBoardAndLikeDto> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(user.getId(), recruitBoard2.getId(), searchContents, null, 5);
+        List<RecruitBoard> findRecruitBoardsOfList = findRecruitBoards.stream().map(RecruitBoardAndLikeDto::getRecruitBoard).collect(Collectors.toList());
 
         assertAll(
-                () -> assertThat(findRecruitBoards).containsExactly(recruitBoard1),
-                () -> assertThat(findRecruitBoards).doesNotContain(recruitBoard2),
-                () -> assertThat(findRecruitBoards).hasSize(1)
+                () -> assertThat(findRecruitBoardsOfList).containsExactly(recruitBoard1),
+                () -> assertThat(findRecruitBoardsOfList).doesNotContain(recruitBoard2),
+                () -> assertThat(findRecruitBoardsOfList).hasSize(1)
         );
     }
 
@@ -167,11 +173,12 @@ class RecruitBoardRepositoryTest extends TestDataRepository {
         searchStacks.add(StackType.JAVA);
         searchStacks.add(StackType.JAVASCRIPT);
 
-        List<RecruitBoard> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(null, "", searchStacks, Pageable.ofSize(5));
+        List<RecruitBoardAndLikeDto> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(user.getId(), null, "", searchStacks, 5);
+        List<RecruitBoard> findRecruitBoardsOfList = findRecruitBoards.stream().map(RecruitBoardAndLikeDto::getRecruitBoard).collect(Collectors.toList());
 
         assertAll(
-                () -> assertThat(findRecruitBoards).containsExactly(recruitBoardInJavaScriptStack, recruitBoardInJavaStack),
-                () -> assertThat(findRecruitBoards).doesNotContain(recruitBoardNotInStack)
+                () -> assertThat(findRecruitBoardsOfList).containsExactly(recruitBoardInJavaScriptStack, recruitBoardInJavaStack),
+                () -> assertThat(findRecruitBoardsOfList).doesNotContain(recruitBoardNotInStack)
         );
     }
 
@@ -193,12 +200,13 @@ class RecruitBoardRepositoryTest extends TestDataRepository {
         searchStacks.add(StackType.JAVA);
         searchStacks.add(StackType.JAVASCRIPT);
 
-        List<RecruitBoard> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(recruitBoardInJavaScriptStack.getId(), "", searchStacks, Pageable.ofSize(5));
+        List<RecruitBoardAndLikeDto> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(user.getId(), recruitBoardInJavaScriptStack.getId(), "", searchStacks, 5);
+        List<RecruitBoard> findRecruitBoardsOfList = findRecruitBoards.stream().map(RecruitBoardAndLikeDto::getRecruitBoard).collect(Collectors.toList());
 
         assertAll(
-                () -> assertThat(findRecruitBoards).containsExactly(recruitBoardInJavaStack),
-                () -> assertThat(findRecruitBoards).doesNotContain(recruitBoardInJavaScriptStack),
-                () -> assertThat(findRecruitBoards).hasSize(1)
+                () -> assertThat(findRecruitBoardsOfList).containsExactly(recruitBoardInJavaStack),
+                () -> assertThat(findRecruitBoardsOfList).doesNotContain(recruitBoardInJavaScriptStack),
+                () -> assertThat(findRecruitBoardsOfList).hasSize(1)
         );
     }
 
@@ -231,14 +239,15 @@ class RecruitBoardRepositoryTest extends TestDataRepository {
         List<StackType> searchStacks = new ArrayList<>();
         searchStacks.add(StackType.JAVA);
 
-        List<RecruitBoard> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(null, searchKeyword, searchStacks, Pageable.ofSize(5));
+        List<RecruitBoardAndLikeDto> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(user.getId(), null, searchKeyword, searchStacks, 5);
+        List<RecruitBoard> findRecruitBoardsOfList = findRecruitBoards.stream().map(RecruitBoardAndLikeDto::getRecruitBoard).collect(Collectors.toList());
 
         assertAll(
-                () -> assertThat(findRecruitBoards).containsExactly(boardInKeywordWithStacks),
-                () -> assertThat(findRecruitBoards).doesNotContain(boardInKeywordWithOtherStacks),
-                () -> assertThat(findRecruitBoards).doesNotContain(boardInKeyword),
-                () -> assertThat(findRecruitBoards).doesNotContain(boardInStacks),
-                () -> assertThat(findRecruitBoards).doesNotContain(boardNotInKeywordWithStacks)
+                () -> assertThat(findRecruitBoardsOfList).containsExactly(boardInKeywordWithStacks),
+                () -> assertThat(findRecruitBoardsOfList).doesNotContain(boardInKeywordWithOtherStacks),
+                () -> assertThat(findRecruitBoardsOfList).doesNotContain(boardInKeyword),
+                () -> assertThat(findRecruitBoardsOfList).doesNotContain(boardInStacks),
+                () -> assertThat(findRecruitBoardsOfList).doesNotContain(boardNotInKeywordWithStacks)
         );
     }
 
@@ -262,12 +271,13 @@ class RecruitBoardRepositoryTest extends TestDataRepository {
         List<StackType> searchStacks = new ArrayList<>();
         searchStacks.add(StackType.JAVA);
 
-        List<RecruitBoard> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(boardInKeywordWithStacks2.getId(), searchKeyword, searchStacks, Pageable.ofSize(5));
+        List<RecruitBoardAndLikeDto> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(user.getId(), boardInKeywordWithStacks2.getId(), searchKeyword, searchStacks, 5);
+        List<RecruitBoard> findRecruitBoardsOfList = findRecruitBoards.stream().map(RecruitBoardAndLikeDto::getRecruitBoard).collect(Collectors.toList());
 
         assertAll(
-                () -> assertThat(findRecruitBoards).containsExactly(boardInKeywordWithStacks1),
-                () -> assertThat(findRecruitBoards).doesNotContain(boardInKeywordWithStacks2),
-                () -> assertThat(findRecruitBoards).hasSize(1)
+                () -> assertThat(findRecruitBoardsOfList).containsExactly(boardInKeywordWithStacks1),
+                () -> assertThat(findRecruitBoardsOfList).doesNotContain(boardInKeywordWithStacks2),
+                () -> assertThat(findRecruitBoardsOfList).hasSize(1)
         );
     }
 
@@ -346,6 +356,23 @@ class RecruitBoardRepositoryTest extends TestDataRepository {
         );
     }
 
+    @DisplayName("게시글 상세 조회할 때 좋아요 여부 확인")
+    @Test
+    void detailRecruitBoardWithLike() {
+        RecruitBoard recruitBoard = RecruitBoard.builder().title("모집 게시판").contents("내용").build();
+        RecruitBoard savedRecruitboard = recruitBoardRepository.save(recruitBoard);
+
+        RecruitLike recruitLike = RecruitLike.createRecruitLike(user, recruitBoard);
+        em.persist(recruitLike);
+
+        RecruitBoardAndLikeDto likeDto = recruitBoardRepository.findByBoardIdAndUserId(savedRecruitboard.getId(), user.getId()).orElse(null);
+
+        assertAll(
+                () -> assertThat(likeDto.isLike()).isTrue(),
+                () -> assertThat(likeDto.getRecruitBoard().getRecruitLikes()).hasSize(1)
+        );
+    }
+
     private Long getLastId() {
         List<RecruitBoard> recruitBoards = recruitBoardRepository.findAll();
         return recruitBoards.get(recruitBoards.size() - 1).getId();
@@ -358,6 +385,15 @@ class RecruitBoardRepositoryTest extends TestDataRepository {
             recruitBoards.add(recruitBoard);
         }
         return recruitBoards;
+    }
+
+    private void like(RecruitBoard recruitBoard, Integer likeNum) {
+        for (int i = 0; i < likeNum; i++) {
+            User user = User.builder().nickname("추천한 유저" + i).build();
+            em.persist(user);
+            RecruitLike recruitLike = RecruitLike.createRecruitLike(user, recruitBoard);
+            em.persist(recruitLike);
+        }
     }
 
 }
