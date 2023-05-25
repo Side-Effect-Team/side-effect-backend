@@ -67,7 +67,7 @@ class RecruitBoardControllerTest {
     }
 
     @DisplayName("모집게시글을 조회한다.")
-    @WithMockUser
+    @WithCustomUser
     @Test
     void findRecruitBoard() throws Exception {
         RecruitBoardResponse response = RecruitBoardResponse.builder()
@@ -81,7 +81,7 @@ class RecruitBoardControllerTest {
                 .tags(List.of(new BoardStackResponse(StackType.SPRING.getValue(), "url")))
                 .build();
 
-        given(recruitBoardService.findRecruitBoard(any())).willReturn(response);
+        given(recruitBoardService.findRecruitBoard(any(), any())).willReturn(response);
 
         mvc.perform(get("/api/recruit-board/1")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -93,7 +93,7 @@ class RecruitBoardControllerTest {
                 .andExpect(jsonPath("$.tags.length()").value(1))
                 .andDo(print());
 
-        verify(recruitBoardService).findRecruitBoard(any());
+        verify(recruitBoardService).findRecruitBoard(any(), any());
     }
 
     @DisplayName("모집게시글 목록을 조회한다.")
