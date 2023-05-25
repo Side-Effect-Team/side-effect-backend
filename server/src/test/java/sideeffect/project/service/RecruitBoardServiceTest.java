@@ -159,14 +159,13 @@ class RecruitBoardServiceTest {
     @Test
     void findAllRecruitBoard() {
         List<RecruitBoardAndLikeDto> recruitBoards = generateRecruitBoards(1L, 100);
-        List<RecruitBoard> findRecruitBoardsOfList = recruitBoards.stream().map(RecruitBoardAndLikeDto::getRecruitBoard).collect(Collectors.toList());
 
-        when(recruitBoardRepository.findAll()).thenReturn(findRecruitBoardsOfList);
+        when(recruitBoardRepository.findByAllWithLike(any())).thenReturn(recruitBoards);
 
-        RecruitBoardAllResponse allRecruitBoard = recruitBoardService.findAllRecruitBoard();
+        RecruitBoardAllResponse allRecruitBoard = recruitBoardService.findAllRecruitBoard(user);
 
         assertAll(
-                () -> verify(recruitBoardRepository).findAll(),
+                () -> verify(recruitBoardRepository).findByAllWithLike(any()),
                 () -> assertThat(allRecruitBoard.getRecruitBoards()).hasSize(100)
         );
     }

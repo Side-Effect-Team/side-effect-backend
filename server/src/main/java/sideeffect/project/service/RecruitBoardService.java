@@ -51,10 +51,10 @@ public class RecruitBoardService {
     }
 
     @Transactional(readOnly = true)
-    public RecruitBoardAllResponse findAllRecruitBoard() {
-        List<RecruitBoard> recruitBoards = recruitBoardRepository.findAll();
+    public RecruitBoardAllResponse findAllRecruitBoard(User user) {
+        List<RecruitBoardAndLikeDto> allWithLike = recruitBoardRepository.findByAllWithLike(user.getId());
 
-        return RecruitBoardAllResponse.of(RecruitBoardResponse.listOf(recruitBoards));
+        return RecruitBoardAllResponse.of(RecruitBoardResponse.listOfLike(allWithLike));
     }
 
     @Transactional(readOnly = true)
