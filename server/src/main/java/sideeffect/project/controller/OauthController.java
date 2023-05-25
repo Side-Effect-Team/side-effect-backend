@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -41,6 +42,7 @@ public class OauthController {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", accessToken);
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        headers.add(HttpHeaders.SET_COOKIE, createCookie(refreshToken.getRefreshToken()).toString());
         return new ResponseEntity<>(RefreshTokenResponse.of(refreshToken), headers, HttpStatus.OK);
     }
 
@@ -48,5 +50,13 @@ public class OauthController {
         UserDetailsImpl userDetails = UserDetailsImpl.of(user);
         return new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(),
             userDetails.getAuthorities());
+    }
+
+    private ResponseCookie createCookie(String refreshToken) {
+        return ResponseCookie.from("token", refreshToken)
+            .sameSite("None")
+            .path("/api/token/at-issue")
+            .httpOnly(true)
+            .build();
     }
 }

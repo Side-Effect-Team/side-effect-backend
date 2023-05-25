@@ -28,6 +28,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = refreshTokenProvider.issueAccessToken(refreshToken.getRefreshToken());
         response.addHeader("Authorization", accessToken);
         response.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        response.addHeader(HttpHeaders.SET_COOKIE, createCookie(refreshToken.getRefreshToken()).toString());
         response.getWriter().write(new ObjectMapper().writeValueAsString(RefreshTokenResponse.of(refreshToken)));
     }
 
