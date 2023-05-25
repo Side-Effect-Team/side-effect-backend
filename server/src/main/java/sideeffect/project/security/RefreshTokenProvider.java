@@ -37,12 +37,15 @@ public class RefreshTokenProvider {
     public String issueAccessToken(String refreshToken){
         RefreshToken token = refreshTokenRepository.findById(refreshToken)
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
-        String email = userRepository.findEmailByUserId(token.getUserId())
+//        String email = userRepository.findEmailByUserId(token.getUserId())
+//            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findById(token.getUserId())
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
 
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(user.getEmail())
                 .claim("auth", UserRoleType.ROLE_USER)
+                .claim("providerType", user.getProviderType())
                 .setExpiration(createExpiration())
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
