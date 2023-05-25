@@ -11,7 +11,7 @@ import java.io.IOException;
 @Service
 public class UserUploadService extends FileUploadService{
 
-    @Value("${file.recruit-base-img}")
+    @Value("${file.user-base-img}")
     private String baseImg;
 
     public UserUploadService(FilePathService filePathService) {
