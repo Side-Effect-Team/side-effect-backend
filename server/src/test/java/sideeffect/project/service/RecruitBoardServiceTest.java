@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.InvalidValueException;
 import sideeffect.project.common.fileupload.service.RecruitUploadService;
+import sideeffect.project.domain.like.RecruitLike;
 import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.BoardPosition;
@@ -122,14 +123,35 @@ class RecruitBoardServiceTest {
     @Test
     void getRecruitBoard() {
         int beforeViews = recruitBoard.getViews();
+        RecruitBoardAndLikeDto likeDto = RecruitBoardAndLikeDto.builder().recruitBoard(recruitBoard).build();
 
-        when(recruitBoardRepository.findById(any())).thenReturn(Optional.of(recruitBoard));
+        when(recruitBoardRepository.findByBoardIdAndUserId(any(),any())).thenReturn(Optional.of(likeDto));
 
-        recruitBoardService.findRecruitBoard(1L);
+        recruitBoardService.findRecruitBoard(1L, user);
 
         assertAll(
-                () -> verify(recruitBoardRepository).findById(any()),
+                () -> verify(recruitBoardRepository).findByBoardIdAndUserId(any(), any()),
                 () -> assertThat(recruitBoard.getViews()).isEqualTo(beforeViews + 1)
+        );
+    }
+
+    @DisplayName("모집 게시판 상세 조회에 좋아요 여부도 반환한다.")
+    @Test
+    void getRecruitBoardWithLike() {
+        int beforeViews = recruitBoard.getViews();
+        RecruitLike recruitLike = RecruitLike.createRecruitLike(user, recruitBoard);
+
+        RecruitBoardAndLikeDto likeDto = RecruitBoardAndLikeDto.builder().recruitBoard(recruitBoard).like(true).build();
+
+        when(recruitBoardRepository.findByBoardIdAndUserId(any(),any())).thenReturn(Optional.of(likeDto));
+
+        RecruitBoardResponse response = recruitBoardService.findRecruitBoard(recruitBoard.getId(), user);
+
+        assertAll(
+                () -> verify(recruitBoardRepository).findByBoardIdAndUserId(any(), any()),
+                () -> assertThat(recruitBoard.getViews()).isEqualTo(beforeViews + 1),
+                () -> assertThat(response.isLike()).isTrue(),
+                () -> assertThat(response.getLikeNum()).isEqualTo(1)
         );
     }
 

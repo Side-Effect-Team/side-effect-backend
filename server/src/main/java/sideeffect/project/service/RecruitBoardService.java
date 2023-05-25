@@ -42,12 +42,12 @@ public class RecruitBoardService {
     }
 
     @Transactional
-    public RecruitBoardResponse findRecruitBoard(Long boardId) {
-        RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId)
+    public RecruitBoardResponse findRecruitBoard(Long boardId, User user) {
+        RecruitBoardAndLikeDto findRecruitBoard = recruitBoardRepository.findByBoardIdAndUserId(boardId, user.getId())
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
-        findRecruitBoard.increaseViews();
+        findRecruitBoard.getRecruitBoard().increaseViews();
 
-        return RecruitBoardResponse.of(findRecruitBoard);
+        return RecruitBoardResponse.ofLike(findRecruitBoard);
     }
 
     @Transactional(readOnly = true)
