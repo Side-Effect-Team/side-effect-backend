@@ -18,7 +18,7 @@ public class RefreshTokenResponse {
 
     public static RefreshTokenResponse of(RefreshToken refreshToken) {
         return RefreshTokenResponse.builder()
-            .refreshToken(refreshToken.getRefreshToken())
+            .refreshToken("token=" + refreshToken.getRefreshToken())
             .userId(refreshToken.getUserId())
             .build();
     }

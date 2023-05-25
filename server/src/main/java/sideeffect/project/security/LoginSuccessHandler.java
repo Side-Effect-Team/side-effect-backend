@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import sideeffect.project.domain.token.RefreshToken;
 import sideeffect.project.dto.user.RefreshTokenResponse;
 
 @RequiredArgsConstructor
@@ -23,11 +24,11 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
         Authentication authentication) throws IOException{
 
-        RefreshTokenResponse refreshTokenResponse = refreshTokenProvider.createRefreshToken(authentication);
-        String accessToken = refreshTokenProvider.issueAccessToken(refreshTokenResponse.getRefreshToken());
+        RefreshToken refreshToken = refreshTokenProvider.createRefreshToken(authentication);
+        String accessToken = refreshTokenProvider.issueAccessToken(refreshToken.getRefreshToken());
         response.addHeader("Authorization", accessToken);
         response.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(new ObjectMapper().writeValueAsString(refreshTokenResponse));
+        response.getWriter().write(new ObjectMapper().writeValueAsString(RefreshTokenResponse.of(refreshToken)));
     }
 
     private ResponseCookie createCookie(String refreshToken) {

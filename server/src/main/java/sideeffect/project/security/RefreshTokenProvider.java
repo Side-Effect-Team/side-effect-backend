@@ -13,7 +13,6 @@ import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.domain.token.RefreshToken;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
-import sideeffect.project.dto.user.RefreshTokenResponse;
 import sideeffect.project.redis.RefreshTokenRepository;
 import sideeffect.project.repository.UserRepository;
 
@@ -37,8 +36,6 @@ public class RefreshTokenProvider {
     public String issueAccessToken(String refreshToken){
         RefreshToken token = refreshTokenRepository.findById(refreshToken)
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
-//        String email = userRepository.findEmailByUserId(token.getUserId())
-//            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
         User user = userRepository.findById(token.getUserId())
             .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
 
@@ -51,11 +48,10 @@ public class RefreshTokenProvider {
                 .compact();
     }
 
-    public RefreshTokenResponse createRefreshToken(Authentication authentication) {
+    public RefreshToken createRefreshToken(Authentication authentication) {
         User user = getUserFromAuthentication(authentication);
         RefreshToken refreshToken = generateRefreshToken(user);
-        refreshTokenRepository.save(refreshToken);
-        return RefreshTokenResponse.of(refreshToken);
+        return refreshTokenRepository.save(refreshToken);
     }
 
     private Date createExpiration() {

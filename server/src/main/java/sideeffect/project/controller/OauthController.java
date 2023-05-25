@@ -12,16 +12,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import sideeffect.project.domain.token.RefreshToken;
 import sideeffect.project.domain.user.ProviderType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.user.RefreshTokenResponse;
-import sideeffect.project.security.JwtTokenProvider;
 import sideeffect.project.security.RefreshTokenProvider;
 import sideeffect.project.security.UserDetailsImpl;
-import sideeffect.project.security.UserDetailsServiceImpl;
 import sideeffect.project.service.OauthService;
 
-import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
 @RestController
@@ -38,12 +36,12 @@ public class OauthController {
         log.info("test={}", token);
         ProviderType providerType = ProviderType.valueOf(provider.toUpperCase());
         User user = oauthService.login(token, providerType);
-        RefreshTokenResponse refreshToken = refreshTokenProvider.createRefreshToken(createToken(user));
+        RefreshToken refreshToken = refreshTokenProvider.createRefreshToken(createToken(user));
         String accessToken = refreshTokenProvider.issueAccessToken(refreshToken.getRefreshToken());
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", accessToken);
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        return new ResponseEntity<>(refreshToken, headers, HttpStatus.OK);
+        return new ResponseEntity<>(RefreshTokenResponse.of(refreshToken), headers, HttpStatus.OK);
     }
 
     private Authentication createToken(User user) {
