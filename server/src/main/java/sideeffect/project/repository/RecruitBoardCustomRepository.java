@@ -12,5 +12,6 @@ public interface RecruitBoardCustomRepository {
 
     Optional<RecruitBoardAndLikeDto> findByBoardIdAndUserId(Long boardId, Long userId);
 
+    List<RecruitBoardAndLikeDto> findByAllWithLike(Long userId);
     boolean existsApplicantByRecruitBoard(Long boardId, Long userId);
 }

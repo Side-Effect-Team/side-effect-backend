@@ -56,6 +56,13 @@ public class RecruitBoardCustomRepositoryImpl implements RecruitBoardCustomRepos
         return Optional.ofNullable(recruitBoardAndLikeDto);
     }
 
+    @Override
+    public List<RecruitBoardAndLikeDto> findByAllWithLike(Long userId) {
+        return jpaQueryFactory.select(getResponseConstructor(userId))
+                .from(recruitBoard)
+                .fetch();
+    }
+
     private ConstructorExpression<RecruitBoardAndLikeDto> getResponseConstructor(Long userId) {
 
         return Projections.constructor(RecruitBoardAndLikeDto.class,
