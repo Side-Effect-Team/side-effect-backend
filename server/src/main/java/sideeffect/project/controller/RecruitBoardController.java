@@ -37,8 +37,8 @@ public class RecruitBoardController {
     }
 
     @GetMapping("/all")
-    public RecruitBoardAllResponse findAllRecruitBoard() {
-        return recruitBoardService.findAllRecruitBoard();
+    public RecruitBoardAllResponse findAllRecruitBoard(@LoginUser User user) {
+        return recruitBoardService.findAllRecruitBoard(user);
     }
 
     @GetMapping("/scroll")

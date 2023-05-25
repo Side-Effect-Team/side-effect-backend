@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -123,7 +122,7 @@ class RecruitBoardControllerTest {
     }
 
     @DisplayName("모집게시글 전체를 조회한다.")
-    @WithMockUser
+    @WithCustomUser
     @Test
     void findAllRecruitBoard() throws Exception {
         RecruitBoard recruitBoard1 = RecruitBoard.builder().id(10L).title("모집 게시판1").contents("모집합니다1.").build();
@@ -133,7 +132,7 @@ class RecruitBoardControllerTest {
         List<RecruitBoardResponse> recruitBoardResponses = RecruitBoardResponse.listOf(List.of(recruitBoard1, recruitBoard2));
         RecruitBoardAllResponse response = RecruitBoardAllResponse.of(recruitBoardResponses);
 
-        given(recruitBoardService.findAllRecruitBoard()).willReturn(response);
+        given(recruitBoardService.findAllRecruitBoard(any())).willReturn(response);
 
         mvc.perform(get("/api/recruit-board/all")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -141,7 +140,7 @@ class RecruitBoardControllerTest {
                 .andExpect(jsonPath("$.recruitBoards.length()").value(2))
                 .andDo(print());
 
-        verify(recruitBoardService).findAllRecruitBoard();
+        verify(recruitBoardService).findAllRecruitBoard(any());
     }
 
     @DisplayName("모집 게시판을 등록한다.")
