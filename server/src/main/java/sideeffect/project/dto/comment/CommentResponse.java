@@ -19,6 +19,7 @@ public class CommentResponse {
     private Long boardId;
     private String content;
     private String writer;
+    private Long writerId;
 
     public static CommentResponse of(Comment comment) {
         return CommentResponse.builder()
@@ -26,6 +27,7 @@ public class CommentResponse {
             .writer(comment.getUser().getNickname())
             .boardId(comment.getFreeBoard().getId())
             .content(comment.getContent())
+            .writerId(comment.getUser().getId())
             .build();
     }
 
