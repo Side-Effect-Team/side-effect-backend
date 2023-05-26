@@ -25,8 +25,8 @@ import java.util.UUID;
 @Transactional
 public class RefreshTokenProvider {
 
-    private static final int EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 3;
-
+    //private static final int EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 3;
+    private static final int EXPIRATION_TIME = 1000 * 30;
     @Value("${jwt.secret}")
     private String secretKey;
 
