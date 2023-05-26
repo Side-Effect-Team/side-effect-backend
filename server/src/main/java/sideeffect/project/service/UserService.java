@@ -80,6 +80,8 @@ public class UserService {
     }
     public void update(User user, Long id, UserRequest request){
         if(user.getId()!=id) throw new AuthException(ErrorCode.USER_UNAUTHORIZED);
+        log.info("current imgUrl before update: " + user.getImgUrl());
+        log.info("request imgUrl: " + request.getImgUrl());
         user.update(request.toUser());
         user.updateUserStack(getUserStacks(user, request.getTags()));
     }
@@ -99,7 +101,6 @@ public class UserService {
             String filePath = userUploadService.storeFile(file);
             log.info("filepath: " + filePath);
             user.updateImgUrl(filePath);
-            log.info(user.getImgUrl());
         } catch (IOException e) {
             throw new BaseException(ErrorCode.USER_FILE_UPLOAD_FAILED);
         }
