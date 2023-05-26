@@ -35,6 +35,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     private ResponseCookie createCookie(String refreshToken) {
         return ResponseCookie.from("token", refreshToken)
             .sameSite("None")
+            .secure(true)
             .path("/api/token/at-issue")
             .httpOnly(true)
             .build();

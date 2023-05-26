@@ -34,7 +34,7 @@ public class OauthController {
     @PostMapping("/login")
     public ResponseEntity<RefreshTokenResponse> login(@RequestHeader(value = "token") String token,
                                 @RequestHeader(value = "providerType") String provider){
-        log.info("test={}", token);
+
         ProviderType providerType = ProviderType.valueOf(provider.toUpperCase());
         User user = oauthService.login(token, providerType);
         RefreshToken refreshToken = refreshTokenProvider.createRefreshToken(createToken(user));
@@ -55,6 +55,7 @@ public class OauthController {
     private ResponseCookie createCookie(String refreshToken) {
         return ResponseCookie.from("token", refreshToken)
             .sameSite("None")
+            .secure(true)
             .path("/api/token/at-issue")
             .httpOnly(true)
             .build();
