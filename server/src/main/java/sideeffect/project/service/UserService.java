@@ -97,6 +97,7 @@ public class UserService {
         if(user.getId() == null) throw new AuthException(ErrorCode.USER_UNAUTHORIZED);
         try {
             String filePath = userUploadService.storeFile(file);
+            log.info("filepath: " + filePath);
             user.updateImgUrl(filePath);
         } catch (IOException e) {
             throw new BaseException(ErrorCode.USER_FILE_UPLOAD_FAILED);

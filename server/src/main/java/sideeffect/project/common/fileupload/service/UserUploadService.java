@@ -1,5 +1,6 @@
 package sideeffect.project.common.fileupload.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 
 @Service
+@Slf4j
 public class UserUploadService extends FileUploadService{
 
     @Value("${file.user-base-img}")
@@ -24,6 +26,7 @@ public class UserUploadService extends FileUploadService{
         if (validate(multipartFile)) {
             String originalFilename = multipartFile.getOriginalFilename();
             String storeFileName = createStoreFileName(originalFilename);
+            log.info("storeFileName: " + storeFileName);
             multipartFile.transferTo(new File(getFullPath(storeFileName)));
             return storeFileName;
         }
