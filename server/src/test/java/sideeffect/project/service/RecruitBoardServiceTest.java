@@ -145,7 +145,7 @@ class RecruitBoardServiceTest {
 
         when(recruitBoardRepository.findByBoardIdAndUserId(any(),any())).thenReturn(Optional.of(likeDto));
 
-        RecruitBoardResponse response = recruitBoardService.findRecruitBoard(recruitBoard.getId(), user);
+        DetailedRecruitBoardResponse response = recruitBoardService.findRecruitBoard(recruitBoard.getId(), user);
 
         assertAll(
                 () -> verify(recruitBoardRepository).findByBoardIdAndUserId(any(), any()),
