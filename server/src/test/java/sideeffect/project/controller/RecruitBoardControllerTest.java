@@ -69,7 +69,7 @@ class RecruitBoardControllerTest {
     @WithCustomUser
     @Test
     void findRecruitBoard() throws Exception {
-        RecruitBoardResponse response = RecruitBoardResponse.builder()
+        DetailedRecruitBoardResponse response = DetailedRecruitBoardResponse.builder()
                 .id(1L)
                 .views(0)
                 .userId(1L)
