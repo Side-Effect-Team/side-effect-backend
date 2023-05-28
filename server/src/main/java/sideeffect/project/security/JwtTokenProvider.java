@@ -64,7 +64,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
-                .setExpiration(new Date(now + 1000 * 30))
+                .setExpiration(new Date(now + 1000 * 60 * 30))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
