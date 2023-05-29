@@ -26,17 +26,23 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         RefreshToken refreshToken = refreshTokenProvider.createRefreshToken(authentication);
         String accessToken = refreshTokenProvider.issueAccessToken(refreshToken.getRefreshToken());
+
+        addHeaders(response, refreshToken.getRefreshToken(), accessToken);
+
+        response.getWriter().write(new ObjectMapper().writeValueAsString(RefreshTokenResponse.of(refreshToken)));
+    }
+
+    private void addHeaders(HttpServletResponse response, String refreshToken, String accessToken) {
         response.addHeader("Authorization", accessToken);
         response.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        response.addHeader(HttpHeaders.SET_COOKIE, createCookie(refreshToken.getRefreshToken()).toString());
-        response.getWriter().write(new ObjectMapper().writeValueAsString(RefreshTokenResponse.of(refreshToken)));
+        response.addHeader(HttpHeaders.SET_COOKIE, createCookie(refreshToken).toString());
     }
 
     private ResponseCookie createCookie(String refreshToken) {
         return ResponseCookie.from("token", refreshToken)
             .sameSite("None")
             .secure(true)
-            .path("/api/token/at-issue")
+            .path("/api/token/")
             .httpOnly(true)
             .build();
     }
