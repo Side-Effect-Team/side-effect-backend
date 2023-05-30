@@ -53,6 +53,10 @@ public class RefreshTokenProvider {
         return refreshTokenRepository.save(refreshToken);
     }
 
+    public void deleteToken(String refreshToken) {
+        refreshTokenRepository.deleteById(refreshToken);
+    }
+
     private Date createExpiration() {
         return new Date(System.currentTimeMillis() + EXPIRATION_TIME);
     }

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -40,6 +41,7 @@ class RefreshTokenProviderTest {
         ReflectionTestUtils.setField(refreshTokenProvider, "secretKey", "testKey");
     }
 
+    @DisplayName("엑세스 토큰을 재발급 한다.")
     @Test
     void issueAccessToken() {
         String token = UUID.randomUUID().toString();
@@ -56,12 +58,23 @@ class RefreshTokenProviderTest {
         );
     }
 
+    @DisplayName("refresh token을 발급한다.")
     @Test
     void createRefreshToken() {
         Authentication authentication = createAuthentication();
         refreshTokenProvider.createRefreshToken(authentication);
 
         verify(refreshTokenRepository).save(any());
+    }
+
+    @DisplayName("refresh token을 삭제한다.")
+    @Test
+    void deleteToken() {
+        String token = UUID.randomUUID().toString();
+
+        refreshTokenProvider.deleteToken(token);
+
+        verify(refreshTokenProvider).deleteToken(any());
     }
 
     private Authentication createAuthentication() {
