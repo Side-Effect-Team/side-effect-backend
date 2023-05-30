@@ -76,7 +76,7 @@ class RecruitBoardControllerTest {
                 .title("모집 게시글 제목")
                 .projectName("프로젝트명1")
                 .content("모집 게시글 내용")
-                .positions(List.of(new BoardPositionResponse(1L, PositionType.BACKEND.getValue(), 3, 0)))
+                .positions(List.of(new DetailedBoardPositionResponse(1L, PositionType.BACKEND.getValue(), 3, 0, false)))
                 .tags(List.of(new BoardStackResponse(StackType.SPRING.getValue(), "url")))
                 .build();
 
