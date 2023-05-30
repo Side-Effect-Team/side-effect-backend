@@ -61,7 +61,18 @@ public class RecruitBoardService {
     public RecruitBoardScrollResponse findRecruitBoards(RecruitBoardScrollRequest request, User user) {
         List<RecruitBoardAndLikeDto> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(user.getId(), request.getLastId(), request.getKeyword(), request.validateStackTypes(), request.getSize() + 1);
         boolean hasNext = hasNextRecruitBoards(findRecruitBoards, request.getSize());
-        return RecruitBoardScrollResponse.of(RecruitBoardResponse.listOfLike(findRecruitBoards), hasNext);
+        List<RecruitBoardResponse> recruitBoardResponses = RecruitBoardResponse.listOfLike(findRecruitBoards);
+        updateClosedStatus(recruitBoardResponses);
+
+        return RecruitBoardScrollResponse.of(recruitBoardResponses, hasNext);
+    }
+
+    private void updateClosedStatus(List<RecruitBoardResponse> recruitBoardResponses) {
+        recruitBoardResponses.stream()
+                .filter(response -> response.getPositions() != null && !response.getPositions().isEmpty())
+                .filter(response -> response.getPositions().stream()
+                        .allMatch(position -> position.getCurrentNumber() == position.getTargetNumber()))
+                .forEach(RecruitBoardResponse::updateClosed);
     }
 
     @Transactional
