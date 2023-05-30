@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface RecruitBoardRepository extends JpaRepository<RecruitBoard, Long>, RecruitBoardCustomRepository {
 
-    @Query("SELECT new sideeffect.project.dto.applicant.ApplicantListResponse(a.user.id, a.id, u.nickname, u.email, p.positionType, a.createAt) " +
+    @Query("SELECT new sideeffect.project.dto.applicant.ApplicantListResponse(a.user.id, a.id, u.nickname, u.imgUrl, u.email, p.positionType, a.createAt) " +
             "FROM RecruitBoard rb " +
             "INNER JOIN rb.boardPositions bp " +
             "ON rb.id = :boardId " +

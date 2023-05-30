@@ -16,6 +16,7 @@ public class RecruitBoardResponse {
 
     private Long id;
     private Long userId;
+    private boolean closed;
     private String title;
     private String projectName;
     private String content;
@@ -71,6 +72,10 @@ public class RecruitBoardResponse {
         return recruitBoards.stream()
                 .map(RecruitBoardResponse::ofLike)
                 .collect(Collectors.toList());
+    }
+
+    public void updateClosed() {
+        this.closed = true;
     }
 
 }
