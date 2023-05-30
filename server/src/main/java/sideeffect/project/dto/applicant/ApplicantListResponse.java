@@ -14,6 +14,7 @@ public class ApplicantListResponse {
     private Long userId;
     private Long applicantId;
     private String nickName;
+    private String imgUrl;
     private String email;
     private PositionType positionType;
     private LocalDateTime createdAt;
