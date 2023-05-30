@@ -193,6 +193,9 @@ public class User extends BaseTimeEntity {
         if(user.getCareer() != null) {
             this.career = user.getCareer();
         }
+        if(user.getImgUrl() != null) {
+            this.imgUrl = user.getImgUrl();
+        }
         if(user.getBlogUrl() != null) {
             this.blogUrl = user.getBlogUrl();
         }
