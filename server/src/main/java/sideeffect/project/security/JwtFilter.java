@@ -36,7 +36,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         //Token 만료여부
         if(jwtTokenProvider.validateAccessToken(token)){
-            throw new AuthException(ErrorCode.TOKEN_EXPIRED);
+            throw new AuthException(ErrorCode.ACCESS_TOKEN_ERROR);
         }
 
         //권한 부여
