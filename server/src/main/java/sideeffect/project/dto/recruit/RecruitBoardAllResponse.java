@@ -9,9 +9,9 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public class RecruitBoardAllResponse {
-    private List<RecruitBoardResponse> recruitBoards;
+    private List<RecruitBoardListResponse> recruitBoards;
 
-    public static RecruitBoardAllResponse of(List<RecruitBoardResponse> recruitBoards) {
+    public static RecruitBoardAllResponse of(List<RecruitBoardListResponse> recruitBoards) {
         return RecruitBoardAllResponse.builder()
                 .recruitBoards(recruitBoards)
                 .build();
