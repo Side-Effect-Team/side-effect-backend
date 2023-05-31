@@ -129,7 +129,7 @@ class RecruitBoardControllerTest {
         RecruitBoard recruitBoard2 = RecruitBoard.builder().id(5L).title("모집 게시판2").contents("모집합니다2.").build();
         recruitBoard1.associateUser(user);
         recruitBoard2.associateUser(user);
-        List<RecruitBoardResponse> recruitBoardResponses = RecruitBoardResponse.listOf(List.of(recruitBoard1, recruitBoard2));
+        List<RecruitBoardListResponse> recruitBoardResponses = RecruitBoardListResponse.listOf(List.of(recruitBoard1, recruitBoard2));
         RecruitBoardAllResponse response = RecruitBoardAllResponse.of(recruitBoardResponses);
 
         given(recruitBoardService.findAllRecruitBoard(any())).willReturn(response);
