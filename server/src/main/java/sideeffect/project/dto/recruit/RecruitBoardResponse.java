@@ -1,6 +1,7 @@
 package sideeffect.project.dto.recruit;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import sideeffect.project.domain.recruit.RecruitBoard;
 
@@ -15,49 +16,56 @@ import java.util.stream.Collectors;
 public class RecruitBoardResponse {
 
     private Long id;
-    private Long userId;
+    private boolean closed;
     private String title;
-    private String projectName;
-    private String content;
-    private String imgSrc;
     private int views;
     private boolean like;
     private int likeNum;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
-    private List<BoardPositionResponse> positions;
-    private List<BoardStackResponse> tags;
+    private List<String> positions;
+    private List<String> tags;
+    @JsonIgnore
+    private List<BoardPositionResponse> positionsList;
 
     public static RecruitBoardResponse of(RecruitBoard recruitBoard) {
         return RecruitBoardResponse.builder()
                 .id(recruitBoard.getId())
-                .userId(recruitBoard.getUser().getId())
-                .projectName(recruitBoard.getProjectName())
                 .title(recruitBoard.getTitle())
-                .content(recruitBoard.getContents())
-                .imgSrc(recruitBoard.getImgSrc())
                 .views(recruitBoard.getViews())
                 .likeNum(recruitBoard.getRecruitLikes().size())
                 .createdAt(recruitBoard.getCreateAt())
-                .positions(BoardPositionResponse.listOf(recruitBoard.getBoardPositions()))
-                .tags(BoardStackResponse.listOf(recruitBoard.getBoardStacks()))
+                .positions(getPositionList(recruitBoard))
+                .tags(getStackList(recruitBoard))
+                .positionsList(BoardPositionResponse.listOf(recruitBoard.getBoardPositions()))
                 .build();
+    }
+
+    private static List<String> getStackList(RecruitBoard recruitBoard) {
+        List<String> stackList = recruitBoard.getBoardStacks().stream()
+                .map(boardStack -> boardStack.getStack().getStackType().getValue())
+                .collect(Collectors.toList());
+        return stackList;
+    }
+
+    private static List<String> getPositionList(RecruitBoard recruitBoard) {
+        List<String> positionList = recruitBoard.getBoardPositions().stream()
+                .map(boardPosition -> boardPosition.getPosition().getPositionType().getValue())
+                .collect(Collectors.toList());
+        return positionList;
     }
 
     public static RecruitBoardResponse ofLike(RecruitBoardAndLikeDto recruitBoardAndLikeDto) {
         return RecruitBoardResponse.builder()
                 .id(recruitBoardAndLikeDto.getRecruitBoard().getId())
-                .userId(recruitBoardAndLikeDto.getRecruitBoard().getUser().getId())
-                .projectName(recruitBoardAndLikeDto.getRecruitBoard().getProjectName())
                 .title(recruitBoardAndLikeDto.getRecruitBoard().getTitle())
-                .content(recruitBoardAndLikeDto.getRecruitBoard().getContents())
-                .imgSrc(recruitBoardAndLikeDto.getRecruitBoard().getImgSrc())
                 .views(recruitBoardAndLikeDto.getRecruitBoard().getViews())
                 .like(recruitBoardAndLikeDto.isLike())
                 .likeNum(recruitBoardAndLikeDto.getRecruitBoard().getRecruitLikes().size())
                 .createdAt(recruitBoardAndLikeDto.getRecruitBoard().getCreateAt())
-                .positions(BoardPositionResponse.listOf(recruitBoardAndLikeDto.getRecruitBoard().getBoardPositions()))
-                .tags(BoardStackResponse.listOf(recruitBoardAndLikeDto.getRecruitBoard().getBoardStacks()))
+                .positions(getPositionList(recruitBoardAndLikeDto.getRecruitBoard()))
+                .tags(getStackList(recruitBoardAndLikeDto.getRecruitBoard()))
+                .positionsList(BoardPositionResponse.listOf(recruitBoardAndLikeDto.getRecruitBoard().getBoardPositions()))
                 .build();
     }
 
@@ -71,6 +79,10 @@ public class RecruitBoardResponse {
         return recruitBoards.stream()
                 .map(RecruitBoardResponse::ofLike)
                 .collect(Collectors.toList());
+    }
+
+    public void updateClosed() {
+        this.closed = true;
     }
 
 }

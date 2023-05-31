@@ -39,17 +39,16 @@ public class JwtTokenProvider {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(accessToken);
             return false;
         }catch (UnsupportedJwtException e){
-            log.error("if the claimsJws argument does not represent an Claims JWS");
+            throw new AuthException(ErrorCode.ACCESS_TOKEN_UNSUPPORTED);
         }catch (MalformedJwtException e){
-            log.error(" if the claimsJws string is not a valid JWS");
+            throw new AuthException(ErrorCode.ACCESS_TOKEN_MALFORMED);
         }catch (SignatureException e){
-            log.error("if the claimsJws JWS signature validation fails");
+            throw new AuthException(ErrorCode.ACCESS_TOKEN_SIGNATURE_FAILED);
         }catch (ExpiredJwtException e){
             throw new AuthException(ErrorCode.ACCESS_TOKEN_EXPIRED);
         }catch (IllegalStateException e){
-            log.error("if the claimsJws string is null or empty or only whitespace");
+            throw new AuthException(ErrorCode.ACCESS_TOKEN_ILLEGAL_STATE);
         }
-        return true;
     }
 
     public String createAccessToken(Authentication authentication){

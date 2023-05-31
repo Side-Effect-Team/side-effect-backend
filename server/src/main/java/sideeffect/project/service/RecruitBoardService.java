@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import sideeffect.project.common.exception.*;
 import sideeffect.project.common.fileupload.service.RecruitUploadService;
+import sideeffect.project.domain.applicant.Applicant;
 import sideeffect.project.domain.position.Position;
 import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.BoardStack;
@@ -47,21 +48,48 @@ public class RecruitBoardService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
         findRecruitBoard.getRecruitBoard().increaseViews();
 
-        return DetailedRecruitBoardResponse.ofLike(findRecruitBoard);
+        DetailedRecruitBoardResponse detailedRecruitBoardResponse = DetailedRecruitBoardResponse.ofLike(findRecruitBoard);
+
+        if(user.getApplicants() != null && !user.getApplicants().isEmpty()) {
+            updateSupportedStatus(detailedRecruitBoardResponse, user.getApplicants());
+        }
+
+        return detailedRecruitBoardResponse;
+    }
+
+    private void updateSupportedStatus(DetailedRecruitBoardResponse detailedRecruitBoardResponse, List<Applicant> applicants) {
+        List<Long> applicantBoardPositionIds = applicants.stream()
+                .map(applicant -> applicant.getBoardPosition().getId())
+                .collect(Collectors.toList());
+
+        detailedRecruitBoardResponse.getPositions().stream()
+                .filter(position -> applicantBoardPositionIds.contains(position.getId()))
+                .forEach(DetailedBoardPositionResponse::updateSupported);
     }
 
     @Transactional(readOnly = true)
     public RecruitBoardAllResponse findAllRecruitBoard(User user) {
         List<RecruitBoardAndLikeDto> allWithLike = recruitBoardRepository.findByAllWithLike(user.getId());
 
-        return RecruitBoardAllResponse.of(RecruitBoardResponse.listOfLike(allWithLike));
+        return RecruitBoardAllResponse.of(RecruitBoardListResponse.listOfLike(allWithLike));
     }
 
     @Transactional(readOnly = true)
     public RecruitBoardScrollResponse findRecruitBoards(RecruitBoardScrollRequest request, User user) {
         List<RecruitBoardAndLikeDto> findRecruitBoards = recruitBoardRepository.findWithSearchConditions(user.getId(), request.getLastId(), request.getKeyword(), request.validateStackTypes(), request.getSize() + 1);
         boolean hasNext = hasNextRecruitBoards(findRecruitBoards, request.getSize());
-        return RecruitBoardScrollResponse.of(RecruitBoardResponse.listOfLike(findRecruitBoards), hasNext);
+        List<RecruitBoardResponse> recruitBoardResponses = RecruitBoardResponse.listOfLike(findRecruitBoards);
+        updateClosedStatus(recruitBoardResponses);
+
+        return RecruitBoardScrollResponse.of(recruitBoardResponses, hasNext);
+    }
+
+    private void updateClosedStatus(List<RecruitBoardResponse> recruitBoardResponses) {
+        recruitBoardResponses.stream()
+                .filter(response -> response.getPositionsList() != null && !response.getPositionsList().isEmpty())
+                .filter(response -> response.getPositionsList().stream()
+                        .allMatch(position -> position.getCurrentNumber() == position.getTargetNumber()))
+                .forEach(RecruitBoardResponse::updateClosed);
     }
 
     @Transactional

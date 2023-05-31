@@ -101,6 +101,7 @@ public class UserService {
             String filePath = userUploadService.storeFile(file);
             log.info("filepath: " + filePath);
             user.updateImgUrl(filePath);
+            log.info("after upload: " + user.getImgUrl());
         } catch (IOException e) {
             throw new BaseException(ErrorCode.USER_FILE_UPLOAD_FAILED);
         }

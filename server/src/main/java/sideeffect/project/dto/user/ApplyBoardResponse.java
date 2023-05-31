@@ -16,11 +16,13 @@ import java.util.stream.Collectors;
 @Builder
 public class ApplyBoardResponse {
 
+    private String category;
     private Long applicationId;
+    private Long boardId;
     private String title;
     private PositionType position;
     private ApplicantStatus status;
-    private Boolean isRecruiting;
+    private Boolean closed;
 
     public static List<ApplyBoardResponse> listOf(User user){
 
@@ -37,11 +39,13 @@ public class ApplyBoardResponse {
 
     private static ApplyBoardResponse getApplyBoardResponse(User user, Applicant applicant) {
         return ApplyBoardResponse.builder()
-                .applicationId(applicant.getBoardPosition().getRecruitBoard().getId())
+                .category("recruits")
+                .applicationId(applicant.getId())
+                .boardId(applicant.getBoardPosition().getRecruitBoard().getId())
                 .title(applicant.getBoardPosition().getRecruitBoard().getTitle())
                 .position(user.getPosition())
                 .status(applicant.getStatus())
-                .isRecruiting(true)
+                .closed(applicant.getBoardPosition().getTargetNumber()==applicant.getBoardPosition().getCurrentNumber())
                 .build();
     }
 

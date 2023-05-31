@@ -5,6 +5,8 @@ import lombok.*;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.like.Like;
 import sideeffect.project.domain.like.RecruitLike;
+import sideeffect.project.domain.position.PositionType;
+import sideeffect.project.domain.recruit.BoardPosition;
 import sideeffect.project.domain.recruit.BoardStack;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.stack.StackType;
@@ -34,6 +36,8 @@ public class LikeBoardResponse {
     private int commentNum;
     private String imgUrl;
     private List<StackType> tags;
+    private List<PositionType> positions;
+    private Boolean closed;
 
     public static List<LikeBoardResponse> listOf(User user){
         List<LikeBoardResponse> likeBoardResponses = new ArrayList<>();
@@ -60,14 +64,35 @@ public class LikeBoardResponse {
                 .category("recruits")
                 .id(recruitBoard.getId())
                 .title(recruitBoard.getTitle())
-                .content(recruitBoard.getContents())
                 .createdAt(recruitBoard.getCreateAt())
                 .like(true)
                 .likeNum(recruitBoard.getRecruitLikes().size())
                 .views(recruitBoard.getViews())
-                .imgUrl(recruitBoard.getImgSrc())
                 .tags(getStackType(recruitBoard.getBoardStacks()))
+                .positions(getPositionType(recruitBoard.getBoardPositions()))
+                .closed(isClosed(recruitBoard))
                 .build();
+    }
+
+    private static Boolean isClosed(RecruitBoard recruitBoard) {
+        Boolean flag = true;
+        for (BoardPosition boardPosition : recruitBoard.getBoardPositions()) {
+            if(boardPosition.getCurrentNumber()!=boardPosition.getTargetNumber()){
+                flag = false;
+                break;
+            }
+        }
+        return flag;
+    }
+
+    private static List<PositionType> getPositionType(List<BoardPosition> boardPositions) {
+        List<PositionType> positionTypes = Collections.emptyList();
+        if(boardPositions!=null && !boardPositions.isEmpty()){
+            positionTypes = boardPositions.stream()
+                    .map(boardPosition -> boardPosition.getPosition().getPositionType())
+                    .collect(Collectors.toList());
+        }
+        return positionTypes;
     }
 
     private static List<StackType> getStackType(List<BoardStack> boardStacks) {

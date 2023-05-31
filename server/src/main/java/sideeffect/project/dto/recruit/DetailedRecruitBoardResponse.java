@@ -24,7 +24,7 @@ public class DetailedRecruitBoardResponse {
     private int likeNum;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
-    private List<BoardPositionResponse> positions;
+    private List<DetailedBoardPositionResponse> positions;
     private List<BoardStackResponse> tags;
 
     public static DetailedRecruitBoardResponse ofLike(RecruitBoardAndLikeDto recruitBoardAndLikeDto) {
@@ -40,7 +40,7 @@ public class DetailedRecruitBoardResponse {
                 .like(recruitBoardAndLikeDto.isLike())
                 .likeNum(recruitBoardAndLikeDto.getRecruitBoard().getRecruitLikes().size())
                 .createdAt(recruitBoardAndLikeDto.getRecruitBoard().getCreateAt())
-                .positions(BoardPositionResponse.listOf(recruitBoardAndLikeDto.getRecruitBoard().getBoardPositions()))
+                .positions(DetailedBoardPositionResponse.listOf(recruitBoardAndLikeDto.getRecruitBoard().getBoardPositions()))
                 .tags(BoardStackResponse.listOf(recruitBoardAndLikeDto.getRecruitBoard().getBoardStacks()))
                 .build();
     }
