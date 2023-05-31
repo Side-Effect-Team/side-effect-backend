@@ -1,19 +1,20 @@
 package sideeffect.project.domain.recruit;
 
-import java.util.HashSet;
-import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import sideeffect.project.common.domain.BaseTimeEntity;
+import sideeffect.project.domain.comment.RecruitComment;
 import sideeffect.project.domain.like.RecruitLike;
 import sideeffect.project.domain.penalty.Penalty;
 import sideeffect.project.domain.user.User;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "RECRUIT_BOARD")
@@ -51,6 +52,10 @@ public class RecruitBoard extends BaseTimeEntity {
     @OneToMany(mappedBy = "recruitBoard", cascade = {CascadeType.REMOVE})
     private List<RecruitLike> recruitLikes = new ArrayList<>();
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "recruitBoard", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @OrderBy("id desc")
+    private List<RecruitComment> recruitComments = new ArrayList<>();
+
     @OneToMany(mappedBy = "recruitBoard", cascade = {CascadeType.REMOVE})
     private Set<Penalty> penalties = new HashSet<>();
 
@@ -85,6 +90,10 @@ public class RecruitBoard extends BaseTimeEntity {
 
     public void addRecruitLike(RecruitLike recruitLike) {
         this.recruitLikes.add(recruitLike);
+    }
+
+    public void addRecruitComment(RecruitComment comment) {
+        this.recruitComments.add(comment);
     }
 
     public void addPenalty(Penalty penalty) {
