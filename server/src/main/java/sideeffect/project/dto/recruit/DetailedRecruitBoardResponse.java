@@ -2,6 +2,7 @@ package sideeffect.project.dto.recruit;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+import sideeffect.project.dto.comment.RecruitCommentResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +27,7 @@ public class DetailedRecruitBoardResponse {
     private LocalDateTime createdAt;
     private List<DetailedBoardPositionResponse> positions;
     private List<BoardStackResponse> tags;
+    private List<RecruitCommentResponse> comments;
 
     public static DetailedRecruitBoardResponse ofLike(RecruitBoardAndLikeDto recruitBoardAndLikeDto) {
         return DetailedRecruitBoardResponse.builder()
@@ -42,6 +44,7 @@ public class DetailedRecruitBoardResponse {
                 .createdAt(recruitBoardAndLikeDto.getRecruitBoard().getCreateAt())
                 .positions(DetailedBoardPositionResponse.listOf(recruitBoardAndLikeDto.getRecruitBoard().getBoardPositions()))
                 .tags(BoardStackResponse.listOf(recruitBoardAndLikeDto.getRecruitBoard().getBoardStacks()))
+                .comments(RecruitCommentResponse.listOf(recruitBoardAndLikeDto.getRecruitBoard().getRecruitComments()))
                 .build();
     }
 }

@@ -13,10 +13,12 @@ import org.springframework.web.context.WebApplicationContext;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.common.security.WithCustomUser;
+import sideeffect.project.domain.comment.RecruitComment;
 import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
+import sideeffect.project.dto.comment.RecruitCommentResponse;
 import sideeffect.project.dto.like.LikeResult;
 import sideeffect.project.dto.like.RecruitLikeResponse;
 import sideeffect.project.dto.recruit.*;
@@ -24,6 +26,8 @@ import sideeffect.project.service.RecruitBoardService;
 import sideeffect.project.service.RecruitLikeService;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
@@ -62,6 +66,12 @@ class RecruitBoardControllerTest {
                 .password("qwer1234!")
                 .build();
 
+        recruitBoard = RecruitBoard.builder()
+                .id(1L)
+                .title("모집 게시판")
+                .contents("모집 게시판 내용")
+                .build();
+
         objectMapper = new ObjectMapper();
     }
 
@@ -78,6 +88,7 @@ class RecruitBoardControllerTest {
                 .content("모집 게시글 내용")
                 .positions(List.of(new DetailedBoardPositionResponse(1L, PositionType.BACKEND.getValue(), 3, 0, false)))
                 .tags(List.of(new BoardStackResponse(StackType.SPRING.getValue(), "url")))
+                .comments(RecruitCommentResponse.listOf(generateRecruitComments(1L,10L)))
                 .build();
 
         given(recruitBoardService.findRecruitBoard(any(), any())).willReturn(response);
@@ -90,6 +101,7 @@ class RecruitBoardControllerTest {
                 .andExpect(jsonPath("$.content").value(response.getContent()))
                 .andExpect(jsonPath("$.positions.length()").value(1))
                 .andExpect(jsonPath("$.tags.length()").value(1))
+                .andExpect(jsonPath("$.comments.length()").value(10))
                 .andDo(print());
 
         verify(recruitBoardService).findRecruitBoard(any(), any());
@@ -280,6 +292,18 @@ class RecruitBoardControllerTest {
                 .andExpect(jsonPath("$.userNickname").value("test1"))
                 .andExpect(jsonPath("$.message").value(LikeResult.CANCEL_LIKE.getMessage()))
                 .andDo(print());
+    }
+
+    private List<RecruitComment> generateRecruitComments(Long startId, Long endId) {
+        return LongStream.range(startId, endId + 1)
+                .map(i -> startId + (endId - i))
+                .mapToObj(this::generateRecruitComment).collect(Collectors.toList());
+    }
+
+    private RecruitComment generateRecruitComment(Long id) {
+        RecruitComment comment = RecruitComment.builder().id(id).content("내용" + id).build();
+        comment.associate(user, recruitBoard);
+        return comment;
     }
 
 }
