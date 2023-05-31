@@ -71,7 +71,7 @@ public class RecruitBoardService {
     public RecruitBoardAllResponse findAllRecruitBoard(User user) {
         List<RecruitBoardAndLikeDto> allWithLike = recruitBoardRepository.findByAllWithLike(user.getId());
 
-        return RecruitBoardAllResponse.of(RecruitBoardResponse.listOfLike(allWithLike));
+        return RecruitBoardAllResponse.of(RecruitBoardListResponse.listOfLike(allWithLike));
     }
 
     @Transactional(readOnly = true)
@@ -86,8 +86,8 @@ public class RecruitBoardService {
 
     private void updateClosedStatus(List<RecruitBoardResponse> recruitBoardResponses) {
         recruitBoardResponses.stream()
-                .filter(response -> response.getPositions() != null && !response.getPositions().isEmpty())
-                .filter(response -> response.getPositions().stream()
+                .filter(response -> response.getPositionsList() != null && !response.getPositionsList().isEmpty())
+                .filter(response -> response.getPositionsList().stream()
                         .allMatch(position -> position.getCurrentNumber() == position.getTargetNumber()))
                 .forEach(RecruitBoardResponse::updateClosed);
     }
