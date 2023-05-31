@@ -10,8 +10,12 @@ public enum ErrorCode {
     USER_FILE_UPLOAD_FAILED(500, "U_006", "이미지 업로드에 문제가 발생했습니다."),
     USER_SOCIAL_ACCESS_TOKEN_EXPIRED(401, "U_007", "소셜 서버의 액세스 토큰이 만료되었습니다"),
 
-    TOKEN_EXPIRED(401, "T_001", "토큰이 만료되었습니다"),
-    ACCESS_TOKEN_EXPIRED(401, "AT_001", "엑세스 토큰이 만료되었습니다"),
+    ACCESS_TOKEN_ERROR(401, "AT_001", "비정상적인 액세스 토큰입니다"),
+    ACCESS_TOKEN_UNSUPPORTED(401, "AT_002", "지원하지 않는 액세스 토큰 형식입니다"),
+    ACCESS_TOKEN_MALFORMED(401, "AT_003", "잘못된 액세스 토큰 구조입니다"),
+    ACCESS_TOKEN_SIGNATURE_FAILED(401, "AT_004", "유효하지 않은 서명입니다"),
+    ACCESS_TOKEN_EXPIRED(401, "AT_005", "엑세스 토큰이 만료되었습니다"),
+    ACCESS_TOKEN_ILLEGAL_STATE(401, "AT_005", "엑세스 토큰이 비어있습니다"),
     REFRESH_TOKEN_NOT_FOUND(401, "RT_001", "유효하지 않은 리프레쉬 토큰입니다"),
     REFRESH_TOKEN_NOT_REQUEST(401, "RT_002", "토큰이 전달되지 않았습니다."),
 
