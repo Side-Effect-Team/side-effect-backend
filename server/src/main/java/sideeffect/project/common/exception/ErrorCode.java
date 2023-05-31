@@ -30,6 +30,9 @@ public enum ErrorCode {
     RECRUIT_BOARD_FILE_UPLOAD_FAILED(500, "RB_003", "이미지 업로드에 문제가 발생했습니다."),
     RECRUIT_BOARD_FILE_DOWNLOAD_FAILED(500, "RB_004", "이미지 다운로드에 문제가 발생했습니다."),
 
+    RECRUIT_COMMENT_NOT_FOUND(400, "RC_001", "해당 댓글을 찾을 수 없습니다."),
+    RECRUIT_COMMENT_UNAUTHORIZED(403, "RC_002", "해당 댓글에 대한 권한이 없습니다."),
+
     BOARD_POSITION_NOT_FOUND(400, "BP_001", "해당 게시판이 모집하는 포지션을 찾을 수 없습니다."),
     BOARD_POSITION_FULL(409, "BP_002", "해당 포지션은 전부 모집되었습니다."),
     BOARD_POSITION_ALREADY_EXISTS(400, "BP_003", "해당 포지션은 이미 모집중인 포지션이므로, 추가할 수 없습니다."),
