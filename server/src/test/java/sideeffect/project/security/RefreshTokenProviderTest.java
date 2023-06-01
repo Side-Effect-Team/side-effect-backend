@@ -2,6 +2,7 @@ package sideeffect.project.security;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,12 +16,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.test.util.ReflectionTestUtils;
 import sideeffect.project.domain.token.RefreshToken;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.redis.RefreshTokenRepository;
-import sideeffect.project.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class RefreshTokenProviderTest {
@@ -31,14 +30,13 @@ class RefreshTokenProviderTest {
     private RefreshTokenRepository refreshTokenRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private JwtTokenProvider jwtTokenProvider;
 
     private static final String EMAIL = "test@naver.com";
 
     @BeforeEach
     void setUp() {
-        refreshTokenProvider = new RefreshTokenProvider(refreshTokenRepository, userRepository);
-        ReflectionTestUtils.setField(refreshTokenProvider, "secretKey", "testKey");
+        refreshTokenProvider = new RefreshTokenProvider(refreshTokenRepository, jwtTokenProvider);
     }
 
     @DisplayName("엑세스 토큰을 재발급 한다.")
@@ -48,13 +46,12 @@ class RefreshTokenProviderTest {
         Long userId = 1L;
         RefreshToken refreshToken = new RefreshToken(token, userId);
         when(refreshTokenRepository.findById(any())).thenReturn(Optional.of(refreshToken));
-        when(userRepository.findEmailByUserId(any())).thenReturn(Optional.of(EMAIL));
 
         refreshTokenProvider.issueAccessToken(token);
 
         assertAll(
             () -> verify(refreshTokenRepository).findById(any()),
-            () -> verify(userRepository).findEmailByUserId(any())
+            () -> verify(jwtTokenProvider).createAccessToken(anyLong())
         );
     }
 
@@ -74,7 +71,7 @@ class RefreshTokenProviderTest {
 
         refreshTokenProvider.deleteToken(token);
 
-        verify(refreshTokenProvider).deleteToken(any());
+        verify(refreshTokenRepository).deleteById(any());
     }
 
     private Authentication createAuthentication() {
