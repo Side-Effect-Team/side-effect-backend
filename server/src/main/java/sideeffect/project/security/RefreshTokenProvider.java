@@ -4,12 +4,12 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sideeffect.project.common.exception.EntityNotFoundException;
 import sideeffect.project.common.exception.ErrorCode;
+import sideeffect.project.config.security.AuthProperties;
 import sideeffect.project.domain.token.RefreshToken;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
@@ -26,8 +26,8 @@ import java.util.UUID;
 public class RefreshTokenProvider {
 
     private static final int EXPIRATION_TIME = 1000 * 60 * 30;
-    @Value("${jwt.secret}")
-    private String secretKey;
+    
+    private final AuthProperties authProperties;
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
@@ -43,7 +43,7 @@ public class RefreshTokenProvider {
                 .claim("auth", UserRoleType.ROLE_USER)
                 .claim("providerType", user.getProviderType())
                 .setExpiration(createExpiration())
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(SignatureAlgorithm.HS256, authProperties.getSecret())
                 .compact();
     }
 
