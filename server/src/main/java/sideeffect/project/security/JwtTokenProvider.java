@@ -3,7 +3,6 @@ package sideeffect.project.security;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
+import sideeffect.project.config.security.AuthProperties;
 import sideeffect.project.domain.user.ProviderType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
@@ -25,16 +25,12 @@ public class JwtTokenProvider {
 
     private static final int EXPIRATION_TIME = 1000 * 60 * 30;
 
-    @Value("${jwt.secret}")
-    private String secretKey;
-    @Value("${jwt.expired}")
-    private String expired;
-
+    private final AuthProperties authProperties;
     private final UserDetailsServiceImpl userDetailsService;
 
     public boolean validateAccessToken(String accessToken){
         try {
-            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(accessToken);
+            Jwts.parser().setSigningKey(authProperties.getSecret()).parseClaimsJws(accessToken);
             return false;
         } catch (UnsupportedJwtException e) {
             throw new AuthException(ErrorCode.ACCESS_TOKEN_UNSUPPORTED);
@@ -62,7 +58,7 @@ public class JwtTokenProvider {
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
                 .setExpiration(new Date(now + 1000 * 60 * 30))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(SignatureAlgorithm.HS256, authProperties.getSecret())
                 .compact();
     }
 
@@ -74,7 +70,7 @@ public class JwtTokenProvider {
             .claim("auth", UserRoleType.ROLE_USER)
             .claim("providerType", user.getProviderType())
             .setExpiration(createExpiration())
-            .signWith(SignatureAlgorithm.HS256, secretKey)
+            .signWith(SignatureAlgorithm.HS256, authProperties.getSecret())
             .compact();
     }
 
@@ -96,7 +92,7 @@ public class JwtTokenProvider {
     }
 
     private JwtTokenDto decodeAccessToken(String accessToken) {
-        Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(accessToken).getBody();
+        Claims claims = Jwts.parser().setSigningKey(authProperties.getSecret()).parseClaimsJws(accessToken).getBody();
         return new JwtTokenDto(claims.getSubject(), ProviderType.valueOf((String) claims.get("providerType")));
     }
 

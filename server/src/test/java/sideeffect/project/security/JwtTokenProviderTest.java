@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
+import sideeffect.project.config.security.AuthProperties;
 import sideeffect.project.domain.user.ProviderType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
@@ -30,6 +31,9 @@ class JwtTokenProviderTest {
     private JwtTokenProvider tokenProvider;
 
     @Mock
+    private AuthProperties authProperties;
+
+    @Mock
     private UserDetailsServiceImpl userDetailsService;
 
     private User user;
@@ -37,11 +41,9 @@ class JwtTokenProviderTest {
 
     @BeforeEach
     void setUp() {
-        tokenProvider = new JwtTokenProvider(userDetailsService);
+        tokenProvider = new JwtTokenProvider(authProperties, userDetailsService);
 
         secretKey = UUID.randomUUID().toString();
-
-        ReflectionTestUtils.setField(tokenProvider, "secretKey", secretKey);
 
         user = User.builder()
             .email("test@naver.com")
@@ -55,13 +57,14 @@ class JwtTokenProviderTest {
     @Test
     void createAccessToken() {
         when(userDetailsService.loadUserByUserId(any())).thenReturn(UserDetailsImpl.of(user));
-
+        when(authProperties.getSecret()).thenReturn(secretKey);
         String accessToken = tokenProvider.createAccessToken(user.getId());
 
         System.out.println("accessToken = " + accessToken);
         assertAll(
             () -> assertThat(accessToken).isNotNull(),
-            () -> verify(userDetailsService).loadUserByUserId(any())
+            () -> verify(userDetailsService).loadUserByUserId(any()),
+            () -> verify(authProperties).getSecret()
         );
     }
 
@@ -70,18 +73,23 @@ class JwtTokenProviderTest {
     void getAuthentication() {
         Long time = 1000 * 60L;
         String token = createToken(time);
+        when(authProperties.getSecret()).thenReturn(secretKey);
         when(userDetailsService.loadUserByUsernameAndProviderType(any(), any()))
             .thenReturn(UserDetailsImpl.of(user));
 
         tokenProvider.getAuthentication(token);
 
-        verify(userDetailsService).loadUserByUsernameAndProviderType(any(), any());
+        assertAll(
+            () -> verify(userDetailsService).loadUserByUsernameAndProviderType(any(), any()),
+            () -> verify(authProperties).getSecret()
+        );
     }
 
     @DisplayName("만료된 토큰을 받으면 예외가 발생한다.")
     @Test
     void inputExpiredAccessToken() {
         String token = createToken(0L);
+        when(authProperties.getSecret()).thenReturn(secretKey);
 
         assertThatThrownBy(() -> tokenProvider.validateAccessToken(token))
             .isInstanceOf(AuthException.class)
@@ -92,6 +100,7 @@ class JwtTokenProviderTest {
     @Test
     void inputNullAccessToken() {
         String token = null;
+        when(authProperties.getSecret()).thenReturn(secretKey);
 
         assertThatThrownBy(() -> tokenProvider.validateAccessToken(token))
             .isInstanceOf(AuthException.class)
@@ -102,6 +111,7 @@ class JwtTokenProviderTest {
     @Test
     void inputMalformedAccessToken() {
         String token = "hello";
+        when(authProperties.getSecret()).thenReturn(secretKey);
 
         assertThatThrownBy(() -> tokenProvider.validateAccessToken(token))
             .isInstanceOf(AuthException.class)
@@ -119,6 +129,7 @@ class JwtTokenProviderTest {
             .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60))
             .signWith(SignatureAlgorithm.HS256, otherKey)
             .compact();
+        when(authProperties.getSecret()).thenReturn(secretKey);
 
         assertThatThrownBy(() -> tokenProvider.validateAccessToken(token))
             .isInstanceOf(AuthException.class)
