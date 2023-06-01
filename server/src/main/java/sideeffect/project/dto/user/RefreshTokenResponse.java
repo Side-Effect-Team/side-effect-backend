@@ -14,11 +14,9 @@ import sideeffect.project.domain.token.RefreshToken;
 public class RefreshTokenResponse {
 
     private Long userId;
-    private String refreshToken;
 
     public static RefreshTokenResponse of(RefreshToken refreshToken) {
         return RefreshTokenResponse.builder()
-            .refreshToken("token=" + refreshToken.getRefreshToken())
             .userId(refreshToken.getUserId())
             .build();
     }

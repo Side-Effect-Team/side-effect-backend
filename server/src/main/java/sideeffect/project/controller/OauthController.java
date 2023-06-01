@@ -33,17 +33,24 @@ public class OauthController {
 
     @PostMapping("/login")
     public ResponseEntity<RefreshTokenResponse> login(@RequestHeader(value = "token") String token,
-                                @RequestHeader(value = "providerType") String provider){
+                                @RequestHeader(value = "providerType") String provider) {
 
         ProviderType providerType = ProviderType.valueOf(provider.toUpperCase());
         User user = oauthService.login(token, providerType);
+
         RefreshToken refreshToken = refreshTokenProvider.createRefreshToken(createToken(user));
         String accessToken = refreshTokenProvider.issueAccessToken(refreshToken.getRefreshToken());
+
+        HttpHeaders headers = createHeaders(refreshToken, accessToken);
+        return new ResponseEntity<>(RefreshTokenResponse.of(refreshToken), headers, HttpStatus.OK);
+    }
+
+    private HttpHeaders createHeaders(RefreshToken refreshToken, String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", accessToken);
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         headers.add(HttpHeaders.SET_COOKIE, createCookie(refreshToken.getRefreshToken()).toString());
-        return new ResponseEntity<>(RefreshTokenResponse.of(refreshToken), headers, HttpStatus.OK);
+        return headers;
     }
 
     private Authentication createToken(User user) {
@@ -56,7 +63,7 @@ public class OauthController {
         return ResponseCookie.from("token", refreshToken)
             .sameSite("None")
             .secure(true)
-            .path("/api/token/at-issue")
+            .path("/api/token/")
             .httpOnly(true)
             .build();
     }

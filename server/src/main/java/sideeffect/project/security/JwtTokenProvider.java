@@ -3,7 +3,6 @@ package sideeffect.project.security;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,42 +10,37 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
+import sideeffect.project.config.security.AuthProperties;
 import sideeffect.project.domain.user.ProviderType;
+import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
 
 import java.util.Date;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret}")
-    private String secretKey;
-    @Value("${jwt.expired}")
-    private String expired;
+    private static final int EXPIRATION_TIME = 1000 * 60 * 30;
 
+    private final AuthProperties authProperties;
     private final UserDetailsServiceImpl userDetailsService;
-
-    public String getUserName(String token, String secretKey){
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token)
-                .getBody().get("name", String.class);
-    }
 
     public boolean validateAccessToken(String accessToken){
         try {
-            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(accessToken);
+            Jwts.parser().setSigningKey(authProperties.getSecret()).parseClaimsJws(accessToken);
             return false;
-        }catch (UnsupportedJwtException e){
+        } catch (UnsupportedJwtException e) {
             throw new AuthException(ErrorCode.ACCESS_TOKEN_UNSUPPORTED);
-        }catch (MalformedJwtException e){
+        } catch (MalformedJwtException e) {
             throw new AuthException(ErrorCode.ACCESS_TOKEN_MALFORMED);
-        }catch (SignatureException e){
+        } catch (SignatureException e) {
             throw new AuthException(ErrorCode.ACCESS_TOKEN_SIGNATURE_FAILED);
-        }catch (ExpiredJwtException e){
+        } catch (ExpiredJwtException e) {
             throw new AuthException(ErrorCode.ACCESS_TOKEN_EXPIRED);
-        }catch (IllegalStateException e){
+        } catch (IllegalStateException | IllegalArgumentException e) {
             throw new AuthException(ErrorCode.ACCESS_TOKEN_ILLEGAL_STATE);
         }
     }
@@ -64,30 +58,59 @@ public class JwtTokenProvider {
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
                 .setExpiration(new Date(now + 1000 * 60 * 30))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(SignatureAlgorithm.HS256, authProperties.getSecret())
                 .compact();
     }
 
-    public String createAccessToken2(String email, UserRoleType userRoleType){
-        //권한 가져오기
-        String authorities = userRoleType.name();
+    public String createAccessToken(Long userId) {
+        User user = getUser(userId);
 
-        long now = System.currentTimeMillis();
-
-        //access token
         return Jwts.builder()
-                .setSubject(email)
-                .claim("auth", authorities)
-                .setExpiration(new Date(now + 1000 * 60 * 60 * 24 * 3))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
-                .compact();
+            .setSubject(user.getEmail())
+            .claim("auth", UserRoleType.ROLE_USER)
+            .claim("providerType", user.getProviderType())
+            .setExpiration(createExpiration())
+            .signWith(SignatureAlgorithm.HS256, authProperties.getSecret())
+            .compact();
+    }
+
+    private User getUser(Long userId) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUserId(userId);
+        return userDetails.getUser();
     }
 
     public Authentication getAuthentication(String token){
-        String name = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
-        ProviderType providerType = ProviderType.valueOf((String) Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("providerType"));
-        UserDetails userDetails = userDetailsService.loadUserByUsernameAndProviderType(name, providerType);
+        JwtTokenDto jwtTokenDto = decodeAccessToken(token);
+        UserDetails userDetails = userDetailsService
+            .loadUserByUsernameAndProviderType(jwtTokenDto.getUsername(), jwtTokenDto.getProviderType());
 
         return new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+    }
+
+    private Date createExpiration() {
+        return new Date(System.currentTimeMillis() + EXPIRATION_TIME);
+    }
+
+    private JwtTokenDto decodeAccessToken(String accessToken) {
+        Claims claims = Jwts.parser().setSigningKey(authProperties.getSecret()).parseClaimsJws(accessToken).getBody();
+        return new JwtTokenDto(claims.getSubject(), ProviderType.valueOf((String) claims.get("providerType")));
+    }
+
+    private static class JwtTokenDto {
+        private final String username;
+        private final ProviderType providerType;
+
+        public JwtTokenDto(String username, ProviderType providerType) {
+            this.username = username;
+            this.providerType = providerType;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public ProviderType getProviderType() {
+            return providerType;
+        }
     }
 }
