@@ -137,7 +137,7 @@ public class ApplicantService {
 
         validateCancelOwner(findApplicant, userId);
         handleApplicantStatus(findApplicant);
-        penaltyService.penalize(findApplicant.getUser(), findApplicant);
+//        penaltyService.penalize(findApplicant.getUser(), findApplicant);
     }
 
     private void handleApplicantStatus(Applicant findApplicant) {
