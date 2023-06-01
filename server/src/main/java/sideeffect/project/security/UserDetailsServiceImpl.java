@@ -7,6 +7,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sideeffect.project.common.exception.EntityNotFoundException;
+import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.common.exception.JoinException;
 import sideeffect.project.domain.user.ProviderType;
 import sideeffect.project.domain.user.User;
@@ -31,6 +33,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsernameAndProviderType(String email, ProviderType providerType) throws UsernameNotFoundException {
         log.info("UserDetailsServiceImpl(provider) 진입");
         User user = userRepository.findByEmailAndProvider(email, providerType).orElseThrow(() -> new JoinException(email));
+
+        return UserDetailsImpl.of(user);
+    }
+
+    @Transactional
+    public UserDetails loadUserByUserId(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
 
         return UserDetailsImpl.of(user);
     }
