@@ -33,7 +33,6 @@ public class ApplicantService {
     private final ApplicantRepository applicantRepository;
     private final RecruitBoardRepository recruitBoardRepository;
     private final BoardPositionRepository boardPositionRepository;
-    private final PenaltyService penaltyService;
     private final MailService mailService;
 
     @Transactional
@@ -43,10 +42,6 @@ public class ApplicantService {
 
         if(findBoardPosition.getRecruitBoard() == null) {
             throw new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND);
-        }
-
-        if (penaltyService.isPenalized(user, findBoardPosition.getRecruitBoard())) {
-            throw new AuthException(ErrorCode.APPLICANT_PENALTY);
         }
 
         isOwnedByUser(findBoardPosition.getRecruitBoard(), user.getId());
@@ -137,7 +132,6 @@ public class ApplicantService {
 
         validateCancelOwner(findApplicant, userId);
         handleApplicantStatus(findApplicant);
-//        penaltyService.penalize(findApplicant.getUser(), findApplicant);
     }
 
     private void handleApplicantStatus(Applicant findApplicant) {

@@ -56,9 +56,6 @@ class ApplicantServiceTest {
     private ApplicantRepository applicantRepository;
 
     @Mock
-    private MailService mailService;
-
-    @Mock
     private PenaltyService penaltyService;
 
     private User user;
