@@ -53,8 +53,8 @@ public class ApplicantController {
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public void cancelApplicant(@LoginUser User user, @PathVariable("id") Long applicantId) {
-        applicantService.cancelApplicant(user.getId(), applicantId);
+    public void cancelApplicant(@LoginUser User user, @PathVariable("id") Long boardPositionId) {
+        applicantService.cancelApplicant(user.getId(), boardPositionId);
     }
 
 }

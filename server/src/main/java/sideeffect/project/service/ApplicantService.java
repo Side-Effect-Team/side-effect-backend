@@ -126,8 +126,8 @@ public class ApplicantService {
     }
 
     @Transactional
-    public void cancelApplicant(Long userId, Long applicantId) {
-        Applicant findApplicant = applicantRepository.findById(applicantId)
+    public void cancelApplicant(Long userId, Long boardPositionId) {
+        Applicant findApplicant = applicantRepository.isUserApplicantForBoardPosition(userId, boardPositionId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.APPLICANT_NOT_FOUND));
 
         validateCancelOwner(findApplicant, userId);
