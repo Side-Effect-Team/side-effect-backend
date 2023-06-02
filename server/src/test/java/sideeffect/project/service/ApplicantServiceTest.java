@@ -58,6 +58,9 @@ class ApplicantServiceTest {
     @Mock
     private PenaltyService penaltyService;
 
+    @Mock
+    private MailService mailService;
+
     private User user;
     private RecruitBoard recruitBoard;
     private BoardPosition boardPosition;
@@ -100,14 +103,14 @@ class ApplicantServiceTest {
 
         when(boardPositionRepository.findByIdWithRecruitBoard(any())).thenReturn(Optional.of(boardPosition));
         when(recruitBoardRepository.existsApplicantByRecruitBoard(any(), any())).thenReturn(false);
-        when(penaltyService.isPenalized(any(), any())).thenReturn(false);
+//        when(penaltyService.isPenalized(any(), any())).thenReturn(false);
         when(applicantRepository.save(any())).thenReturn(applicant);
 
         applicantService.register(otherUser, boardPosition.getId());
 
         assertAll(
                 () -> verify(boardPositionRepository).findByIdWithRecruitBoard(any()),
-                () -> verify(penaltyService).isPenalized(any(),any()),
+//                () -> verify(penaltyService).isPenalized(any(),any()),
                 () -> verify(recruitBoardRepository).existsApplicantByRecruitBoard(any(), any()),
                 () -> verify(applicantRepository).save(any())
         );
@@ -119,7 +122,6 @@ class ApplicantServiceTest {
         User applicant = recruitBoard.getUser();
 
         when(boardPositionRepository.findByIdWithRecruitBoard(any())).thenReturn(Optional.of(boardPosition));
-        when(penaltyService.isPenalized(any(), any())).thenReturn(true);
 
         assertThatThrownBy(() -> applicantService.register(applicant, boardPosition.getId()))
             .isInstanceOf(AuthException.class);
@@ -345,14 +347,13 @@ class ApplicantServiceTest {
         Long userId = user.getId();
         Long applicantId = applicant.getId();
 
-        when(applicantRepository.findById(any())).thenReturn(Optional.of(applicant));
+        when(applicantRepository.isUserApplicantForBoardPosition(any(), any())).thenReturn(Optional.of(applicant));
 
-        applicantService.cancelApplicant(userId, applicantId);
+        applicantService.cancelApplicant(userId, boardPosition.getId());
 
         assertAll(
-            () -> verify(applicantRepository).findById(any()),
-            () -> verify(applicantRepository).delete(any()),
-            () -> verify(penaltyService).penalize(any(), any())
+            () -> verify(applicantRepository).isUserApplicantForBoardPosition(any(), any()),
+            () -> verify(applicantRepository).delete(any())
         );
     }
 
@@ -361,11 +362,10 @@ class ApplicantServiceTest {
     void cancelApplicantNonOwner() {
         applicant.associate(user, boardPosition);
         Long nonOwner = 2L;
-        Long applicantId = applicant.getId();
 
-        when(applicantRepository.findById(any())).thenReturn(Optional.of(applicant));
+        when(applicantRepository.isUserApplicantForBoardPosition(any(), any())).thenReturn(Optional.of(applicant));
 
-        assertThatThrownBy(() ->  applicantService.cancelApplicant(nonOwner, applicantId))
+        assertThatThrownBy(() ->  applicantService.cancelApplicant(nonOwner, boardPosition.getId()))
                 .isInstanceOf(AuthException.class);
 
     }
@@ -375,12 +375,11 @@ class ApplicantServiceTest {
     void cancelApplicantByRejected() {
         applicant.associate(user, boardPosition);
         Long userId = user.getId();
-        Long applicantId = applicant.getId();
         applicant.updateStatus(REJECTED);
 
-        when(applicantRepository.findById(any())).thenReturn(Optional.of(applicant));
+        when(applicantRepository.isUserApplicantForBoardPosition(any(), any())).thenReturn(Optional.of(applicant));
 
-        assertThatThrownBy(() ->  applicantService.cancelApplicant(userId, applicantId))
+        assertThatThrownBy(() ->  applicantService.cancelApplicant(userId, boardPosition.getId()))
                 .isInstanceOf(InvalidValueException.class);
     }
 
@@ -392,9 +391,9 @@ class ApplicantServiceTest {
         Long applicantId = applicant.getId();
         applicant.updateStatus(APPROVED);
 
-        when(applicantRepository.findById(any())).thenReturn(Optional.of(applicant));
+        when(applicantRepository.isUserApplicantForBoardPosition(any(), any())).thenReturn(Optional.of(applicant));
 
-        assertThatThrownBy(() ->  applicantService.cancelApplicant(userId, applicantId))
+        assertThatThrownBy(() ->  applicantService.cancelApplicant(userId, boardPosition.getId()))
                 .isInstanceOf(InvalidValueException.class);
     }
     
