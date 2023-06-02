@@ -21,10 +21,10 @@ import sideeffect.project.domain.freeboard.FreeBoard;
 public class FreeBoardResponse {
 
     private Long id;
-    private String headerImage;
+    private String imgUrl;
+    private String subTitle;
     private Integer views;
     private String title;
-    private String content;
     @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
     private boolean like;
@@ -41,9 +41,9 @@ public class FreeBoardResponse {
         return FreeBoardResponse.builder()
             .id(freeBoard.getId())
             .title(freeBoard.getTitle())
-            .content(freeBoard.getContent())
             .views(freeBoard.getViews())
-            .headerImage(freeBoard.getImgUrl())
+            .subTitle(freeBoard.getSubTitle())
+            .imgUrl(freeBoard.getImgUrl())
             .likeNum(freeBoard.getLikes().size())
             .commentNum(freeBoard.getComments().size())
             .createdAt(freeBoard.getCreateAt())

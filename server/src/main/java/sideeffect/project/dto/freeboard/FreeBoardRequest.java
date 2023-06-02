@@ -30,12 +30,15 @@ public class FreeBoardRequest {
     @Size(min = 3, max = 20)
     private String projectName;
 
+    private String subTitle;
+
     public FreeBoard toFreeBoard() {
         return FreeBoard.builder()
             .title(title)
             .content(content)
             .projectUrl(projectUrl)
             .projectName(projectName)
+            .subTitle(subTitle)
             .build();
     }
 }
