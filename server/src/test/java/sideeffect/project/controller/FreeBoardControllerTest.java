@@ -105,7 +105,7 @@ class FreeBoardControllerTest {
             .andExpect(jsonPath("$.writer").value(user.getNickname()))
             .andExpect(jsonPath("$.content").value(response.getContent()))
             .andExpect(jsonPath("$.projectUrl").value(response.getProjectUrl()))
-            .andExpect(jsonPath("$.headerImage").value(response.getHeaderImage()))
+            .andExpect(jsonPath("$.imgUrl").value(response.getImgUrl()))
             .andExpect(jsonPath("$.comments.size()").value(10))
             .andExpect(jsonPath("$.likeNum").value(recommendNumber))
             .andExpect(jsonPath("$.like").value(false))

@@ -19,7 +19,7 @@ import sideeffect.project.dto.comment.CommentResponse;
 public class DetailedFreeBoardResponse {
 
     private Long id;
-    private String headerImage;
+    private String imgUrl;
     private String subTitle;
     private int views;
     private Long userId;
@@ -45,7 +45,7 @@ public class DetailedFreeBoardResponse {
             .content(freeBoard.getContent())
             .projectUrl(freeBoard.getProjectUrl())
             .projectName(freeBoard.getProjectName())
-            .headerImage(freeBoard.getImgUrl())
+            .imgUrl(freeBoard.getImgUrl())
             .likeNum(freeBoard.getLikes().size())
             .comments(CommentResponse.listOf(freeBoard.getComments()))
             .createdAt(freeBoard.getCreateAt())

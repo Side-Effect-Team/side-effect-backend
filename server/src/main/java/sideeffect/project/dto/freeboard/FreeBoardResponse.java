@@ -21,7 +21,7 @@ import sideeffect.project.domain.freeboard.FreeBoard;
 public class FreeBoardResponse {
 
     private Long id;
-    private String headerImage;
+    private String imgUrl;
     private String subTitle;
     private Integer views;
     private String title;
@@ -43,7 +43,7 @@ public class FreeBoardResponse {
             .title(freeBoard.getTitle())
             .views(freeBoard.getViews())
             .subTitle(freeBoard.getSubTitle())
-            .headerImage(freeBoard.getImgUrl())
+            .imgUrl(freeBoard.getImgUrl())
             .likeNum(freeBoard.getLikes().size())
             .commentNum(freeBoard.getComments().size())
             .createdAt(freeBoard.getCreateAt())
