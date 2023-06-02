@@ -20,6 +20,7 @@ public class DetailedFreeBoardResponse {
 
     private Long id;
     private String headerImage;
+    private String subTitle;
     private int views;
     private Long userId;
     private String writer;
@@ -39,6 +40,7 @@ public class DetailedFreeBoardResponse {
             .views(freeBoard.getViews())
             .title(freeBoard.getTitle())
             .writer(freeBoard.getUser().getNickname())
+            .subTitle(freeBoard.getSubTitle())
             .userId(freeBoard.getUser().getId())
             .content(freeBoard.getContent())
             .projectUrl(freeBoard.getProjectUrl())
