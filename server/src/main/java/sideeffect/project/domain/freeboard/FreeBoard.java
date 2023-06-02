@@ -64,6 +64,8 @@ public class FreeBoard extends BaseTimeEntity {
 
     private String projectName;
 
+    private String subTitle;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -80,7 +82,8 @@ public class FreeBoard extends BaseTimeEntity {
     private boolean deleted;
 
     @Builder
-    public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl, String projectName) {
+    public FreeBoard(Long id, String title, String projectUrl, String content, String imgUrl, String projectName,
+        String subTitle) {
         this.id = id;
         this.views = 0;
         this.title = title;
@@ -90,6 +93,7 @@ public class FreeBoard extends BaseTimeEntity {
         this.projectName = projectName;
         this.comments = new ArrayList<>();
         this.likes = new HashSet<>();
+        this.subTitle = subTitle;
     }
 
     public void update(FreeBoard freeBoard) {
@@ -104,6 +108,9 @@ public class FreeBoard extends BaseTimeEntity {
         }
         if (freeBoard.getProjectName() != null) {
             this.projectName = freeBoard.getProjectName();
+        }
+        if (freeBoard.getSubTitle() != null) {
+            this.subTitle = freeBoard.getSubTitle();
         }
     }
 
