@@ -7,9 +7,10 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import sideeffect.project.domain.user.ProviderType;
-import sideeffect.project.domain.user.User;
+import sideeffect.project.security.UserDetailsImpl;
 import sideeffect.project.service.OauthService;
 
 
@@ -28,13 +29,8 @@ public class Oauth2LoginFilter extends UsernamePasswordAuthenticationFilter {
         String token = request.getHeader("token");
         ProviderType providerType = ProviderType.valueOf(request.getHeader("providerType").toUpperCase());
 
-        User user = oauthService.login(token, providerType);
+        UserDetails user = UserDetailsImpl.of(oauthService.login(token, providerType));
 
-        UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
-            user.getEmail(), user.getPassword());
-
-        setDetails(request, authRequest);
-
-        return this.getAuthenticationManager().authenticate(authRequest);
+        return new UsernamePasswordAuthenticationToken(user, user.getPassword(), user.getAuthorities());
     }
 }
