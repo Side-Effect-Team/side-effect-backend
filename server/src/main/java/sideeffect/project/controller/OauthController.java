@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import sideeffect.project.domain.token.RefreshToken;
 import sideeffect.project.domain.user.ProviderType;
 import sideeffect.project.domain.user.User;
@@ -22,6 +23,7 @@ import sideeffect.project.service.OauthService;
 
 
 @Slf4j
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/social")
 public class OauthController {
