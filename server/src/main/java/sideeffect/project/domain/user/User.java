@@ -211,7 +211,7 @@ public class User extends BaseTimeEntity {
         this.imgUrl = filepath;
     }
     public void updateUserStack(List<UserStack> userStacks) {
-        if(userStacks!=null && !userStacks.isEmpty()){
+        if(userStacks!=null){
             this.userStacks.clear();
             this.userStacks.addAll(userStacks);
         }

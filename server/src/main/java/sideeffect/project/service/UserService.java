@@ -32,14 +32,14 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
     private final UserUploadService userUploadService;
-    public Long join(UserRequest request){
+    public User join(UserRequest request){
 
         validateDuplicateUser(request.getEmail(), request.getProviderType());
         User user = request.toUser();
         user.setPassword(encoder.encode(user.getPassword()));
         user.setUserRoleType(UserRoleType.ROLE_USER);
         user.updateUserStack(getUserStacks(user, request.getTags()));
-        return userRepository.save(user).getId();
+        return userRepository.save(user);
     }
 
     private List<UserStack> getUserStacks(User user, List<String> stacks) {
