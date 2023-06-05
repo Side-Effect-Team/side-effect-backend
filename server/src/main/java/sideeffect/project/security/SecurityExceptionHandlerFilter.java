@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.filter.OncePerRequestFilter;
 import sideeffect.project.common.dto.ErrorResponse;
 import sideeffect.project.common.exception.AuthException;
+import sideeffect.project.common.exception.BaseException;
 import sideeffect.project.common.exception.ErrorCode;
 
 import javax.servlet.FilterChain;
@@ -13,19 +14,20 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import sideeffect.project.common.exception.InvalidValueException;
 
 @Slf4j
-public class JwtExceptionHandlerFilter extends OncePerRequestFilter {
+public class SecurityExceptionHandlerFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try{
             filterChain.doFilter(request, response);
-        }catch (AuthException e){
+        } catch (AuthException | InvalidValueException e) {
             setErrorResponse(response, e);
         }
     }
 
-    private void setErrorResponse(HttpServletResponse response, AuthException e) throws IOException {
+    private void setErrorResponse(HttpServletResponse response, BaseException e) throws IOException {
         ObjectMapper om = new ObjectMapper();
         ErrorCode errorCode = e.getErrorCode();
         ErrorResponse errorResponse = ErrorResponse.of(errorCode);
