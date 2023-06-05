@@ -23,7 +23,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        log.info("UserDetailsServiceImpl 진입");
         User user = userRepository.findByEmail(email).orElseThrow(() -> new JoinException(email));
 
         return UserDetailsImpl.of(user);
@@ -31,7 +30,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Transactional
     public UserDetails loadUserByUsernameAndProviderType(String email, ProviderType providerType) throws UsernameNotFoundException {
-        log.info("UserDetailsServiceImpl(provider) 진입");
         User user = userRepository.findByEmailAndProvider(email, providerType).orElseThrow(() -> new JoinException(email));
 
         return UserDetailsImpl.of(user);

@@ -26,7 +26,6 @@ public class UserUploadService extends FileUploadService{
         if (validate(multipartFile)) {
             String originalFilename = multipartFile.getOriginalFilename();
             String storeFileName = createStoreFileName(originalFilename);
-            log.info("storeFileName: " + storeFileName);
             multipartFile.transferTo(new File(getFullPath(storeFileName)));
             return storeFileName;
         }
