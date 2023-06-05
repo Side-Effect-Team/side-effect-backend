@@ -61,7 +61,7 @@ public class OauthController {
         return ResponseCookie.from("token", refreshToken)
             .sameSite("None")
             .secure(true)
-            .path("/api/token/at-issue")
+            .path("/api/token/")
             .httpOnly(true)
             .build();
     }
