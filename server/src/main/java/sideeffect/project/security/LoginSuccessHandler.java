@@ -8,12 +8,12 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.transaction.annotation.Transactional;
+import sideeffect.project.domain.token.RefreshToken;
+import sideeffect.project.dto.user.RefreshTokenResponse;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import sideeffect.project.domain.token.RefreshToken;
-import sideeffect.project.dto.user.RefreshTokenResponse;
 
 @RequiredArgsConstructor
 @Transactional
@@ -42,7 +42,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         return ResponseCookie.from("token", refreshToken)
             .sameSite("None")
             .secure(true)
-            .path("/api/token/")
+            .path("/api/token/at-issue")
             .httpOnly(true)
             .build();
     }

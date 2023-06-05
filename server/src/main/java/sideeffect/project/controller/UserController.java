@@ -105,7 +105,7 @@ public class UserController {
         return ResponseCookie.from("token", refreshToken)
                 .sameSite("None")
                 .secure(true)
-                .path("/api/token/")
+                .path("/api/token/at-issue")
                 .httpOnly(true)
                 .build();
     }
