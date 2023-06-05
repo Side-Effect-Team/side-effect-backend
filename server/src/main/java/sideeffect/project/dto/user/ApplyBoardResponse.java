@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class ApplyBoardResponse {
 
     private String category;
-    private Long applicationId;
+    private Long positionId;
     private Long boardId;
     private String title;
     private PositionType position;
@@ -40,7 +40,7 @@ public class ApplyBoardResponse {
     private static ApplyBoardResponse getApplyBoardResponse(User user, Applicant applicant) {
         return ApplyBoardResponse.builder()
                 .category("recruits")
-                .applicationId(applicant.getId())
+                .positionId(applicant.getBoardPosition().getId())
                 .boardId(applicant.getBoardPosition().getRecruitBoard().getId())
                 .title(applicant.getBoardPosition().getRecruitBoard().getTitle())
                 .position(user.getPosition())
