@@ -13,7 +13,9 @@ public class ApplicantInfoResponse {
     private Long userId;
     private Long applicantId;
     private String nickName;
+    private String career;
     private String imgUrl;
+    private String githubUrl;
     private String email;
     private LocalDateTime createdAt;
 
@@ -22,7 +24,9 @@ public class ApplicantInfoResponse {
                 .userId(response.getUserId())
                 .applicantId(response.getApplicantId())
                 .nickName(response.getNickName())
+                .career(response.getCareer())
                 .imgUrl(response.getImgUrl())
+                .githubUrl(response.getGithubUrl())
                 .email(response.getEmail())
                 .createdAt(response.getCreatedAt())
                 .build();
