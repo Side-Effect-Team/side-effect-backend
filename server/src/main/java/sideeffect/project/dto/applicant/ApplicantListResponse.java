@@ -14,7 +14,9 @@ public class ApplicantListResponse {
     private Long userId;
     private Long applicantId;
     private String nickName;
+    private String career;
     private String imgUrl;
+    private String githubUrl;
     private String email;
     private PositionType positionType;
     private LocalDateTime createdAt;
