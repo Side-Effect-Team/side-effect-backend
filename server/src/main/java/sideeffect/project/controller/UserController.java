@@ -60,7 +60,7 @@ public class UserController {
     @PatchMapping("/{id}")
     public String update(@LoginUser User user, @PathVariable Long id, @RequestBody UserRequest request){
         userService.update(user, id, request);
-        return "update success";
+        return "update";
     }
     @DeleteMapping("/{id}")
     public String delete(@LoginUser User user, @PathVariable Long id){
