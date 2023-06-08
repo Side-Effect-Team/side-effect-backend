@@ -1,5 +1,6 @@
 package sideeffect.project.dto.recruit;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import sideeffect.project.domain.recruit.RecruitBoard;
@@ -7,6 +8,8 @@ import sideeffect.project.domain.recruit.RecruitBoard;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.fasterxml.jackson.annotation.JsonFormat.*;
 
 @Getter
 @Builder
@@ -20,6 +23,7 @@ public class RecruitBoardResponse {
     private int views;
     private boolean like;
     private int likeNum;
+    @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSSSSS", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
     private List<String> positions;
     private List<String> tags;
