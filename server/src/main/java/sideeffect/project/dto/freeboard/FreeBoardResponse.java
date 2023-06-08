@@ -25,12 +25,11 @@ public class FreeBoardResponse {
     private String subTitle;
     private Integer views;
     private String title;
-    @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
+    @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSSSSS", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
     private boolean like;
     private int likeNum;
     private int commentNum;
-
     public static List<FreeBoardResponse> listOf(List<FreeBoard> freeBoards) {
         return freeBoards.stream()
             .map(FreeBoardResponse::of)
