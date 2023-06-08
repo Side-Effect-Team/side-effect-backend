@@ -1,6 +1,5 @@
 package sideeffect.project.dto.recruit;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import sideeffect.project.domain.recruit.RecruitBoard;
@@ -21,7 +20,6 @@ public class RecruitBoardResponse {
     private int views;
     private boolean like;
     private int likeNum;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
     private List<String> positions;
     private List<String> tags;
