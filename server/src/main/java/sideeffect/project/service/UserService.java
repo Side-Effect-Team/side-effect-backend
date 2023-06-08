@@ -6,8 +6,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import sideeffect.project.common.exception.*;
 import sideeffect.project.common.exception.IllegalStateException;
+import sideeffect.project.common.exception.*;
 import sideeffect.project.common.fileupload.service.UserUploadService;
 import sideeffect.project.domain.user.ProviderType;
 import sideeffect.project.domain.user.User;
@@ -19,7 +19,6 @@ import sideeffect.project.dto.user.UserResponse;
 import sideeffect.project.repository.UserRepository;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,25 +31,22 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
     private final UserUploadService userUploadService;
-    public Long join(UserRequest request){
+    public User join(UserRequest request){
 
         validateDuplicateUser(request.getEmail(), request.getProviderType());
         User user = request.toUser();
         user.setPassword(encoder.encode(user.getPassword()));
         user.setUserRoleType(UserRoleType.ROLE_USER);
         user.updateUserStack(getUserStacks(user, request.getTags()));
-        return userRepository.save(user).getId();
+        return userRepository.save(user);
     }
 
     private List<UserStack> getUserStacks(User user, List<String> stacks) {
-        List<UserStack> userStacks = Collections.emptyList();
-
-        if(stacks!=null && !stacks.isEmpty()){
-            userStacks = stacks.stream()
+        if(stacks!=null){
+            return stacks.stream()
                     .map(userStackRequest -> toUserStack(user, userStackRequest))
                     .collect(Collectors.toList());
-        }
-        return userStacks;
+        }else return null;
     }
 
     private UserStack toUserStack(User user, String userStackRequest) {
