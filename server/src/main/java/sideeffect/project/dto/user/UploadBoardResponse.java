@@ -1,6 +1,5 @@
 package sideeffect.project.dto.user;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import sideeffect.project.domain.freeboard.FreeBoard;
 import sideeffect.project.domain.like.Like;
@@ -29,7 +28,6 @@ public class UploadBoardResponse {
     private Long id;
     private String title;
     private String content;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
     private Boolean like;
     private int likeNum;
