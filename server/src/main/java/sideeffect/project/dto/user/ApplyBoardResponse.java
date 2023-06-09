@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Getter
 @Builder
 public class ApplyBoardResponse {
-
+    //
     private String category;
     private Long positionId;
     private Long boardId;
