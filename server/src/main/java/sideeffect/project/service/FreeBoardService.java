@@ -29,7 +29,7 @@ import sideeffect.project.repository.LikeRepository;
 @RequiredArgsConstructor
 public class FreeBoardService {
 
-    private static final int RANK_NUMBER = 6;
+    private static final int RANK_NUMBER = 8;
     private static final int RANK_DAYS = 30;
 
     private final FreeBoardRepository repository;
