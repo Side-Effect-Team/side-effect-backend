@@ -12,7 +12,7 @@ public interface FreeBoardRepository extends JpaRepository<FreeBoard, Long>, Fre
     boolean existsByProjectUrl(String projectUrl);
 
     @Query("SELECT distinct b from FreeBoard b "
-        + "join fetch b.likes "
+        + "left outer join fetch b.likes "
         + "where b.id = :boardId ")
     Optional<FreeBoard> searchBoardFetchJoin(@Param("boardId") Long boardId);
 }
