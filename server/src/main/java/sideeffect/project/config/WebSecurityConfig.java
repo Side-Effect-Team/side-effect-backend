@@ -49,12 +49,12 @@ public class WebSecurityConfig{
                 .and()
                 .addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new SecurityExceptionHandlerFilter(), JwtFilter.class)
-                .formLogin()
-                    .loginProcessingUrl("/api/user/login")
-                    .usernameParameter("email")
-                    .successHandler(loginSuccessHandler(refreshTokenProvider))
-                    .failureHandler(loginFailureHandler())
-                    .and()
+//                .formLogin()
+//                    .loginProcessingUrl("/api/user/login")
+//                    .usernameParameter("email")
+//                    .successHandler(loginSuccessHandler(refreshTokenProvider))
+//                    .failureHandler(loginFailureHandler())
+//                    .and()
                 .build();
     }
 }
