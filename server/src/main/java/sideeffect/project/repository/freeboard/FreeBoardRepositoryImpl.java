@@ -27,6 +27,7 @@ import org.springframework.stereotype.Repository;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollDto;
 import sideeffect.project.dto.freeboard.OrderType;
+import sideeffect.project.dto.freeboard.RankResponse;
 
 @Slf4j
 @Repository
@@ -64,12 +65,12 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
     }
 
     @Override
-    public List<FreeBoardResponse> searchRankBoard(Integer size, Integer days, Long userId, ChronoUnit chronoUnit) {
-        return jpaQueryFactory.select(getResponseConstructor(userId))
+    public List<RankResponse> searchRankBoard(Integer size, Integer days, Long userId, ChronoUnit chronoUnit) {
+        return jpaQueryFactory.select(getRankResponseConstructor(userId))
             .from(freeBoard)
             .leftJoin(freeBoard.likes, like)
-            .where(like.createdAt.after(LocalDateTime.now().minus(days, chronoUnit)))
-            .orderBy(like.count().desc(), freeBoard.views.desc())
+            .where(like.createdAt.after(LocalDateTime.now().minus(days, chronoUnit)).or(freeBoard.likes.isNotEmpty()))
+            .orderBy(like.count().desc(), freeBoard.likes.size().desc(), freeBoard.views.desc())
             .groupBy(freeBoard.id)
             .limit(size)
             .fetch();
@@ -140,6 +141,20 @@ public class FreeBoardRepositoryImpl implements FreeBoardRepositoryCustom {
             freeBoard.id,
             freeBoard.imgUrl,
             freeBoard.subTitle,
+            freeBoard.views,
+            freeBoard.title,
+            freeBoard.createAt,
+            getLikeExpression(userId),
+            freeBoard.likes.size(),
+            freeBoard.comments.size());
+    }
+
+    private ConstructorExpression<RankResponse> getRankResponseConstructor(Long userId) {
+        return Projections.constructor(RankResponse.class,
+            freeBoard.id,
+            freeBoard.imgUrl,
+            freeBoard.subTitle,
+            freeBoard.content,
             freeBoard.views,
             freeBoard.title,
             freeBoard.createAt,
