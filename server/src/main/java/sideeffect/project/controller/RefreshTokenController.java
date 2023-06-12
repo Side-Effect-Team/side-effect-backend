@@ -29,14 +29,11 @@ public class RefreshTokenController {
         response.addHeader("Authorization", accessToken);
     }
 
-    @DeleteMapping("/logout")
+    @DeleteMapping("/at-issue")
     public void logout(@CookieValue(value = "token", required = false) String refreshToken, HttpServletResponse response) {
-
-        if (refreshToken == null) {
-            throw new AuthException(ErrorCode.REFRESH_TOKEN_NOT_REQUEST);
+        if (refreshToken != null) {
+            refreshTokenProvider.deleteToken(refreshToken);
         }
-
-        refreshTokenProvider.deleteToken(refreshToken);
 
         response.addHeader(HttpHeaders.SET_COOKIE, createBlankCookie().toString());
     }
@@ -45,7 +42,7 @@ public class RefreshTokenController {
         return ResponseCookie.from("token", null)
             .sameSite("None")
             .secure(true)
-            .path("/api/token/")
+            .path("/api/token/at-issue")
             .httpOnly(true)
             .maxAge(0)
             .build();
