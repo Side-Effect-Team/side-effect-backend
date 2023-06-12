@@ -4,6 +4,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollDto;
+import sideeffect.project.dto.freeboard.RankResponse;
 
 public interface FreeBoardRepositoryCustom {
 
@@ -11,6 +12,6 @@ public interface FreeBoardRepositoryCustom {
 
     List<FreeBoardResponse> searchScrollWithKeyword(FreeBoardScrollDto scrollDto, Long userId);
 
-    List<FreeBoardResponse> searchRankBoard(Integer size, Integer days, Long userId, ChronoUnit chronoUnit);
+    List<RankResponse> searchRankBoard(Integer size, Integer days, Long userId, ChronoUnit chronoUnit);
 
 }

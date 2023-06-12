@@ -22,6 +22,7 @@ import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollDto;
 import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
+import sideeffect.project.dto.freeboard.RankResponse;
 import sideeffect.project.repository.FreeBoardRepository;
 import sideeffect.project.repository.LikeRepository;
 
@@ -61,7 +62,7 @@ public class FreeBoardService {
     }
 
     @Transactional(readOnly = true)
-    public List<FreeBoardResponse> findRankFreeBoards(User user) {
+    public List<RankResponse> findRankFreeBoards(User user) {
         return repository.searchRankBoard(RANK_NUMBER, RANK_DAYS, user.getId(), ChronoUnit.DAYS);
     }
 
