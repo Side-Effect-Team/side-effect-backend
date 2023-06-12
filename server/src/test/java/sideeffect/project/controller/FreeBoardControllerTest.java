@@ -42,6 +42,7 @@ import sideeffect.project.dto.freeboard.FreeBoardRequest;
 import sideeffect.project.dto.freeboard.DetailedFreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
+import sideeffect.project.dto.freeboard.RankResponse;
 import sideeffect.project.service.FreeBoardService;
 
 import java.util.List;
@@ -163,7 +164,7 @@ class FreeBoardControllerTest {
     @Test
     void getRankBoard() throws Exception {
         List<FreeBoard> freeBoards = generateLikeBoards();
-        given(freeBoardService.findRankFreeBoards(any())).willReturn(FreeBoardResponse.listOf(freeBoards));
+        given(freeBoardService.findRankFreeBoards(any())).willReturn(RankResponse.listOf(freeBoards));
 
         mvc.perform(get("/api/free-boards/rank")
                 .contentType(MediaType.APPLICATION_JSON))

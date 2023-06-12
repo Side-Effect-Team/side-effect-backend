@@ -30,6 +30,7 @@ import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollRequest;
 import sideeffect.project.dto.freeboard.FreeBoardScrollResponse;
 import sideeffect.project.dto.freeboard.OrderType;
+import sideeffect.project.dto.freeboard.RankResponse;
 import sideeffect.project.security.LoginUser;
 import sideeffect.project.service.FreeBoardService;
 
@@ -63,7 +64,7 @@ public class FreeBoardController {
     }
 
     @GetMapping("/rank")
-    public List<FreeBoardResponse> getRankBoard(@LoginUser User user) {
+    public List<RankResponse> getRankBoard(@LoginUser User user) {
         return freeBoardService.findRankFreeBoards(user);
     }
 
