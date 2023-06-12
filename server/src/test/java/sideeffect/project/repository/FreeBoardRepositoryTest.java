@@ -12,7 +12,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -29,6 +28,7 @@ import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollDto;
 import sideeffect.project.dto.freeboard.OrderType;
+import sideeffect.project.dto.freeboard.RankResponse;
 
 class FreeBoardRepositoryTest extends TestDataRepository {
 
@@ -132,9 +132,9 @@ class FreeBoardRepositoryTest extends TestDataRepository {
         Thread.sleep(2000);
         associateLikesAndFreeBoards(freeBoards, afterLikes);
 
-        List<FreeBoardResponse> freeBoardResponses =
+        List<RankResponse> freeBoardResponses =
             repository.searchRankBoard(rankSize, 1, null, ChronoUnit.SECONDS);
-        List<Integer> result = freeBoardResponses.stream().map(FreeBoardResponse::getLikeNum).collect(Collectors.toList());
+        List<Integer> result = freeBoardResponses.stream().map(RankResponse::getLikeNum).collect(Collectors.toList());
         assertThat(result).isEqualTo(List.of(10, 19, 17, 16, 16, 17));
     }
 
