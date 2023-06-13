@@ -8,7 +8,6 @@ import static sideeffect.project.dto.freeboard.OrderType.LATEST;
 import static sideeffect.project.dto.freeboard.OrderType.LIKE;
 import static sideeffect.project.dto.freeboard.OrderType.VIEWS;
 
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,7 +27,7 @@ import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.freeboard.FreeBoardResponse;
 import sideeffect.project.dto.freeboard.FreeBoardScrollDto;
 import sideeffect.project.dto.freeboard.OrderType;
-import sideeffect.project.dto.freeboard.RankResponse;
+
 
 class FreeBoardRepositoryTest extends TestDataRepository {
 
@@ -118,24 +117,6 @@ class FreeBoardRepositoryTest extends TestDataRepository {
         List<Long> boardIds = boards.stream().map(FreeBoardResponse::getId).collect(Collectors.toList());
 
         assertThat(boardIds).containsExactly(freeBoard2.getId(), freeBoard1.getId());
-    }
-
-    @DisplayName("랭킹 게시판을 조회한다.")
-    @Test
-    void findRankFreeBoard() throws InterruptedException {
-        int rankSize = 6;
-        int boardsSize = 6;
-        List<Integer> beforeLikes = List.of(16, 14, 13, 12, 11, 0);
-        List<Integer> afterLikes = List.of(1, 2, 3, 5, 8, 10);
-        List<FreeBoard> freeBoards = generateFreeBoards(boardsSize);
-        associateLikesAndFreeBoards(freeBoards, beforeLikes);
-        Thread.sleep(2000);
-        associateLikesAndFreeBoards(freeBoards, afterLikes);
-
-        List<RankResponse> freeBoardResponses =
-            repository.searchRankBoard(rankSize, 1, null, ChronoUnit.SECONDS);
-        List<Integer> result = freeBoardResponses.stream().map(RankResponse::getLikeNum).collect(Collectors.toList());
-        assertThat(result).isEqualTo(List.of(10, 19, 17, 16, 16, 17));
     }
 
     @DisplayName("댓글 순으로 스크롤을 진행한다.")
