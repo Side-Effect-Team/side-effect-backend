@@ -4,9 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -30,6 +36,12 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -37,8 +49,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @WebMvcTest(ApplicantController.class)
+@ExtendWith(RestDocumentationExtension.class)
 class ApplicantControllerTest {
 
     @MockBean
@@ -54,9 +66,10 @@ class ApplicantControllerTest {
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    void setUp(WebApplicationContext context) {
+    void setUp(WebApplicationContext context, RestDocumentationContextProvider restDocumentationContextProvider) {
         mvc = MockMvcBuilders.webAppContextSetup(context)
                 .apply(springSecurity())
+                .apply(documentationConfiguration(restDocumentationContextProvider))
                 .build();
 
         applicant = Applicant.builder()
@@ -85,10 +98,21 @@ class ApplicantControllerTest {
 
         given(applicantService.register(any(), any())).willReturn(applicantResponse);
 
-        mvc.perform(post("/api/applicant/1")
+        mvc.perform(RestDocumentationRequestBuilders.post("/api/applicant/{id}", 1L)
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andDo(print());
+                .andDo(print())
+                .andDo(MockMvcRestDocumentation.document("/applicant/register",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        pathParameters(
+                                parameterWithName("id").description("BoardPosition Id")
+                        ),
+                        responseFields(
+                                fieldWithPath("id").type(JsonFieldType.NUMBER).description("Applicant ID"),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description("상태")
+                        )
+                        ));
     }
 
     @DisplayName("자신의 게시글에는 지원을 할 수 없다.")

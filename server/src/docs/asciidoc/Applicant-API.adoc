@@ -1,0 +1,7 @@
+[[Applicant-API]]
+== Applicant API
+
+[[Applicant-지원]]
+=== 게시판 지원
+
+operation::applicant/register[snippets='http-request,path-parameters,http-response,response-fields']

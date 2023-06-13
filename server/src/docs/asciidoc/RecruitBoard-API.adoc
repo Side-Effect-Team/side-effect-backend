@@ -1,0 +1,7 @@
+[[RecruitBoard-API]]
+== Member API
+
+[[RecruitBoard-조회]]
+=== 게시판 조회
+
+operation::recruit-board/find[snippets='http-request,path-parameters,http-response,response-fields']

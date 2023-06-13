@@ -4,9 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -33,6 +37,12 @@ import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -41,6 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RecruitBoardController.class)
+@ExtendWith(RestDocumentationExtension.class)
 class RecruitBoardControllerTest {
 
     @MockBean
@@ -55,9 +66,10 @@ class RecruitBoardControllerTest {
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    void setUp(WebApplicationContext context) {
+    void setUp(WebApplicationContext context, RestDocumentationContextProvider restDocumentationContextProvider) {
         mvc = MockMvcBuilders.webAppContextSetup(context)
                 .apply(springSecurity())
+                .apply(documentationConfiguration(restDocumentationContextProvider))
                 .build();
 
         user = User.builder()
@@ -81,8 +93,10 @@ class RecruitBoardControllerTest {
     void findRecruitBoard() throws Exception {
         DetailedRecruitBoardResponse response = DetailedRecruitBoardResponse.builder()
                 .id(1L)
+                .writer(user.getNickname())
                 .views(0)
-                .userId(1L)
+                .userId(user.getId())
+                .createdAt(null)
                 .title("모집 게시글 제목")
                 .projectName("프로젝트명1")
                 .content("모집 게시글 내용")
@@ -93,8 +107,8 @@ class RecruitBoardControllerTest {
 
         given(recruitBoardService.findRecruitBoard(any(), any())).willReturn(response);
 
-        mvc.perform(get("/api/recruit-board/1")
-                .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(RestDocumentationRequestBuilders.get("/api/recruit-board/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value(response.getTitle()))
                 .andExpect(jsonPath("$.projectName").value(response.getProjectName()))
@@ -102,7 +116,37 @@ class RecruitBoardControllerTest {
                 .andExpect(jsonPath("$.positions.length()").value(1))
                 .andExpect(jsonPath("$.tags.length()").value(1))
                 .andExpect(jsonPath("$.comments.length()").value(10))
-                .andDo(print());
+                .andDo( // rest docs 문서 작성 시작
+                        document("/recruit-board/find", // 문서 조각 디렉토리 명
+                                pathParameters( // path 파라미터 정보 입력
+                                        parameterWithName("id").description("모집 게시글 아이디")
+                                ),
+                                responseFields( // response 필드 정보 입력
+                                        fieldWithPath("id").description("아이디"),
+                                        fieldWithPath("userId").description("작성자 아이디"),
+                                        fieldWithPath("writer").description("작성자"),
+                                        fieldWithPath("projectName").description("프로젝트명"),
+                                        fieldWithPath("views").description("조회수"),
+                                        fieldWithPath("title").description("제목"),
+                                        fieldWithPath("content").description("내용"),
+                                        fieldWithPath("imgSrc").description("게시글 이미지"),
+                                        fieldWithPath("like").description("좋아요 여부"),
+                                        fieldWithPath("likeNum").description("좋아요 수"),
+                                        fieldWithPath("createdAt").description("작성일"),
+                                        fieldWithPath("positions[].id").description("모집 포지션"),
+                                        fieldWithPath("positions[].positionType").description("모집 포지션"),
+                                        fieldWithPath("positions[].targetNumber").description("모집 포지션"),
+                                        fieldWithPath("positions[].currentNumber").description("모집 포지션"),
+                                        fieldWithPath("positions[].supported").description("모집 포지션"),
+                                        fieldWithPath("tags[].stackType").description("기술 태그"),
+                                        fieldWithPath("tags[].url").description("기술 태그"),
+                                        fieldWithPath("comments[].commentId").description("게시글 댓글"),
+                                        fieldWithPath("comments[].recruitBoardId").description("게시글 댓글"),
+                                        fieldWithPath("comments[].content").description("게시글 댓글"),
+                                        fieldWithPath("comments[].writer").description("게시글 댓글"),
+                                        fieldWithPath("comments[].writerId").description("게시글 댓글")
+                                )
+                        ));
 
         verify(recruitBoardService).findRecruitBoard(any(), any());
     }

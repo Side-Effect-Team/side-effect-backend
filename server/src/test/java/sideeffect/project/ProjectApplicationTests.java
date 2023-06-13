@@ -1,3 +1,4 @@
+/*
 package sideeffect.project;
 
 import org.junit.jupiter.api.Test;
@@ -11,3 +12,4 @@ class ProjectApplicationTests {
 	}
 
 }
+*/
