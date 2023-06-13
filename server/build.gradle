@@ -82,9 +82,8 @@ configurations {
 
 ////rest docs
 
-ext {
-	snippetsDir = file('build/generated-snippets')
-}
+
+def snippetsDir = "$buildDir/generated-snippets"
 
 test {
 	outputs.dir snippetsDir
