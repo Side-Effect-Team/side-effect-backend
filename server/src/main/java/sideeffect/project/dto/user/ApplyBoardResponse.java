@@ -43,7 +43,7 @@ public class ApplyBoardResponse {
                 .positionId(applicant.getBoardPosition().getId())
                 .boardId(applicant.getBoardPosition().getRecruitBoard().getId())
                 .title(applicant.getBoardPosition().getRecruitBoard().getTitle())
-                .position(user.getPosition())
+                .position(applicant.getBoardPosition().getPosition().getPositionType())
                 .status(applicant.getStatus())
                 .closed(applicant.getBoardPosition().getTargetNumber()==applicant.getBoardPosition().getCurrentNumber())
                 .build();
