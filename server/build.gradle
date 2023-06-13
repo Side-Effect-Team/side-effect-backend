@@ -82,15 +82,19 @@ configurations {
 
 ////rest docs
 
+ext {
+	snippetsDir = file('build/generated-snippets')
+}
+
 test {
-	outputs.dir "/var/jenkins_home/workspace/side-effect/server/build/generated-snippets"
+	outputs.dir(snippetsDir)
 	filter {
 		includeTestsMatching "sideeffect.project.controller.*"
 	}
 }
 
 asciidoctor {
-	inputs.dir "/var/jenkins_home/workspace/side-effect/server/build/generated-snippets"
+	inputs.dir(snippetsDir)
 	configurations 'asciidoctorExt'
 	dependsOn test
 	baseDirFollowsSourceFile()
