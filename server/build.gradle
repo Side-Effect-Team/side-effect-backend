@@ -82,15 +82,15 @@ configurations {
 
 ////rest docs
 
-
-def snippetsDir = "$buildDir/generated-snippets"
-
 test {
-	outputs.dir snippetsDir
+	outputs.dir "$buildDir/generated-snippets"
+	filter {
+		includeTestsMatching "sideeffect.project.controller.*"
+	}
 }
 
 asciidoctor {
-	inputs.dir snippetsDir
+	inputs.dir "$buildDir/generated-snippets"
 	configurations 'asciidoctorExt'
 	dependsOn test
 	baseDirFollowsSourceFile()
