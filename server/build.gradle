@@ -20,7 +20,7 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
-	asciidoctorExt
+	asciidoctorExtensions
 }
 
 repositories {
@@ -50,12 +50,13 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 
-	asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
+	asciidoctorExtensions 'org.springframework.restdocs:spring-restdocs-asciidoctor'
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 }
 
 ext {
-	snippetsDir = file("$buildDir/generated-snippets")
+//	snippetsDir = file("$buildDir/generated-snippets")
+	set('snippetsDir', file("build/generated-snippets"))
 }
 
 //tasks.named('test') {
@@ -88,9 +89,8 @@ configurations {
 
 test {
 	print "testTask running\n"
-//	outputs.dir(snippetsDir)
-	useJUnitPlatform()
 	outputs.dir snippetsDir
+	useJUnitPlatform()
 	filter {
 		includeTestsMatching "sideeffect.project.controller.*"
 	}
@@ -98,8 +98,8 @@ test {
 
 asciidoctor {
 	print snippetsDir
+	configurations 'asciidoctorExtensions'
 	inputs.dir snippetsDir
-	configurations 'asciidoctorExt'
 	dependsOn test
 	baseDirFollowsSourceFile()
 }
