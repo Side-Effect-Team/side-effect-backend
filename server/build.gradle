@@ -88,6 +88,7 @@ configurations {
 ////rest docs
 
 test {
+	print "testTask running\n"
 //	outputs.dir(snippetsDir)
 	filter {
 		includeTestsMatching "sideeffect.project.controller.*"
@@ -95,6 +96,7 @@ test {
 }
 
 asciidoctor {
+	print snippetsDir
 	inputs.dir snippetsDir
 	configurations 'asciidoctorExt'
 	dependsOn tasks.test
