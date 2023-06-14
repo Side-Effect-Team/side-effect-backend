@@ -58,10 +58,9 @@ ext {
 	snippetsDir = file("$buildDir/generated-snippets")
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
-	outputs.dir snippetsDir
-}
+//tasks.named('test') {
+//
+//}
 
 def querydslDir = "$buildDir/generated/querydsl"
 
@@ -90,6 +89,8 @@ configurations {
 test {
 	print "testTask running\n"
 //	outputs.dir(snippetsDir)
+	useJUnitPlatform()
+	outputs.dir snippetsDir
 	filter {
 		includeTestsMatching "sideeffect.project.controller.*"
 	}
@@ -99,7 +100,7 @@ asciidoctor {
 	print snippetsDir
 	inputs.dir snippetsDir
 	configurations 'asciidoctorExt'
-	dependsOn tasks.test
+	dependsOn test
 	baseDirFollowsSourceFile()
 }
 
