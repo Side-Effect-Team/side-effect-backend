@@ -23,8 +23,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
-//    private static final int EXPIRATION_TIME = 1000 * 60 * 30;
-    private static final int EXPIRATION_TIME = 1000 * 30;
+    private static final int EXPIRATION_TIME = 1000 * 60 * 30;
 
     private final AuthProperties authProperties;
     private final UserDetailsServiceImpl userDetailsService;
