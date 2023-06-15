@@ -1,7 +1,56 @@
 [[RecruitBoard-API]]
-== Member API
+== RecruitBoard API
 
-[[RecruitBoard-조회]]
-=== 게시판 조회
+[[RecruitBoard-find]]
+=== 게시판 상세 조회
+`GET /api/recruit-board/{게시글 id}`
 
 operation::recruit-board/find[snippets='http-request,path-parameters,http-response,response-fields']
+
+[[RecruitBoard-scroll-all]]
+=== 게시판 스크롤 조회
+`GET /api/recruit-board/scroll`
+
+operation::recruit-board/scroll[snippets='http-request,request-parameters,http-response,response-fields']
+
+[[RecruitBoard-find-all]]
+=== 게시판 전체 조회
+`GET /api/recruit-board/all`
+
+operation::recruit-board/find-all[snippets='http-request,http-response,response-fields']
+
+[[RecruitBoard-register]]
+=== 게시판 생성
+`POST /api/recruit-board`
+
+operation::recruit-board/register[snippets='http-request,request-headers,request-fields,http-response,response-fields']
+
+[[RecruitBoard-update]]
+=== 게시판 수정
+`PATCH /api/recruit-board/{게시글 id}`
+
+operation::recruit-board/update[snippets='http-request,request-headers,path-parameters,request-fields,http-response']
+
+[[RecruitBoard-add-position]]
+=== 게시판 포지션 추가
+`POST /api/recruit-board/{게시글 id}/add-position`
+
+operation::recruit-board/add-position[snippets='http-request,request-headers,path-parameters,request-fields,http-response']
+
+[[RecruitBoard-delete]]
+=== 게시판 삭제
+`DELETE /api/recruit-board/{게시글 id}`
+
+operation::recruit-board/delete[snippets='http-request,request-headers,path-parameters,http-response']
+
+[[RecruitBoard-likes]]
+=== 게시판 좋아요
+`POST /api/recruit-board/likes/{게시글 id}`
+
+operation::recruit-board/likes[snippets='http-request,request-headers,path-parameters,http-response,response-fields']
+
+[[RecruitBoard-image-upload]]
+=== 게시판 이미지 업로드
+`GET /api/recruit-board/image/{게시글 id}`
+
+operation::recruit-board/image-upload[snippets='http-request,request-headers,path-parameters,request-parts,http-response']

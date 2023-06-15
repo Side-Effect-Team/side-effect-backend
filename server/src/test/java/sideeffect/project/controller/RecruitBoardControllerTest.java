@@ -7,10 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -22,6 +25,7 @@ import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.domain.user.User;
+import sideeffect.project.domain.user.UserRoleType;
 import sideeffect.project.dto.comment.RecruitCommentResponse;
 import sideeffect.project.dto.like.LikeResult;
 import sideeffect.project.dto.like.RecruitLikeResponse;
@@ -29,6 +33,7 @@ import sideeffect.project.dto.recruit.*;
 import sideeffect.project.service.RecruitBoardService;
 import sideeffect.project.service.RecruitLikeService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -37,12 +42,13 @@ import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -69,13 +75,18 @@ class RecruitBoardControllerTest {
     void setUp(WebApplicationContext context, RestDocumentationContextProvider restDocumentationContextProvider) {
         mvc = MockMvcBuilders.webAppContextSetup(context)
                 .apply(springSecurity())
-                .apply(documentationConfiguration(restDocumentationContextProvider))
+                .apply(documentationConfiguration(restDocumentationContextProvider)
+                        .operationPreprocessors()
+                        .withRequestDefaults(prettyPrint())
+                        .withResponseDefaults(prettyPrint()))
                 .build();
 
         user = User.builder()
                 .id(1L)
-                .email("test@naver.com")
-                .password("qwer1234!")
+                .email("tester@naver.com")
+                .password("1234")
+                .nickname("테스터")
+                .userRoleType(UserRoleType.ROLE_USER)
                 .build();
 
         recruitBoard = RecruitBoard.builder()
@@ -96,13 +107,14 @@ class RecruitBoardControllerTest {
                 .writer(user.getNickname())
                 .views(0)
                 .userId(user.getId())
-                .createdAt(null)
+                .imgSrc("test.png")
+                .createdAt(LocalDateTime.now())
                 .title("모집 게시글 제목")
                 .projectName("프로젝트명1")
                 .content("모집 게시글 내용")
                 .positions(List.of(new DetailedBoardPositionResponse(1L, PositionType.BACKEND.getValue(), 3, 0, false)))
-                .tags(List.of(new BoardStackResponse(StackType.SPRING.getValue(), "url")))
-                .comments(RecruitCommentResponse.listOf(generateRecruitComments(1L,10L)))
+                .tags(List.of(new BoardStackResponse(StackType.SPRING.getValue(), "tag.png")))
+                .comments(RecruitCommentResponse.listOf(generateRecruitComments(1L,3L)))
                 .build();
 
         given(recruitBoardService.findRecruitBoard(any(), any())).willReturn(response);
@@ -115,36 +127,36 @@ class RecruitBoardControllerTest {
                 .andExpect(jsonPath("$.content").value(response.getContent()))
                 .andExpect(jsonPath("$.positions.length()").value(1))
                 .andExpect(jsonPath("$.tags.length()").value(1))
-                .andExpect(jsonPath("$.comments.length()").value(10))
-                .andDo( // rest docs 문서 작성 시작
-                        document("recruit-board/find", // 문서 조각 디렉토리 명
-                                pathParameters( // path 파라미터 정보 입력
+                .andExpect(jsonPath("$.comments.length()").value(3))
+                .andDo(
+                        document("recruit-board/find",
+                                pathParameters(
                                         parameterWithName("id").description("모집 게시글 아이디")
                                 ),
-                                responseFields( // response 필드 정보 입력
-                                        fieldWithPath("id").description("아이디"),
-                                        fieldWithPath("userId").description("작성자 아이디"),
-                                        fieldWithPath("writer").description("작성자"),
-                                        fieldWithPath("projectName").description("프로젝트명"),
-                                        fieldWithPath("views").description("조회수"),
-                                        fieldWithPath("title").description("제목"),
-                                        fieldWithPath("content").description("내용"),
-                                        fieldWithPath("imgSrc").description("게시글 이미지"),
-                                        fieldWithPath("like").description("좋아요 여부"),
-                                        fieldWithPath("likeNum").description("좋아요 수"),
-                                        fieldWithPath("createdAt").description("작성일"),
-                                        fieldWithPath("positions[].id").description("모집 포지션"),
-                                        fieldWithPath("positions[].positionType").description("모집 포지션"),
-                                        fieldWithPath("positions[].targetNumber").description("모집 포지션"),
-                                        fieldWithPath("positions[].currentNumber").description("모집 포지션"),
-                                        fieldWithPath("positions[].supported").description("모집 포지션"),
-                                        fieldWithPath("tags[].stackType").description("기술 태그"),
-                                        fieldWithPath("tags[].url").description("기술 태그"),
-                                        fieldWithPath("comments[].commentId").description("게시글 댓글"),
-                                        fieldWithPath("comments[].recruitBoardId").description("게시글 댓글"),
-                                        fieldWithPath("comments[].content").description("게시글 댓글"),
-                                        fieldWithPath("comments[].writer").description("게시글 댓글"),
-                                        fieldWithPath("comments[].writerId").description("게시글 댓글")
+                                responseFields(
+                                        fieldWithPath("id").type(JsonFieldType.NUMBER).description("아이디"),
+                                        fieldWithPath("userId").type(JsonFieldType.NUMBER).description("작성자 아이디"),
+                                        fieldWithPath("writer").type(JsonFieldType.STRING).description("작성자"),
+                                        fieldWithPath("projectName").type(JsonFieldType.STRING).description("프로젝트명"),
+                                        fieldWithPath("views").type(JsonFieldType.NUMBER).description("조회수"),
+                                        fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
+                                        fieldWithPath("content").type(JsonFieldType.STRING).description("내용"),
+                                        fieldWithPath("imgSrc").type(JsonFieldType.STRING).description("게시글 이미지"),
+                                        fieldWithPath("like").type(JsonFieldType.BOOLEAN).description("좋아요 여부"),
+                                        fieldWithPath("likeNum").type(JsonFieldType.NUMBER).description("좋아요 수"),
+                                        fieldWithPath("createdAt").type(JsonFieldType.STRING).description("작성일"),
+                                        fieldWithPath("positions[].id").type(JsonFieldType.NUMBER).description("포지션 아이디"),
+                                        fieldWithPath("positions[].positionType").type(JsonFieldType.STRING).description("포지션 종류"),
+                                        fieldWithPath("positions[].targetNumber").type(JsonFieldType.NUMBER).description("포지션 인원 목표 수"),
+                                        fieldWithPath("positions[].currentNumber").type(JsonFieldType.NUMBER).description("포지션 인원 현재 수"),
+                                        fieldWithPath("positions[].supported").type(JsonFieldType.BOOLEAN).description("포지션 지원 여부"),
+                                        fieldWithPath("tags[].stackType").type(JsonFieldType.STRING).description("기술 태그 종류"),
+                                        fieldWithPath("tags[].url").type(JsonFieldType.STRING).description("기술 태그 이미지"),
+                                        fieldWithPath("comments[].commentId").type(JsonFieldType.NUMBER).description("댓글 아이디"),
+                                        fieldWithPath("comments[].recruitBoardId").type(JsonFieldType.NUMBER).description("게시글 아이디"),
+                                        fieldWithPath("comments[].content").type(JsonFieldType.STRING).description("게시글 내용"),
+                                        fieldWithPath("comments[].writer").type(JsonFieldType.STRING).description("게시글 작성자"),
+                                        fieldWithPath("comments[].writerId").type(JsonFieldType.NUMBER).description("게시글 작성자 아이디")
                                 )
                         ));
 
@@ -155,16 +167,15 @@ class RecruitBoardControllerTest {
     @WithCustomUser
     @Test
     void findScrollRecruitBoard() throws Exception {
-        RecruitBoard recruitBoard1 = RecruitBoard.builder().id(10L).title("모집 게시판1").contents("모집합니다1.").build();
-        RecruitBoard recruitBoard2 = RecruitBoard.builder().id(5L).title("모집 게시판2").contents("모집합니다2.").build();
-        recruitBoard1.associateUser(user);
-        recruitBoard2.associateUser(user);
-        List<RecruitBoardResponse> recruitBoardResponses = RecruitBoardResponse.listOf(List.of(recruitBoard1, recruitBoard2));
-        RecruitBoardScrollResponse scrollResponse = RecruitBoardScrollResponse.of(recruitBoardResponses, false);
+        RecruitBoardResponse response1 = RecruitBoardResponse.builder().
+                id(10L).closed(false).title("모집 게시판1").views(10).like(false).likeNum(10).createdAt(LocalDateTime.now()).positions(List.of("backend", "frontend")).tags(List.of("spring", "react")).build();
+        RecruitBoardResponse response2 = RecruitBoardResponse.builder().
+                id(5L).closed(true).title("모집 게시판2").views(5).like(true).likeNum(5).createdAt(LocalDateTime.now()).positions(List.of("backend")).tags(List.of("spring")).build();
+        RecruitBoardScrollResponse scrollResponse = RecruitBoardScrollResponse.of(List.of(response1, response2), false);
 
         given(recruitBoardService.findRecruitBoards(any(), any())).willReturn(scrollResponse);
 
-        mvc.perform(get("/api/recruit-board/scroll")
+        mvc.perform(RestDocumentationRequestBuilders.get("/api/recruit-board/scroll")
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("lastId", "11")
                 .param("size", "2"))
@@ -172,7 +183,28 @@ class RecruitBoardControllerTest {
                 .andExpect(jsonPath("$.recruitBoards.length()").value(2))
                 .andExpect(jsonPath("$.lastId").value(5L))
                 .andExpect(jsonPath("$.hasNext").value(false))
-                .andDo(print());
+                .andDo(
+                        document("recruit-board/scroll",
+                                requestParameters(
+                                        parameterWithName("size").description("응답 받을 게시글 수"),
+                                        parameterWithName("keyword").description("검색어(제목 + 내용)").optional(),
+                                        parameterWithName("stackType").description("기술 스택 포함 검색").optional(),
+                                        parameterWithName("lastId").description("이전 응답에서 가장 작은 ID 값, 없으면 첫 페이지").optional()
+                                ),
+                                responseFields(
+                                        fieldWithPath("recruitBoards[].id").type(JsonFieldType.NUMBER).description("게시글 아이디"),
+                                        fieldWithPath("recruitBoards[].closed").type(JsonFieldType.BOOLEAN).description("모집 마감 여부"),
+                                        fieldWithPath("recruitBoards[].title").type(JsonFieldType.STRING).description("내용"),
+                                        fieldWithPath("recruitBoards[].views").type(JsonFieldType.NUMBER).description("조회수"),
+                                        fieldWithPath("recruitBoards[].like").type(JsonFieldType.BOOLEAN).description("좋아요 여부"),
+                                        fieldWithPath("recruitBoards[].likeNum").type(JsonFieldType.NUMBER).description("좋아요 수"),
+                                        fieldWithPath("recruitBoards[].createdAt").type(JsonFieldType.STRING).description("작성일"),
+                                        fieldWithPath("recruitBoards[].positions[]").type(JsonFieldType.ARRAY).description("모집 포지션 종류"),
+                                        fieldWithPath("recruitBoards[].tags[]").type(JsonFieldType.ARRAY).description("모집 기술 태그 종류"),
+                                        fieldWithPath("lastId").type(JsonFieldType.NUMBER).description("응답한 게시글 중 마지막 아이디"),
+                                        fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN).description("다음 게시글 여부")
+                                )
+                        ));
 
         verify(recruitBoardService).findRecruitBoards(any(), any());
     }
@@ -181,20 +213,45 @@ class RecruitBoardControllerTest {
     @WithCustomUser
     @Test
     void findAllRecruitBoard() throws Exception {
-        RecruitBoard recruitBoard1 = RecruitBoard.builder().id(10L).title("모집 게시판1").contents("모집합니다1.").build();
-        RecruitBoard recruitBoard2 = RecruitBoard.builder().id(5L).title("모집 게시판2").contents("모집합니다2.").build();
-        recruitBoard1.associateUser(user);
-        recruitBoard2.associateUser(user);
-        List<RecruitBoardListResponse> recruitBoardResponses = RecruitBoardListResponse.listOf(List.of(recruitBoard1, recruitBoard2));
-        RecruitBoardAllResponse response = RecruitBoardAllResponse.of(recruitBoardResponses);
+        RecruitBoardListResponse response1 = RecruitBoardListResponse.builder().
+                id(10L).userId(user.getId()).title("모집 게시판1").projectName("프로젝트 명1").content("내용1").imgSrc("test.png").views(10).like(false).likeNum(10).createdAt(LocalDateTime.now())
+                .positions(List.of(new BoardPositionResponse(1L, PositionType.BACKEND.getValue(), 3, 0), new BoardPositionResponse(2L, PositionType.FRONTEND.getValue(), 2, 0)))
+                .tags(List.of(new BoardStackResponse(StackType.SPRING.getValue(), "tag.png"), new BoardStackResponse(StackType.REACT.getValue(), "tag.png"))).build();
+
+        RecruitBoardListResponse response2 = RecruitBoardListResponse.builder().
+                id(5L).userId(user.getId()).title("모집 게시판2").projectName("프로젝트 명2").content("내용2").imgSrc("test.png").views(5).like(true).likeNum(5).createdAt(LocalDateTime.now())
+                .positions(List.of(new BoardPositionResponse(1L, PositionType.BACKEND.getValue(), 3, 0)))
+                .tags(List.of(new BoardStackResponse(StackType.SPRING.getValue(), "tag.png"))).build();
+
+        RecruitBoardAllResponse response = RecruitBoardAllResponse.of(List.of(response1, response2));
 
         given(recruitBoardService.findAllRecruitBoard(any())).willReturn(response);
 
-        mvc.perform(get("/api/recruit-board/all")
+        mvc.perform(RestDocumentationRequestBuilders.get("/api/recruit-board/all")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.recruitBoards.length()").value(2))
-                .andDo(print());
+                .andDo(
+                        document("recruit-board/find-all",
+                                responseFields(
+                                        fieldWithPath("recruitBoards[].id").type(JsonFieldType.NUMBER).description("게시글 아이디"),
+                                        fieldWithPath("recruitBoards[].userId").type(JsonFieldType.NUMBER).description("작성자 아이디"),
+                                        fieldWithPath("recruitBoards[].title").type(JsonFieldType.STRING).description("제목"),
+                                        fieldWithPath("recruitBoards[].projectName").type(JsonFieldType.STRING).description("프로젝트 이름"),
+                                        fieldWithPath("recruitBoards[].content").type(JsonFieldType.STRING).description("내용"),
+                                        fieldWithPath("recruitBoards[].imgSrc").type(JsonFieldType.STRING).description("게시글 이미지"),
+                                        fieldWithPath("recruitBoards[].views").type(JsonFieldType.NUMBER).description("조회수"),
+                                        fieldWithPath("recruitBoards[].like").type(JsonFieldType.BOOLEAN).description("좋아요 여부"),
+                                        fieldWithPath("recruitBoards[].likeNum").type(JsonFieldType.NUMBER).description("좋아요 수"),
+                                        fieldWithPath("recruitBoards[].createdAt").type(JsonFieldType.STRING).description("작성일"),
+                                        fieldWithPath("recruitBoards[].positions[].id").type(JsonFieldType.NUMBER).description("포지션 아이디"),
+                                        fieldWithPath("recruitBoards[].positions[].positionType").type(JsonFieldType.STRING).description("포지션 종류"),
+                                        fieldWithPath("recruitBoards[].positions[].targetNumber").type(JsonFieldType.NUMBER).description("포지션 인원 목표 수"),
+                                        fieldWithPath("recruitBoards[].positions[].currentNumber").type(JsonFieldType.NUMBER).description("포지션 인원 현재 수"),
+                                        fieldWithPath("recruitBoards[].tags[].stackType").type(JsonFieldType.STRING).description("기술 태그 종류"),
+                                        fieldWithPath("recruitBoards[].tags[].url").type(JsonFieldType.STRING).description("기술 태그 이미지")
+                                )
+                        ));
 
         verify(recruitBoardService).findAllRecruitBoard(any());
     }
@@ -203,36 +260,81 @@ class RecruitBoardControllerTest {
     @WithCustomUser
     @Test
     void registerRecruitBoard() throws Exception {
-        RecruitBoardRequest request = RecruitBoardRequest.builder().title("모집 게시판1")
+        RecruitBoardRequest request = RecruitBoardRequest.builder()
+                .title("모집 게시판1")
                 .projectName("프로젝트 명")
-                .content("글 내용이며, 최소 20글자를 입력해야 합니다. 글 내용이며, 최소 20글자를 입력해야 합니다.").build();
-        RecruitBoard recruitBoard = RecruitBoard.builder().id(10L).title("모집 게시판1").contents("모집합니다1.").build();
-        recruitBoard.associateUser(user);
-        RecruitBoardResponse response = RecruitBoardResponse.of(recruitBoard);
+                .content("글 내용이며, 최소 20글자를 입력해야 합니다. 글 내용이며, 최소 20글자를 입력해야 합니다.")
+                .positions(List.of(new BoardPositionRequest(PositionType.BACKEND, 3), new BoardPositionRequest(PositionType.FRONTEND, 2)))
+                .tags(List.of(StackType.SPRING, StackType.REACT))
+                .build();
+
+        RecruitBoardResponse response = RecruitBoardResponse.builder().
+                id(1L).closed(false).title("모집 게시판1").views(0).like(false).likeNum(0).createdAt(LocalDateTime.now()).positions(List.of("backend", "frontend")).tags(List.of("spring", "react")).build();
 
         given(recruitBoardService.register(any(), any())).willReturn(response);
 
-        mvc.perform(post("/api/recruit-board")
+        mvc.perform(RestDocumentationRequestBuilders.post("/api/recruit-board")
                         .with(csrf())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andDo(print());
+                .andDo(document("recruit-board/register",
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                        ),
+                        requestFields(
+                                fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
+                                fieldWithPath("projectName").type(JsonFieldType.STRING).description("프로젝트 명"),
+                                fieldWithPath("content").type(JsonFieldType.STRING).description("내용"),
+                                fieldWithPath("positions[].positionType").type(JsonFieldType.STRING).description("모집 포지션"),
+                                fieldWithPath("positions[].targetNumber").type(JsonFieldType.NUMBER).description("모집 인원"),
+                                fieldWithPath("tags").type(JsonFieldType.ARRAY).description("기술 태그")
+                        ),
+                        responseFields(
+                                fieldWithPath("id").type(JsonFieldType.NUMBER).description("게시글 아이디"),
+                                fieldWithPath("closed").type(JsonFieldType.BOOLEAN).description("모집 마감 여부"),
+                                fieldWithPath("title").type(JsonFieldType.STRING).description("내용"),
+                                fieldWithPath("views").type(JsonFieldType.NUMBER).description("조회수"),
+                                fieldWithPath("like").type(JsonFieldType.BOOLEAN).description("좋아요 여부"),
+                                fieldWithPath("likeNum").type(JsonFieldType.NUMBER).description("좋아요 수"),
+                                fieldWithPath("createdAt").type(JsonFieldType.STRING).description("작성일"),
+                                fieldWithPath("positions").type(JsonFieldType.ARRAY).description("모집 포지션 종류"),
+                                fieldWithPath("tags").type(JsonFieldType.ARRAY).description("모집 기술 태그 종류")
+                        )
+                ));
     }
 
     @DisplayName("모집 게시판을 업데이트한다.")
     @WithCustomUser
     @Test
     void updateBoard() throws Exception {
-        RecruitBoardUpdateRequest request = RecruitBoardUpdateRequest.builder().title("모집 게시판1")
+        RecruitBoardUpdateRequest request = RecruitBoardUpdateRequest.builder()
+                .title("모집 게시판 내용 수정")
                 .projectName("프로젝트 명")
-                .content("글 내용이며, 최소 20글자를 입력해야 합니다. 글 내용이며, 최소 20글자를 입력해야 합니다.").build();
+                .content("개발자 역량을 키우기 위해 진행하는 프로젝트입니다.")
+                .tags(List.of(StackType.VUE, StackType.JAVA)).build();
 
-        mvc.perform(patch("/api/recruit-board/1")
+        mvc.perform(RestDocumentationRequestBuilders.patch("/api/recruit-board/{id}", 1L)
                         .with(csrf())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(document("recruit-board/update",
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                        ),
+                        pathParameters(
+                                parameterWithName("id").description("모집 게시글 아이디")
+                        ),
+                        requestFields(
+                                fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
+                                fieldWithPath("projectName").type(JsonFieldType.STRING).description("프로젝트 명"),
+                                fieldWithPath("content").type(JsonFieldType.STRING).description("내용"),
+                                fieldWithPath("tags").type(JsonFieldType.ARRAY).description("기술 태그")
+                        )
+                ));
     }
 
     @DisplayName("잘못된 유저가 모집 게시판을 업데이트 한다.")
@@ -257,13 +359,26 @@ class RecruitBoardControllerTest {
     @WithCustomUser
     @Test
     void addRecruitBoardPosition() throws Exception {
-        BoardPositionRequest request = BoardPositionRequest.builder().positionType(PositionType.BACKEND).targetNumber(3).build();
+        BoardPositionRequest request = BoardPositionRequest.builder().positionType(PositionType.DEVOPS).targetNumber(1).build();
 
-        mvc.perform(post("/api/recruit-board/1/add-position")
+        mvc.perform(RestDocumentationRequestBuilders.post("/api/recruit-board/{id}/add-position", 1L)
                         .with(csrf())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(document("recruit-board/add-position",
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                        ),
+                        pathParameters(
+                                parameterWithName("id").description("모집 게시글 아이디")
+                        ),
+                        requestFields(
+                                fieldWithPath("positionType").type(JsonFieldType.STRING).description("포지션"),
+                                fieldWithPath("targetNumber").type(JsonFieldType.NUMBER).description("포지션 인원 목표 수")
+                        )
+                ));
     }
 
     @DisplayName("잘못된 유저가 모집 게시판의 포지션을 추가한다.")
@@ -286,9 +401,18 @@ class RecruitBoardControllerTest {
     @WithCustomUser
     @Test
     void deleteBoard() throws Exception {
-        mvc.perform(delete("/api/recruit-board/1")
-                        .with(csrf()))
-                .andExpect(status().isOk());
+        mvc.perform(RestDocumentationRequestBuilders.delete("/api/recruit-board/{id}", 1L)
+                        .with(csrf())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer token"))
+                .andExpect(status().isOk())
+                .andDo(document("recruit-board/delete",
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                        ),
+                        pathParameters(
+                                parameterWithName("id").description("모집 게시글 아이디")
+                        )
+                ));
     }
 
     @DisplayName("모집 게시판 글 작성자가 아니라면 삭제가 불가능하다.")
@@ -310,14 +434,27 @@ class RecruitBoardControllerTest {
 
         given(recruitLikeService.toggleLike(any(), any())).willReturn(response);
 
-        mvc.perform(post("/api/recruit-board/likes/1")
+        mvc.perform(RestDocumentationRequestBuilders.post("/api/recruit-board/likes/{id}", 1L)
                         .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer token"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.recruitBoardId").value(1))
                 .andExpect(jsonPath("$.userNickname").value("test1"))
                 .andExpect(jsonPath("$.message").value(LikeResult.LIKE.getMessage()))
-                .andDo(print());
+                .andDo(document("recruit-board/likes",
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                        ),
+                        pathParameters(
+                                parameterWithName("id").description("모집 게시글 아이디")
+                        ),
+                        responseFields(
+                                fieldWithPath("recruitBoardId").type(JsonFieldType.NUMBER).description("게시글 아이디"),
+                                fieldWithPath("userNickname").type(JsonFieldType.STRING).description("사용자 닉네임"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).description("메시지(추천 또는 취소에 따라 다릅니다)")
+                        )
+                ));
     }
 
     @DisplayName("유저가 모집게시판에 좋아요를 취소한다.")
@@ -337,6 +474,31 @@ class RecruitBoardControllerTest {
                 .andExpect(jsonPath("$.message").value(LikeResult.CANCEL_LIKE.getMessage()))
                 .andDo(print());
     }
+
+    @DisplayName("이미지를 업로드한다.")
+    @WithCustomUser
+    @Test
+    void uploadImage() throws Exception {
+        MockMultipartFile multipartFile =
+                new MockMultipartFile("file", "test.png", "image/png", "테스트 이미지".getBytes());
+
+        mvc.perform(RestDocumentationRequestBuilders.multipart("/api/recruit-board/image/{id}", 1L)
+                        .file(multipartFile)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer token")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andDo(
+                        document("recruit-board/image-upload",
+                                requestHeaders(
+                                        headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                                ),
+                                pathParameters(
+                                        parameterWithName("id").description("모집 게시글 아이디")
+                                ),
+                                requestParts(partWithName("file").description("업로드 이미지"))
+                        ));
+    }
+
 
     private List<RecruitComment> generateRecruitComments(Long startId, Long endId) {
         return LongStream.range(startId, endId + 1)
