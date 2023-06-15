@@ -117,7 +117,7 @@ class RecruitBoardControllerTest {
                 .andExpect(jsonPath("$.tags.length()").value(1))
                 .andExpect(jsonPath("$.comments.length()").value(10))
                 .andDo( // rest docs 문서 작성 시작
-                        document("/recruit-board/find", // 문서 조각 디렉토리 명
+                        document("recruit-board/find", // 문서 조각 디렉토리 명
                                 pathParameters( // path 파라미터 정보 입력
                                         parameterWithName("id").description("모집 게시글 아이디")
                                 ),

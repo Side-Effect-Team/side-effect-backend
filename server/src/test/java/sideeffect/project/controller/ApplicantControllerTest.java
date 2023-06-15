@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -50,11 +50,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ApplicantController.class)
-//@ExtendWith(CustomDocumentationExtension.class)
+@ExtendWith(RestDocumentationExtension.class)
 class ApplicantControllerTest {
-
-    @RegisterExtension
-    public final RestDocumentationExtension extension = new RestDocumentationExtension("build/generated-snippets");
 
     @MockBean
     private UserDetailsServiceImpl userDetailsService;
@@ -105,7 +102,7 @@ class ApplicantControllerTest {
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andDo(MockMvcRestDocumentation.document("/applicant/register",
+                .andDo(MockMvcRestDocumentation.document("applicant/register",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(
