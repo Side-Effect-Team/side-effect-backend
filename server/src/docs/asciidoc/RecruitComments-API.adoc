@@ -1,0 +1,20 @@
+[[RecruitComment-API]]
+== Recruit Comment API
+
+[[RecruitComment-register]]
+=== 댓글 등록
+`POST /api/recruit-comments`
+
+operation::recruit-comments/register[snippets='http-request,request-headers,request-fields,http-response,response-fields']
+
+[[RecruitComment-update]]
+=== 댓글 수정
+`PATCH /api/recruit-comments/{댓글 id}`
+
+operation::recruit-comments/update[snippets='http-request,request-headers,path-parameters,request-fields,http-response']
+
+[[RecruitComment-delete]]
+=== 댓글 삭제
+`DELETE /api/recruit-comments/{댓글 id}`
+
+operation::recruit-comments/delete[snippets='http-request,request-headers,path-parameters,http-response']

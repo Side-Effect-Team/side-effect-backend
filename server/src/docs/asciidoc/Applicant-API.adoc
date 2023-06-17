@@ -1,7 +1,32 @@
 [[Applicant-API]]
 == Applicant API
 
-[[Applicant-지원]]
-=== 게시판 지원
+[[Applicant-register]]
+=== 포지션 지원
+`POST /api/applicant/{포지션 id}`
 
-operation::applicant/register[snippets='http-request,path-parameters,http-response,response-fields']
+operation::applicant/register[snippets='http-request,request-headers,path-parameters,http-response,response-fields']
+
+[[Applicant-find-all]]
+=== 지원자 또는 팀원 리스트 조회
+`GET /api/applicant/list/{게시글 id}`
+
+operation::applicant/find-all[snippets='http-request,request-headers,path-parameters,request-parameters,http-response,response-fields']
+
+[[Applicant-approve-reject]]
+=== 지원자 수락 또는 거절
+`PATCH /api/applicant`
+
+operation::applicant/approve-reject[snippets='http-request,request-headers,request-fields,http-response']
+
+[[Applicant-release]]
+=== 팀원 방출
+`PATCH /api/applicant/release`
+
+operation::applicant/release[snippets='http-request,request-headers,request-fields,http-response']
+
+[[Applicant-cancel]]
+=== 지원 취소
+`DELETE /api/applicant/{모집 포지션 id}`
+
+operation::applicant/cancel[snippets='http-request,request-headers,path-parameters,http-response']

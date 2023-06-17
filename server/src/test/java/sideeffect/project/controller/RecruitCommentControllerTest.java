@@ -4,9 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -26,13 +33,22 @@ import sideeffect.project.service.RecruitCommentService;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RecruitCommentController.class)
+@ExtendWith(RestDocumentationExtension.class)
 class RecruitCommentControllerTest {
 
     @MockBean
@@ -45,9 +61,13 @@ class RecruitCommentControllerTest {
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    void setUp(WebApplicationContext context) {
+    void setUp(WebApplicationContext context, RestDocumentationContextProvider restDocumentationContextProvider) {
         mvc = MockMvcBuilders.webAppContextSetup(context)
             .apply(springSecurity())
+            .apply(documentationConfiguration(restDocumentationContextProvider)
+                    .operationPreprocessors()
+                    .withRequestDefaults(prettyPrint())
+                    .withResponseDefaults(prettyPrint()))
             .build();
 
         user = User.builder()
@@ -78,16 +98,33 @@ class RecruitCommentControllerTest {
     @Test
     void registerComment() throws Exception {
         RecruitCommentRequest request = RecruitCommentRequest.builder()
-            .boardId(recruitBoard.getId()).content("참여 가능하나요?").build();
+            .boardId(recruitBoard.getId()).content(recruitComment.getContent()).build();
+
 
         given(recruitCommentService.registerComment(any(), any())).willReturn(RecruitCommentResponse.of(recruitComment));
 
-        mvc.perform(post("/api/recruit-comments")
+        mvc.perform(RestDocumentationRequestBuilders.post("/api/recruit-comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
-                .with(csrf()))
+                .with(csrf())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer token"))
             .andExpect(status().isOk())
-            .andDo(print());
+            .andDo(MockMvcRestDocumentation.document("recruit-comments/register",
+                    requestHeaders(
+                            headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                    ),
+                    requestFields(
+                            fieldWithPath("boardId").type(JsonFieldType.NUMBER).description("게시글 아이디"),
+                            fieldWithPath("content").type(JsonFieldType.STRING).description("내용")
+                    ),
+                    responseFields(
+                            fieldWithPath("commentId").type(JsonFieldType.NUMBER).description("댓글 아이디"),
+                            fieldWithPath("recruitBoardId").type(JsonFieldType.NUMBER).description("게시글 아이디"),
+                            fieldWithPath("content").type(JsonFieldType.STRING).description("내용"),
+                            fieldWithPath("writer").type(JsonFieldType.STRING).description("작성자"),
+                            fieldWithPath("writerId").type(JsonFieldType.NUMBER).description("작성자 아이디")
+                    )
+            ));
     }
 
     @DisplayName("모집게시판 댓글을 수정한다.")
@@ -97,12 +134,23 @@ class RecruitCommentControllerTest {
         String content = "수정 내용";
         CommentUpdateRequest request = new CommentUpdateRequest(content);
 
-        mvc.perform(patch("/api/recruit-comments/1")
+        mvc.perform(RestDocumentationRequestBuilders.patch("/api/recruit-comments/{id}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer token")
                 .with(csrf()))
             .andExpect(status().isOk())
-            .andDo(print());
+            .andDo(MockMvcRestDocumentation.document("recruit-comments/update",
+                    requestHeaders(
+                            headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                    ),
+                    pathParameters(
+                            parameterWithName("id").description("댓글 아이디")
+                    ),
+                    requestFields(
+                            fieldWithPath("content").type(JsonFieldType.STRING).description("내용")
+                    )
+            ));
     }
 
     @DisplayName("댓글의 주인이 아닌자가 수정 요청을 하면 예외가 발생")
@@ -125,10 +173,18 @@ class RecruitCommentControllerTest {
     @Test
     void deleteComment() throws Exception {
 
-        mvc.perform(delete("/api/recruit-comments/1")
-                .with(csrf()))
+        mvc.perform(RestDocumentationRequestBuilders.delete("/api/recruit-comments/{id}", 1L)
+                .with(csrf())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer token"))
             .andExpect(status().isOk())
-            .andDo(print());
+            .andDo(MockMvcRestDocumentation.document("recruit-comments/delete",
+                    requestHeaders(
+                            headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                    ),
+                    pathParameters(
+                            parameterWithName("id").description("댓글 아이디")
+                    )
+            ));
     }
 
     @DisplayName("댓글의 주인이 아닌자가 삭제 요청을 하면 예외가 발생")
