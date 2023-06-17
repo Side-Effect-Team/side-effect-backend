@@ -6,5 +6,6 @@
 :toclevels: 2
 
 include::RecruitBoard-API.adoc[]
+include::RecruitComments-API.adoc[]
 include::Applicant-API.adoc[]
 
