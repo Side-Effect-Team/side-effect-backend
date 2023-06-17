@@ -5,6 +5,6 @@
 :toc: left
 :toclevels: 2
 
-include::Applicant-API.adoc[]
 include::RecruitBoard-API.adoc[]
+include::Applicant-API.adoc[]
 
