@@ -168,9 +168,9 @@ class RecruitBoardControllerTest {
     @Test
     void findScrollRecruitBoard() throws Exception {
         RecruitBoardResponse response1 = RecruitBoardResponse.builder().
-                id(10L).closed(false).title("모집 게시판1").views(10).like(false).likeNum(10).createdAt(LocalDateTime.now()).positions(List.of("backend", "frontend")).tags(List.of("spring", "react")).build();
+                id(10L).closed(false).title("모집 게시판1").views(10).like(false).likeNum(10).commentsNum(1).createdAt(LocalDateTime.now()).positions(List.of("backend", "frontend")).tags(List.of("spring", "react")).build();
         RecruitBoardResponse response2 = RecruitBoardResponse.builder().
-                id(5L).closed(true).title("모집 게시판2").views(5).like(true).likeNum(5).createdAt(LocalDateTime.now()).positions(List.of("backend")).tags(List.of("spring")).build();
+                id(5L).closed(true).title("모집 게시판2").views(5).like(true).likeNum(5).commentsNum(0).createdAt(LocalDateTime.now()).positions(List.of("backend")).tags(List.of("spring")).build();
         RecruitBoardScrollResponse scrollResponse = RecruitBoardScrollResponse.of(List.of(response1, response2), false);
 
         given(recruitBoardService.findRecruitBoards(any(), any())).willReturn(scrollResponse);
@@ -198,6 +198,7 @@ class RecruitBoardControllerTest {
                                         fieldWithPath("recruitBoards[].views").type(JsonFieldType.NUMBER).description("조회수"),
                                         fieldWithPath("recruitBoards[].like").type(JsonFieldType.BOOLEAN).description("좋아요 여부"),
                                         fieldWithPath("recruitBoards[].likeNum").type(JsonFieldType.NUMBER).description("좋아요 수"),
+                                        fieldWithPath("recruitBoards[].commentsNum").type(JsonFieldType.NUMBER).description("댓글 수"),
                                         fieldWithPath("recruitBoards[].createdAt").type(JsonFieldType.STRING).description("작성일"),
                                         fieldWithPath("recruitBoards[].positions[]").type(JsonFieldType.ARRAY).description("모집 포지션 종류"),
                                         fieldWithPath("recruitBoards[].tags[]").type(JsonFieldType.ARRAY).description("모집 기술 태그 종류"),
@@ -269,7 +270,7 @@ class RecruitBoardControllerTest {
                 .build();
 
         RecruitBoardResponse response = RecruitBoardResponse.builder().
-                id(1L).closed(false).title("모집 게시판1").views(0).like(false).likeNum(0).createdAt(LocalDateTime.now()).positions(List.of("backend", "frontend")).tags(List.of("spring", "react")).build();
+                id(1L).closed(false).title("모집 게시판1").views(0).like(false).likeNum(0).commentsNum(0).createdAt(LocalDateTime.now()).positions(List.of("backend", "frontend")).tags(List.of("spring", "react")).build();
 
         given(recruitBoardService.register(any(), any())).willReturn(response);
 
@@ -298,6 +299,7 @@ class RecruitBoardControllerTest {
                                 fieldWithPath("views").type(JsonFieldType.NUMBER).description("조회수"),
                                 fieldWithPath("like").type(JsonFieldType.BOOLEAN).description("좋아요 여부"),
                                 fieldWithPath("likeNum").type(JsonFieldType.NUMBER).description("좋아요 수"),
+                                fieldWithPath("commentsNum").type(JsonFieldType.NUMBER).description("댓글 수"),
                                 fieldWithPath("createdAt").type(JsonFieldType.STRING).description("작성일"),
                                 fieldWithPath("positions").type(JsonFieldType.ARRAY).description("모집 포지션 종류"),
                                 fieldWithPath("tags").type(JsonFieldType.ARRAY).description("모집 기술 태그 종류")
