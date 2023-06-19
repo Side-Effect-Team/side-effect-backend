@@ -103,6 +103,9 @@ public class UserService {
         return userUploadService.getFullPath(imagePath);
     }
 
+    public void toBaseImage(User user){
+        user.updateImgUrl(userUploadService.getBaseImgPath());
+    }
     public void validateDuplicateUser(String email, ProviderType providerType) {
         userRepository.findByEmailAndProvider(email, providerType).ifPresent(user -> {
             throw new IllegalStateException(ErrorCode.USER_ALREADY_EXIST);

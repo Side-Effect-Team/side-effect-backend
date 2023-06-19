@@ -32,4 +32,8 @@ public class UserUploadService extends FileUploadService{
 
         return baseImg;
     }
+
+    public String getBaseImgPath(){
+        return baseImg;
+    }
 }

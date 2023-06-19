@@ -87,6 +87,11 @@ public class UserController {
         }
     }
 
+    @PostMapping("/image/basic")
+    public void toBaseImage(@LoginUser User user){
+        userService.toBaseImage(user);
+    }
+    
     private HttpHeaders createHeaders(RefreshToken refreshToken, String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", accessToken);
