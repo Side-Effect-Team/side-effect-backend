@@ -22,18 +22,21 @@ public class NotificationResponse {
     private Boolean watched;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
+    private NotificationType category;
+    private String nickname;
     private Long userId;
 
     public static NotificationResponse of(Notification notification){
         return NotificationResponse.builder()
                 .id(notification.getId())
                 .title(notification.getTitle())
-                .contents(notification.getNotificationType()==NotificationType.REGISTER || notification.getNotificationType()==NotificationType.COMMENT ?
-                        notification.getSendingUser().getNickname() + notification.getContents() : notification.getContents())
+                .contents(notification.getContents())
                 .link(notification.getLink())
                 .watched(notification.getWatched())
                 .createdAt(notification.getCreatedAt())
                 .userId(notification.getSendingUser().getId())
+                .category(notification.getNotificationType())
+                .nickname(notification.getSendingUser().getNickname())
                 .build();
     }
 
