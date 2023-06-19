@@ -107,6 +107,7 @@ public class RecruitBoardService {
         RecruitBoard findRecruitBoard = recruitBoardRepository.findById(boardId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
         validateOwner(userId, findRecruitBoard);
+        recruitUploadService.deleteFile(findRecruitBoard.getImgSrc());
         saveImageFile(file, findRecruitBoard);
     }
 
