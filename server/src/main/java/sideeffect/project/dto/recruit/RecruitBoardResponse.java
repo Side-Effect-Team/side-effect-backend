@@ -23,7 +23,7 @@ public class RecruitBoardResponse {
     private int views;
     private boolean like;
     private int likeNum;
-    private int commentsNum;
+    private int commentNum;
     @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSSSSS", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
     private List<String> positions;
@@ -37,7 +37,7 @@ public class RecruitBoardResponse {
                 .title(recruitBoard.getTitle())
                 .views(recruitBoard.getViews())
                 .likeNum(recruitBoard.getRecruitLikes().size())
-                .commentsNum(recruitBoard.getRecruitComments().size())
+                .commentNum(recruitBoard.getRecruitComments().size())
                 .createdAt(recruitBoard.getCreateAt())
                 .positions(getPositionList(recruitBoard))
                 .tags(getStackList(recruitBoard))
@@ -66,7 +66,7 @@ public class RecruitBoardResponse {
                 .views(recruitBoardAndLikeDto.getRecruitBoard().getViews())
                 .like(recruitBoardAndLikeDto.isLike())
                 .likeNum(recruitBoardAndLikeDto.getRecruitBoard().getRecruitLikes().size())
-                .commentsNum(recruitBoardAndLikeDto.getRecruitBoard().getRecruitComments().size())
+                .commentNum(recruitBoardAndLikeDto.getRecruitBoard().getRecruitComments().size())
                 .createdAt(recruitBoardAndLikeDto.getRecruitBoard().getCreateAt())
                 .positions(getPositionList(recruitBoardAndLikeDto.getRecruitBoard()))
                 .tags(getStackList(recruitBoardAndLikeDto.getRecruitBoard()))
