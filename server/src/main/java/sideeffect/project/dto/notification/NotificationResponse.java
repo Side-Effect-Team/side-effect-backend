@@ -22,6 +22,7 @@ public class NotificationResponse {
     private Boolean watched;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
+    private Long userId;
 
     public static NotificationResponse of(Notification notification){
         return NotificationResponse.builder()
@@ -32,6 +33,7 @@ public class NotificationResponse {
                 .link(notification.getLink())
                 .watched(notification.getWatched())
                 .createdAt(notification.getCreatedAt())
+                .userId(notification.getSendingUser().getId())
                 .build();
     }
 
