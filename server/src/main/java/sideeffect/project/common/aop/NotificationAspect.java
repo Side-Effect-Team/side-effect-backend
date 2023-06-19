@@ -17,6 +17,7 @@ import sideeffect.project.domain.recruit.RecruitBoard;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.dto.applicant.ApplicantUpdateRequest;
 import sideeffect.project.dto.comment.CommentRequest;
+import sideeffect.project.dto.comment.RecruitCommentRequest;
 import sideeffect.project.repository.*;
 
 @Slf4j
@@ -32,7 +33,7 @@ public class NotificationAspect {
     private final UserRepository userRepository;
 
     @AfterReturning(value = "execution(* sideeffect.project.service.CommentService.registerComment(..)) and args(request, user)")
-    public void afterRegisterComment(JoinPoint joinPoint, CommentRequest request, User user){
+    public void afterRegisterFreeComment(JoinPoint joinPoint, CommentRequest request, User user){
         FreeBoard freeBoard = freeBoardRepository.findById(request.getBoardId()).orElseThrow(() -> new EntityNotFoundException(ErrorCode.FREE_BOARD_NOT_FOUND));
         String contents = "님이 댓글을 달았습니다";
         Notification notification = Notification.builder()
@@ -45,6 +46,22 @@ public class NotificationAspect {
                                         .notificationType(NotificationType.COMMENT)
                                         .build();
         freeBoard.getUser().addNotification(notification);
+    }
+
+    @AfterReturning(value = "execution(* sideeffect.project.service.RecruitCommentService.registerComment(..)) and args(request, user)")
+    public void afterRegisterRecruitComment(JoinPoint joinPoint, RecruitCommentRequest request, User user){
+        RecruitBoard recruitBoard = recruitBoardRepository.findById(request.getBoardId()).orElseThrow(() -> new EntityNotFoundException(ErrorCode.RECRUIT_BOARD_NOT_FOUND));
+        String contents = "님이 댓글을 달았습니다";
+        Notification notification = Notification.builder()
+                .user(recruitBoard.getUser())
+                .sendingUser(user)
+                .title(recruitBoard.getTitle())
+                .contents(contents)
+                .link("/recruits/" + request.getBoardId())
+                .watched(false)
+                .notificationType(NotificationType.COMMENT)
+                .build();
+        recruitBoard.getUser().addNotification(notification);
     }
 
     @AfterReturning(value = "execution(* sideeffect.project.service.ApplicantService.approveApplicant(..)) and args(userId, applicantUpdateRequest)")
