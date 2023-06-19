@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sideeffect.project.domain.notification.Notification;
+import sideeffect.project.domain.notification.NotificationType;
 import sideeffect.project.domain.position.PositionType;
 import sideeffect.project.domain.user.ProviderType;
 import sideeffect.project.domain.user.User;
@@ -52,9 +53,9 @@ class NotificationServiceTest {
                 .portfolioUrl("naver.com/tlsrl6427")
                 .userRoleType(UserRoleType.ROLE_USER)
                 .notifications(List.of(
-                        new Notification(1L, "제목1", "내용1", "", false, user),
-                        new Notification(2L, "제목2", "내용2", "", false, user),
-                        new Notification(3L, "제목3", "내용3", "", true, user)
+                        new Notification(1L, "제목1", "내용1", "", false, user, user, NotificationType.APPROVE),
+                        new Notification(2L, "제목2", "내용2", "", false, user, user, NotificationType.APPROVE),
+                        new Notification(3L, "제목3", "내용3", "", true, user, user, NotificationType.APPROVE)
                 ))
                 .build();
 

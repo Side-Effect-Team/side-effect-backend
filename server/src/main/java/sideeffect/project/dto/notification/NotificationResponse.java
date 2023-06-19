@@ -3,6 +3,7 @@ package sideeffect.project.dto.notification;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import sideeffect.project.domain.notification.Notification;
+import sideeffect.project.domain.notification.NotificationType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,7 +27,8 @@ public class NotificationResponse {
         return NotificationResponse.builder()
                 .id(notification.getId())
                 .title(notification.getTitle())
-                .contents(notification.getContents())
+                .contents(notification.getNotificationType()==NotificationType.REGISTER || notification.getNotificationType()==NotificationType.COMMENT ?
+                        notification.getSendingUser().getNickname() + notification.getContents() : notification.getContents())
                 .link(notification.getLink())
                 .watched(notification.getWatched())
                 .createdAt(notification.getCreatedAt())

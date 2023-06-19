@@ -25,6 +25,10 @@ public class Notification {
 
     private Boolean watched;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category")
+    private NotificationType notificationType;
+
     @CreatedDate
     private LocalDateTime createdAt;
 
@@ -32,14 +36,20 @@ public class Notification {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sending_user_id")
+    private User sendingUser;
+
     @Builder
-    public Notification(Long id, String title, String contents, String link, Boolean watched, User user) {
+    public Notification(Long id, String title, String contents, String link, Boolean watched, User user, User sendingUser, NotificationType notificationType) {
         this.id = id;
         this.title = title;
         this.contents = contents;
         this.link = link;
         this.watched = watched;
         this.user = user;
+        this.sendingUser = sendingUser;
+        this.notificationType = notificationType;
     }
 
     public void watched(){
