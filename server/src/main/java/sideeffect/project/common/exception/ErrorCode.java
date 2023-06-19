@@ -55,7 +55,9 @@ public enum ErrorCode {
 
     STACK_NOT_FOUND(400, "ST_001", "해당 기술스택을 찾을 수 없습니다."),
 
-    INVALID_FILTER_VALUE(400, "F_001", "게시판 조회 필터를 잘못입력했습니다.");
+    INVALID_FILTER_VALUE(400, "F_001", "게시판 조회 필터를 잘못입력했습니다."),
+
+    FILE_NOT_FOUND(400, "FI_001", "파일을 찾을 수 없습니다.");
 
     private final String code;
     private final String message;
