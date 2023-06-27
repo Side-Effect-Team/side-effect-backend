@@ -5,13 +5,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
-import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
@@ -52,6 +54,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@AutoConfigureMockMvc
+@AutoConfigureRestDocs
 @WebMvcTest(ApplicantController.class)
 @ExtendWith(RestDocumentationExtension.class)
 class ApplicantControllerTest {
@@ -108,7 +112,7 @@ class ApplicantControllerTest {
                         .with(csrf())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer token"))
                 .andExpect(status().isOk())
-                .andDo(MockMvcRestDocumentation.document("applicant/register",
+                .andDo(document("applicant/register",
                         requestHeaders(
                                 headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
                         ),
@@ -172,7 +176,7 @@ class ApplicantControllerTest {
                 .andExpect(jsonPath("$.데브옵스.size").value(0))
                 .andExpect(jsonPath("$.마케터.size").value(0))
                 .andExpect(jsonPath("$.['프로젝트 매니저']['size']").value(0))
-                .andDo(MockMvcRestDocumentation.document("applicant/find-all",
+                .andDo(document("applicant/find-all",
                         requestHeaders(
                                 headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
                         ),
@@ -244,7 +248,7 @@ class ApplicantControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andDo(MockMvcRestDocumentation.document("applicant/approve-reject",
+                .andDo(document("applicant/approve-reject",
                         requestHeaders(
                                 headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
                         ),
@@ -369,7 +373,7 @@ class ApplicantControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andDo(MockMvcRestDocumentation.document("applicant/release",
+                .andDo(document("applicant/release",
                         requestHeaders(
                                 headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
                         ),
@@ -426,7 +430,7 @@ class ApplicantControllerTest {
                 .with(csrf())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer token"))
                 .andExpect(status().isOk())
-                .andDo(MockMvcRestDocumentation.document("applicant/cancel",
+                .andDo(document("applicant/cancel",
                         requestHeaders(
                                 headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
                         ),
