@@ -1,6 +1,7 @@
 buildscript {
 	ext {
 		queryDslVersion = "5.0.0"
+		restdocsApiSpecVersion = '0.16.2'
 	}
 }
 
@@ -10,6 +11,8 @@ plugins {
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 	id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
 	id "org.asciidoctor.jvm.convert" version "3.3.2"
+	id 'com.epages.restdocs-api-spec' version "${restdocsApiSpecVersion}"
+	id 'org.hidetake.swagger.generator' version '2.18.2'
 }
 
 group = 'sideeffect'
@@ -42,6 +45,7 @@ dependencies {
 	implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
 
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
@@ -53,16 +57,12 @@ dependencies {
 
 	asciidoctorExtensions 'org.springframework.restdocs:spring-restdocs-asciidoctor'
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+	testImplementation 'com.epages:restdocs-api-spec-mockmvc:' + restdocsApiSpecVersion
 }
 
 ext {
-//	snippetsDir = file("$buildDir/generated-snippets")
 	set('snippetsDir', file("build/generated-snippets"))
 }
-
-//tasks.named('test') {
-//
-//}
 
 def querydslDir = "$buildDir/generated/querydsl"
 
@@ -79,35 +79,34 @@ compileQuerydsl{
 	options.annotationProcessorPath = configurations.querydsl
 }
 
-//configurations {
-//	compileOnly {
-//		extendsFrom annotationProcessor
-//	}
-//	querydsl.extendsFrom compileClasspath
-//}
-
-////rest docs
-
 test {
-	print "testTask running\n"
-	outputs.dir snippetsDir
 	useJUnitPlatform()
 	filter {
 		includeTestsMatching "sideeffect.project.controller.*"
 	}
 }
 
-asciidoctor {
-	print snippetsDir
-	configurations 'asciidoctorExtensions'
-	inputs.dir snippetsDir
-	dependsOn test
-	baseDirFollowsSourceFile()
+tasks.withType(GenerateSwaggerUI) {
+	dependsOn 'openapi3'
+
+	delete file('src/main/resources/static/docs/')
+	copy {
+		from "build/resources/main/static/docs"
+		into "src/main/resources/static/docs/"
+	}
 }
 
-bootJar {
-	dependsOn asciidoctor
-	from("${asciidoctor.outputDir}") {
-		into 'static/docs'
-	}
+bootJar{
+	dependsOn(':openapi3')
+}
+
+openapi3 {
+	server = "https://sideeffectproject.com"
+	title = "THT API 문서"
+	description = "Spring REST Docs with SwaggerUI."
+	version = "0.0.1"
+	outputFileNamePrefix = 'open-api-3.0.1'
+	format = 'json'
+
+	outputDirectory = 'build/resources/main/static/docs'
 }
