@@ -15,6 +15,7 @@ import sideeffect.project.domain.stack.StackType;
 import sideeffect.project.dto.recruit.RecruitBoardAndLikeDto;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,6 +52,7 @@ public class RecruitBoardCustomRepositoryImpl implements RecruitBoardCustomRepos
         RecruitBoardAndLikeDto recruitBoardAndLikeDto = jpaQueryFactory.select(getResponseConstructor(userId))
                 .from(recruitBoard)
                 .where(recruitBoard.id.eq(boardId))
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
                 .fetchOne();
 
         return Optional.ofNullable(recruitBoardAndLikeDto);
