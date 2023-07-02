@@ -1,17 +1,20 @@
 package sideeffect.project.controller;
 
+import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
+import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
-import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,16 +33,15 @@ import sideeffect.project.dto.comment.RecruitCommentRequest;
 import sideeffect.project.dto.comment.RecruitCommentResponse;
 import sideeffect.project.service.RecruitCommentService;
 
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
-import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -47,6 +49,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@AutoConfigureMockMvc
+@AutoConfigureRestDocs
 @WebMvcTest(RecruitCommentController.class)
 @ExtendWith(RestDocumentationExtension.class)
 class RecruitCommentControllerTest {
@@ -109,21 +113,25 @@ class RecruitCommentControllerTest {
                 .with(csrf())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer token"))
             .andExpect(status().isOk())
-            .andDo(MockMvcRestDocumentation.document("recruit-comments/register",
-                    requestHeaders(
-                            headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
-                    ),
-                    requestFields(
-                            fieldWithPath("boardId").type(JsonFieldType.NUMBER).description("게시글 아이디"),
-                            fieldWithPath("content").type(JsonFieldType.STRING).description("내용")
-                    ),
-                    responseFields(
-                            fieldWithPath("commentId").type(JsonFieldType.NUMBER).description("댓글 아이디"),
-                            fieldWithPath("recruitBoardId").type(JsonFieldType.NUMBER).description("게시글 아이디"),
-                            fieldWithPath("content").type(JsonFieldType.STRING).description("내용"),
-                            fieldWithPath("writer").type(JsonFieldType.STRING).description("작성자"),
-                            fieldWithPath("writerId").type(JsonFieldType.NUMBER).description("작성자 아이디")
-                    )
+            .andDo(MockMvcRestDocumentationWrapper.document("recruit-comments/register",
+                    resource(
+                            ResourceSnippetParameters.builder()
+                                    .tag("모집게시판 댓글 API")
+                                    .description("모집게시판 댓글을 등록한다.")
+                                    .requestHeaders(
+                                                    headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                                            )
+                                    .requestFields(
+                                        fieldWithPath("boardId").type(JsonFieldType.NUMBER).description("게시글 아이디"),
+                                        fieldWithPath("content").type(JsonFieldType.STRING).description("내용")
+                                    )
+                                    .responseFields(
+                                        fieldWithPath("commentId").type(JsonFieldType.NUMBER).description("댓글 아이디"),
+                                        fieldWithPath("recruitBoardId").type(JsonFieldType.NUMBER).description("게시글 아이디"),
+                                        fieldWithPath("content").type(JsonFieldType.STRING).description("내용"),
+                                        fieldWithPath("writer").type(JsonFieldType.STRING).description("작성자"),
+                                        fieldWithPath("writerId").type(JsonFieldType.NUMBER).description("작성자 아이디")
+                                    ).build())
             ));
     }
 
@@ -140,16 +148,20 @@ class RecruitCommentControllerTest {
                 .header(HttpHeaders.AUTHORIZATION, "Bearer token")
                 .with(csrf()))
             .andExpect(status().isOk())
-            .andDo(MockMvcRestDocumentation.document("recruit-comments/update",
-                    requestHeaders(
-                            headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
-                    ),
-                    pathParameters(
-                            parameterWithName("id").description("댓글 아이디")
-                    ),
-                    requestFields(
-                            fieldWithPath("content").type(JsonFieldType.STRING).description("내용")
-                    )
+            .andDo(MockMvcRestDocumentationWrapper.document("recruit-comments/update",
+                            resource(
+                                    ResourceSnippetParameters.builder()
+                                            .tag("모집게시판 댓글 API")
+                                            .description("모집게시판 댓글을 수정한다.")
+                                            .requestHeaders(
+                                                    headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                                            )
+                                            .pathParameters(
+                                                parameterWithName("id").description("댓글 아이디")
+                                            )
+                                            .requestFields(
+                                                fieldWithPath("content").type(JsonFieldType.STRING).description("내용")
+                                            ).build())
             ));
     }
 
@@ -177,13 +189,17 @@ class RecruitCommentControllerTest {
                 .with(csrf())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer token"))
             .andExpect(status().isOk())
-            .andDo(MockMvcRestDocumentation.document("recruit-comments/delete",
-                    requestHeaders(
-                            headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
-                    ),
-                    pathParameters(
-                            parameterWithName("id").description("댓글 아이디")
-                    )
+            .andDo(MockMvcRestDocumentationWrapper.document("recruit-comments/delete",
+                            resource(
+                                    ResourceSnippetParameters.builder()
+                                            .tag("모집게시판 댓글 API")
+                                            .description("모집게시판 댓글을 삭제한다.")
+                                            .requestHeaders(
+                                                    headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                                            )
+                                            .pathParameters(
+                                                parameterWithName("id").description("댓글 아이디")
+                                            ).build())
             ));
     }
 
