@@ -1,5 +1,7 @@
 package sideeffect.project.controller;
 
+import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
+import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,16 +39,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
-import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -112,17 +113,21 @@ class ApplicantControllerTest {
                         .with(csrf())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer token"))
                 .andExpect(status().isOk())
-                .andDo(document("applicant/register",
-                        requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
-                        ),
-                        pathParameters(
-                                parameterWithName("id").description("지원할 포지션 아이디")
-                        ),
-                        responseFields(
-                                fieldWithPath("id").type(JsonFieldType.NUMBER).description("지원 아이디"),
-                                fieldWithPath("status").type(JsonFieldType.STRING).description("상태")
-                        )
+                .andDo(MockMvcRestDocumentationWrapper.document("applicant/register",
+                                resource(
+                                        ResourceSnippetParameters.builder()
+                                                .tag("지원 API")
+                                                .description("모집게시판의 포지션에 지원한다.")
+                                                .requestHeaders(
+                                                        headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                                                )
+                                                .pathParameters(
+                                                    parameterWithName("id").description("지원할 포지션 아이디")
+                                                )
+                                                .responseFields(
+                                                    fieldWithPath("id").type(JsonFieldType.NUMBER).description("지원 아이디"),
+                                                    fieldWithPath("status").type(JsonFieldType.STRING).description("상태")
+                                                ).build())
                 ));
     }
 
@@ -176,46 +181,50 @@ class ApplicantControllerTest {
                 .andExpect(jsonPath("$.데브옵스.size").value(0))
                 .andExpect(jsonPath("$.마케터.size").value(0))
                 .andExpect(jsonPath("$.['프로젝트 매니저']['size']").value(0))
-                .andDo(document("applicant/find-all",
-                        requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
-                        ),
-                        pathParameters(
-                                parameterWithName("id").description("지원할 포지션 아이디")
-                        ),
-                        requestParameters(
-                                parameterWithName("status").description("지원 상태")
-                        ),
-                        responseFields(
-                                fieldWithPath("프론트엔드.applicants[]").type(JsonFieldType.ARRAY).description("프론트엔드 지원 리스트"),
-                                fieldWithPath("프론트엔드.applicants[].userId").type(JsonFieldType.NUMBER).description("프론트엔드 지원 유저 아이디"),
-                                fieldWithPath("프론트엔드.applicants[].applicantId").type(JsonFieldType.NUMBER).description("프론트엔드 지원 아이디"),
-                                fieldWithPath("프론트엔드.applicants[].nickName").type(JsonFieldType.STRING).description("프론트엔드 지원자 닉네임"),
-                                fieldWithPath("프론트엔드.applicants[].career").type(JsonFieldType.STRING).description("프론트엔드 지원자 경력"),
-                                fieldWithPath("프론트엔드.applicants[].imgUrl").type(JsonFieldType.STRING).description("프론트엔드 지원자 프로필 이미지"),
-                                fieldWithPath("프론트엔드.applicants[].githubUrl").type(JsonFieldType.STRING).description("프론트엔드 지원자 깃허브 주소"),
-                                fieldWithPath("프론트엔드.applicants[].email").type(JsonFieldType.STRING).description("프론트엔드 지원자 이메일"),
-                                fieldWithPath("프론트엔드.applicants[].createdAt").type(JsonFieldType.STRING).description("프론트엔드 지원 일자"),
-                                fieldWithPath("프론트엔드.size").type(JsonFieldType.NUMBER).description("프론트엔드 지원 수"),
-                                fieldWithPath("백엔드.applicants[]").type(JsonFieldType.ARRAY).description("백엔드 지원 리스트"),
-                                fieldWithPath("백엔드.applicants[].userId").type(JsonFieldType.NUMBER).description("백엔드 지원 유저 아이디"),
-                                fieldWithPath("백엔드.applicants[].applicantId").type(JsonFieldType.NUMBER).description("백엔드 지원 아이디"),
-                                fieldWithPath("백엔드.applicants[].nickName").type(JsonFieldType.STRING).description("백엔드 지원자 닉네임"),
-                                fieldWithPath("백엔드.applicants[].career").type(JsonFieldType.STRING).description("백엔드 지원자 경력"),
-                                fieldWithPath("백엔드.applicants[].imgUrl").type(JsonFieldType.STRING).description("백엔드 지원자 프로필 이미지"),
-                                fieldWithPath("백엔드.applicants[].githubUrl").type(JsonFieldType.STRING).description("백엔드 지원자 깃허브 주소"),
-                                fieldWithPath("백엔드.applicants[].email").type(JsonFieldType.STRING).description("백엔드 지원자 이메일"),
-                                fieldWithPath("백엔드.applicants[].createdAt").type(JsonFieldType.STRING).description("백엔드 지원 일자"),
-                                fieldWithPath("백엔드.size").type(JsonFieldType.NUMBER).description("백엔드 지원 수"),
-                                fieldWithPath("디자이너.applicants[]").type(JsonFieldType.ARRAY).description("디자이너 지원 리스트"),
-                                fieldWithPath("디자이너.size").type(JsonFieldType.NUMBER).description("디자이너 지원 수"),
-                                fieldWithPath("데브옵스.applicants[]").type(JsonFieldType.ARRAY).description("데브옵스 지원 리스트"),
-                                fieldWithPath("데브옵스.size").type(JsonFieldType.NUMBER).description("데브옵스 지원 수"),
-                                fieldWithPath("마케터.applicants[]").type(JsonFieldType.ARRAY).description("마케터 지원 리스트"),
-                                fieldWithPath("마케터.size").type(JsonFieldType.NUMBER).description("마케터 지원 수"),
-                                fieldWithPath("프로젝트 매니저.applicants[]").type(JsonFieldType.ARRAY).description("프로젝트 매니저 지원 리스트"),
-                                fieldWithPath("프로젝트 매니저.size").type(JsonFieldType.NUMBER).description("프로젝트 매니저 지원 수")
-                        )
+                .andDo(MockMvcRestDocumentationWrapper.document("applicant/list",
+                                resource(
+                                        ResourceSnippetParameters.builder()
+                                                .tag("지원 API")
+                                                .description("지원자 또는 팀원 목록을 조회한다.")
+                                                .requestHeaders(
+                                                        headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                                                )
+                                                .pathParameters(
+                                                    parameterWithName("id").description("지원할 포지션 아이디")
+                                                )
+                                                .requestParameters(
+                                                    parameterWithName("status").description("지원 상태")
+                                                )
+                                                .responseFields(
+                                                    fieldWithPath("프론트엔드.applicants[]").type(JsonFieldType.ARRAY).description("프론트엔드 지원 리스트"),
+                                                    fieldWithPath("프론트엔드.applicants[].userId").type(JsonFieldType.NUMBER).description("프론트엔드 지원 유저 아이디"),
+                                                    fieldWithPath("프론트엔드.applicants[].applicantId").type(JsonFieldType.NUMBER).description("프론트엔드 지원 아이디"),
+                                                    fieldWithPath("프론트엔드.applicants[].nickName").type(JsonFieldType.STRING).description("프론트엔드 지원자 닉네임"),
+                                                    fieldWithPath("프론트엔드.applicants[].career").type(JsonFieldType.STRING).description("프론트엔드 지원자 경력"),
+                                                    fieldWithPath("프론트엔드.applicants[].imgUrl").type(JsonFieldType.STRING).description("프론트엔드 지원자 프로필 이미지"),
+                                                    fieldWithPath("프론트엔드.applicants[].githubUrl").type(JsonFieldType.STRING).description("프론트엔드 지원자 깃허브 주소"),
+                                                    fieldWithPath("프론트엔드.applicants[].email").type(JsonFieldType.STRING).description("프론트엔드 지원자 이메일"),
+                                                    fieldWithPath("프론트엔드.applicants[].createdAt").type(JsonFieldType.STRING).description("프론트엔드 지원 일자"),
+                                                    fieldWithPath("프론트엔드.size").type(JsonFieldType.NUMBER).description("프론트엔드 지원 수"),
+                                                    fieldWithPath("백엔드.applicants[]").type(JsonFieldType.ARRAY).description("백엔드 지원 리스트"),
+                                                    fieldWithPath("백엔드.applicants[].userId").type(JsonFieldType.NUMBER).description("백엔드 지원 유저 아이디"),
+                                                    fieldWithPath("백엔드.applicants[].applicantId").type(JsonFieldType.NUMBER).description("백엔드 지원 아이디"),
+                                                    fieldWithPath("백엔드.applicants[].nickName").type(JsonFieldType.STRING).description("백엔드 지원자 닉네임"),
+                                                    fieldWithPath("백엔드.applicants[].career").type(JsonFieldType.STRING).description("백엔드 지원자 경력"),
+                                                    fieldWithPath("백엔드.applicants[].imgUrl").type(JsonFieldType.STRING).description("백엔드 지원자 프로필 이미지"),
+                                                    fieldWithPath("백엔드.applicants[].githubUrl").type(JsonFieldType.STRING).description("백엔드 지원자 깃허브 주소"),
+                                                    fieldWithPath("백엔드.applicants[].email").type(JsonFieldType.STRING).description("백엔드 지원자 이메일"),
+                                                    fieldWithPath("백엔드.applicants[].createdAt").type(JsonFieldType.STRING).description("백엔드 지원 일자"),
+                                                    fieldWithPath("백엔드.size").type(JsonFieldType.NUMBER).description("백엔드 지원 수"),
+                                                    fieldWithPath("디자이너.applicants[]").type(JsonFieldType.ARRAY).description("디자이너 지원 리스트"),
+                                                    fieldWithPath("디자이너.size").type(JsonFieldType.NUMBER).description("디자이너 지원 수"),
+                                                    fieldWithPath("데브옵스.applicants[]").type(JsonFieldType.ARRAY).description("데브옵스 지원 리스트"),
+                                                    fieldWithPath("데브옵스.size").type(JsonFieldType.NUMBER).description("데브옵스 지원 수"),
+                                                    fieldWithPath("마케터.applicants[]").type(JsonFieldType.ARRAY).description("마케터 지원 리스트"),
+                                                    fieldWithPath("마케터.size").type(JsonFieldType.NUMBER).description("마케터 지원 수"),
+                                                    fieldWithPath("프로젝트 매니저.applicants[]").type(JsonFieldType.ARRAY).description("프로젝트 매니저 지원 리스트"),
+                                                    fieldWithPath("프로젝트 매니저.size").type(JsonFieldType.NUMBER).description("프로젝트 매니저 지원 수")
+                                                ).build())
                 ));
     }
 
@@ -248,15 +257,19 @@ class ApplicantControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andDo(document("applicant/approve-reject",
-                        requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
-                        ),
-                        requestFields(
-                                fieldWithPath("recruitBoardId").type(JsonFieldType.NUMBER).description("게시글 아이디"),
-                                fieldWithPath("applicantId").type(JsonFieldType.NUMBER).description("지원 아이디"),
-                                fieldWithPath("status").type(JsonFieldType.STRING).description("상태(approved = 수락, rejected = 거절)")
-                        )
+                .andDo(MockMvcRestDocumentationWrapper.document("applicant/approve-reject",
+                                resource(
+                                        ResourceSnippetParameters.builder()
+                                                .tag("지원 API")
+                                                .description("포지션에 지원한 지원자를 수락 또는 거절한다.")
+                                                .requestHeaders(
+                                                        headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                                                )
+                                                .requestFields(
+                                                    fieldWithPath("recruitBoardId").type(JsonFieldType.NUMBER).description("게시글 아이디"),
+                                                    fieldWithPath("applicantId").type(JsonFieldType.NUMBER).description("지원 아이디"),
+                                                    fieldWithPath("status").type(JsonFieldType.STRING).description("상태(approved = 수락, rejected = 거절)")
+                                                ).build())
                 ));
     }
 
@@ -373,14 +386,18 @@ class ApplicantControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andDo(document("applicant/release",
-                        requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
-                        ),
-                        requestFields(
-                                fieldWithPath("recruitBoardId").type(JsonFieldType.NUMBER).description("게시글 아이디"),
-                                fieldWithPath("applicantId").type(JsonFieldType.NUMBER).description("지원 아이디")
-                        )
+                .andDo(MockMvcRestDocumentationWrapper.document("applicant/release",
+                                resource(
+                                        ResourceSnippetParameters.builder()
+                                                .tag("지원 API")
+                                                .description("프로젝트에 참여한 팀원을 방출한다.")
+                                                .requestHeaders(
+                                                        headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                                                )
+                                                .requestFields(
+                                                    fieldWithPath("recruitBoardId").type(JsonFieldType.NUMBER).description("게시글 아이디"),
+                                                    fieldWithPath("applicantId").type(JsonFieldType.NUMBER).description("지원 아이디")
+                                                ).build())
                 ));
     }
 
@@ -430,13 +447,17 @@ class ApplicantControllerTest {
                 .with(csrf())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer token"))
                 .andExpect(status().isOk())
-                .andDo(document("applicant/cancel",
-                        requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
-                        ),
-                        pathParameters(
-                                parameterWithName("id").description("모집 포지션 아이디")
-                        )
+                .andDo(MockMvcRestDocumentationWrapper.document("applicant/cancel",
+                                resource(
+                                        ResourceSnippetParameters.builder()
+                                                .tag("지원 API")
+                                                .description("지원을 취소한다.")
+                                                .requestHeaders(
+                                                        headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                                                )
+                                                .pathParameters(
+                                                    parameterWithName("id").description("모집 포지션 아이디")
+                                                ).build())
                 ));
     }
 

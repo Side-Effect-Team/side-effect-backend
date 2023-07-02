@@ -48,12 +48,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
-import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
-import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -135,11 +133,11 @@ class RecruitBoardControllerTest {
             .andExpect(jsonPath("$.tags.length()").value(1))
             .andExpect(jsonPath("$.comments.length()").value(10))
             .andDo( // rest docs 문서 작성 시작
-                MockMvcRestDocumentationWrapper.document("recruit-board/find", // 문서 조각 디렉토리 명
+                MockMvcRestDocumentationWrapper.document("recruit-board/find",
                     resource(
                         ResourceSnippetParameters.builder()
-                            .tag("모집게시판 조회")
-                            .description("게시판을 스크롤 조회한다.").
+                            .tag("모집게시판 API")
+                            .description("모집게시판을 상세 조회한다.").
                             pathParameters( // path 파라미터 정보 입력
                                 parameterWithName("id").description("모집 게시글 아이디")
                             ).responseFields( // response 필드 정보 입력
@@ -192,29 +190,32 @@ class RecruitBoardControllerTest {
                 .andExpect(jsonPath("$.recruitBoards.length()").value(2))
                 .andExpect(jsonPath("$.lastId").value(5L))
                 .andExpect(jsonPath("$.hasNext").value(false))
-                .andDo(
-                        document("recruit-board/scroll",
-                                requestParameters(
-                                        parameterWithName("size").description("응답 받을 게시글 수"),
-                                        parameterWithName("keyword").description("검색어(제목 + 내용)").optional(),
-                                        parameterWithName("stackType").description("기술 스택 포함 검색").optional(),
-                                        parameterWithName("lastId").description("이전 응답에서 가장 작은 ID 값, 없으면 첫 페이지").optional()
-                                ),
-                                responseFields(
-                                        fieldWithPath("recruitBoards[].id").type(JsonFieldType.NUMBER).description("게시글 아이디"),
-                                        fieldWithPath("recruitBoards[].closed").type(JsonFieldType.BOOLEAN).description("모집 마감 여부"),
-                                        fieldWithPath("recruitBoards[].title").type(JsonFieldType.STRING).description("내용"),
-                                        fieldWithPath("recruitBoards[].views").type(JsonFieldType.NUMBER).description("조회수"),
-                                        fieldWithPath("recruitBoards[].like").type(JsonFieldType.BOOLEAN).description("좋아요 여부"),
-                                        fieldWithPath("recruitBoards[].likeNum").type(JsonFieldType.NUMBER).description("좋아요 수"),
-                                        fieldWithPath("recruitBoards[].commentNum").type(JsonFieldType.NUMBER).description("댓글 수"),
-                                        fieldWithPath("recruitBoards[].createdAt").type(JsonFieldType.STRING).description("작성일"),
-                                        fieldWithPath("recruitBoards[].positions[]").type(JsonFieldType.ARRAY).description("모집 포지션 종류"),
-                                        fieldWithPath("recruitBoards[].tags[]").type(JsonFieldType.ARRAY).description("모집 기술 태그 종류"),
-                                        fieldWithPath("lastId").type(JsonFieldType.NUMBER).description("응답한 게시글 중 마지막 아이디"),
-                                        fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN).description("다음 게시글 여부")
-                                )
-                        ));
+                .andDo(MockMvcRestDocumentationWrapper.document("recruit-board/scroll",
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("모집게시판 API")
+                                        .description("모집게시판을 스크롤 조회한다.")
+                                        .requestParameters(
+                                                parameterWithName("size").description("응답 받을 게시글 수"),
+                                                parameterWithName("keyword").description("검색어(제목 + 내용)").optional(),
+                                                parameterWithName("stackType").description("기술 스택 포함 검색").optional(),
+                                                parameterWithName("lastId").description("이전 응답에서 가장 작은 ID 값, 없으면 첫 페이지").optional()
+                                        )
+                                        .responseFields(
+                                            fieldWithPath("recruitBoards[].id").type(JsonFieldType.NUMBER).description("게시글 아이디"),
+                                            fieldWithPath("recruitBoards[].closed").type(JsonFieldType.BOOLEAN).description("모집 마감 여부"),
+                                            fieldWithPath("recruitBoards[].title").type(JsonFieldType.STRING).description("내용"),
+                                            fieldWithPath("recruitBoards[].views").type(JsonFieldType.NUMBER).description("조회수"),
+                                            fieldWithPath("recruitBoards[].like").type(JsonFieldType.BOOLEAN).description("좋아요 여부"),
+                                            fieldWithPath("recruitBoards[].likeNum").type(JsonFieldType.NUMBER).description("좋아요 수"),
+                                            fieldWithPath("recruitBoards[].commentNum").type(JsonFieldType.NUMBER).description("댓글 수"),
+                                            fieldWithPath("recruitBoards[].createdAt").type(JsonFieldType.STRING).description("작성일"),
+                                            fieldWithPath("recruitBoards[].positions[]").type(JsonFieldType.ARRAY).description("모집 포지션 종류"),
+                                            fieldWithPath("recruitBoards[].tags[]").type(JsonFieldType.ARRAY).description("모집 기술 태그 종류"),
+                                            fieldWithPath("lastId").type(JsonFieldType.NUMBER).description("응답한 게시글 중 마지막 아이디"),
+                                            fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN).description("다음 게시글 여부")
+                                     ).build())
+                ));
 
         verify(recruitBoardService).findRecruitBoards(any(), any());
     }
@@ -242,26 +243,30 @@ class RecruitBoardControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.recruitBoards.length()").value(2))
                 .andDo(
-                        document("recruit-board/find-all",
-                                responseFields(
-                                        fieldWithPath("recruitBoards[].id").type(JsonFieldType.NUMBER).description("게시글 아이디"),
-                                        fieldWithPath("recruitBoards[].userId").type(JsonFieldType.NUMBER).description("작성자 아이디"),
-                                        fieldWithPath("recruitBoards[].title").type(JsonFieldType.STRING).description("제목"),
-                                        fieldWithPath("recruitBoards[].projectName").type(JsonFieldType.STRING).description("프로젝트 이름"),
-                                        fieldWithPath("recruitBoards[].content").type(JsonFieldType.STRING).description("내용"),
-                                        fieldWithPath("recruitBoards[].imgSrc").type(JsonFieldType.STRING).description("게시글 이미지"),
-                                        fieldWithPath("recruitBoards[].views").type(JsonFieldType.NUMBER).description("조회수"),
-                                        fieldWithPath("recruitBoards[].like").type(JsonFieldType.BOOLEAN).description("좋아요 여부"),
-                                        fieldWithPath("recruitBoards[].likeNum").type(JsonFieldType.NUMBER).description("좋아요 수"),
-                                        fieldWithPath("recruitBoards[].createdAt").type(JsonFieldType.STRING).description("작성일"),
-                                        fieldWithPath("recruitBoards[].positions[].id").type(JsonFieldType.NUMBER).description("포지션 아이디"),
-                                        fieldWithPath("recruitBoards[].positions[].positionType").type(JsonFieldType.STRING).description("포지션 종류"),
-                                        fieldWithPath("recruitBoards[].positions[].targetNumber").type(JsonFieldType.NUMBER).description("포지션 인원 목표 수"),
-                                        fieldWithPath("recruitBoards[].positions[].currentNumber").type(JsonFieldType.NUMBER).description("포지션 인원 현재 수"),
-                                        fieldWithPath("recruitBoards[].tags[].stackType").type(JsonFieldType.STRING).description("기술 태그 종류"),
-                                        fieldWithPath("recruitBoards[].tags[].url").type(JsonFieldType.STRING).description("기술 태그 이미지")
-                                )
-                        ));
+                        MockMvcRestDocumentationWrapper.document("recruit-board/all",
+                                resource(
+                                        ResourceSnippetParameters.builder()
+                                                .tag("모집게시판 API")
+                                                .description("모집게시판을 전체 조회한다.")
+                                                .responseFields(
+                                                        fieldWithPath("recruitBoards[].id").type(JsonFieldType.NUMBER).description("게시글 아이디"),
+                                                        fieldWithPath("recruitBoards[].userId").type(JsonFieldType.NUMBER).description("작성자 아이디"),
+                                                        fieldWithPath("recruitBoards[].title").type(JsonFieldType.STRING).description("제목"),
+                                                        fieldWithPath("recruitBoards[].projectName").type(JsonFieldType.STRING).description("프로젝트 이름"),
+                                                        fieldWithPath("recruitBoards[].content").type(JsonFieldType.STRING).description("내용"),
+                                                        fieldWithPath("recruitBoards[].imgSrc").type(JsonFieldType.STRING).description("게시글 이미지"),
+                                                        fieldWithPath("recruitBoards[].views").type(JsonFieldType.NUMBER).description("조회수"),
+                                                        fieldWithPath("recruitBoards[].like").type(JsonFieldType.BOOLEAN).description("좋아요 여부"),
+                                                        fieldWithPath("recruitBoards[].likeNum").type(JsonFieldType.NUMBER).description("좋아요 수"),
+                                                        fieldWithPath("recruitBoards[].createdAt").type(JsonFieldType.STRING).description("작성일"),
+                                                        fieldWithPath("recruitBoards[].positions[].id").type(JsonFieldType.NUMBER).description("포지션 아이디"),
+                                                        fieldWithPath("recruitBoards[].positions[].positionType").type(JsonFieldType.STRING).description("포지션 종류"),
+                                                        fieldWithPath("recruitBoards[].positions[].targetNumber").type(JsonFieldType.NUMBER).description("포지션 인원 목표 수"),
+                                                        fieldWithPath("recruitBoards[].positions[].currentNumber").type(JsonFieldType.NUMBER).description("포지션 인원 현재 수"),
+                                                        fieldWithPath("recruitBoards[].tags[].stackType").type(JsonFieldType.STRING).description("기술 태그 종류"),
+                                                        fieldWithPath("recruitBoards[].tags[].url").type(JsonFieldType.STRING).description("기술 태그 이미지")
+                                                ).build())
+                ));
 
         verify(recruitBoardService).findAllRecruitBoard(any());
     }
@@ -289,30 +294,34 @@ class RecruitBoardControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andDo(document("recruit-board/register",
-                        requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
-                        ),
-                        requestFields(
-                                fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
-                                fieldWithPath("projectName").type(JsonFieldType.STRING).description("프로젝트 명"),
-                                fieldWithPath("content").type(JsonFieldType.STRING).description("내용"),
-                                fieldWithPath("positions[].positionType").type(JsonFieldType.STRING).description("모집 포지션"),
-                                fieldWithPath("positions[].targetNumber").type(JsonFieldType.NUMBER).description("모집 인원"),
-                                fieldWithPath("tags").type(JsonFieldType.ARRAY).description("기술 태그")
-                        ),
-                        responseFields(
-                                fieldWithPath("id").type(JsonFieldType.NUMBER).description("게시글 아이디"),
-                                fieldWithPath("closed").type(JsonFieldType.BOOLEAN).description("모집 마감 여부"),
-                                fieldWithPath("title").type(JsonFieldType.STRING).description("내용"),
-                                fieldWithPath("views").type(JsonFieldType.NUMBER).description("조회수"),
-                                fieldWithPath("like").type(JsonFieldType.BOOLEAN).description("좋아요 여부"),
-                                fieldWithPath("likeNum").type(JsonFieldType.NUMBER).description("좋아요 수"),
-                                fieldWithPath("commentNum").type(JsonFieldType.NUMBER).description("댓글 수"),
-                                fieldWithPath("createdAt").type(JsonFieldType.STRING).description("작성일"),
-                                fieldWithPath("positions").type(JsonFieldType.ARRAY).description("모집 포지션 종류"),
-                                fieldWithPath("tags").type(JsonFieldType.ARRAY).description("모집 기술 태그 종류")
-                        )
+                .andDo(MockMvcRestDocumentationWrapper.document("recruit-board/register",
+                                resource(
+                                        ResourceSnippetParameters.builder()
+                                                .tag("모집게시판 API")
+                                                .description("모집게시판을 등록한다.")
+                                                .requestHeaders(
+                                                        headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                                                )
+                                                .requestFields(
+                                                        fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
+                                                        fieldWithPath("projectName").type(JsonFieldType.STRING).description("프로젝트 명"),
+                                                        fieldWithPath("content").type(JsonFieldType.STRING).description("내용"),
+                                                        fieldWithPath("positions[].positionType").type(JsonFieldType.STRING).description("모집 포지션"),
+                                                        fieldWithPath("positions[].targetNumber").type(JsonFieldType.NUMBER).description("모집 인원"),
+                                                        fieldWithPath("tags").type(JsonFieldType.ARRAY).description("기술 태그")
+                                                )
+                                                .responseFields(
+                                                        fieldWithPath("id").type(JsonFieldType.NUMBER).description("게시글 아이디"),
+                                                        fieldWithPath("closed").type(JsonFieldType.BOOLEAN).description("모집 마감 여부"),
+                                                        fieldWithPath("title").type(JsonFieldType.STRING).description("내용"),
+                                                        fieldWithPath("views").type(JsonFieldType.NUMBER).description("조회수"),
+                                                        fieldWithPath("like").type(JsonFieldType.BOOLEAN).description("좋아요 여부"),
+                                                        fieldWithPath("likeNum").type(JsonFieldType.NUMBER).description("좋아요 수"),
+                                                        fieldWithPath("commentNum").type(JsonFieldType.NUMBER).description("댓글 수"),
+                                                        fieldWithPath("createdAt").type(JsonFieldType.STRING).description("작성일"),
+                                                        fieldWithPath("positions").type(JsonFieldType.ARRAY).description("모집 포지션 종류"),
+                                                        fieldWithPath("tags").type(JsonFieldType.ARRAY).description("모집 기술 태그 종류")
+                                                ).build())
                 ));
     }
 
@@ -332,19 +341,23 @@ class RecruitBoardControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andDo(document("recruit-board/update",
-                        requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
-                        ),
-                        pathParameters(
-                                parameterWithName("id").description("모집 게시글 아이디")
-                        ),
-                        requestFields(
-                                fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
-                                fieldWithPath("projectName").type(JsonFieldType.STRING).description("프로젝트 명"),
-                                fieldWithPath("content").type(JsonFieldType.STRING).description("내용"),
-                                fieldWithPath("tags").type(JsonFieldType.ARRAY).description("기술 태그")
-                        )
+                .andDo(MockMvcRestDocumentationWrapper.document("recruit-board/update",
+                                resource(
+                                        ResourceSnippetParameters.builder()
+                                                .tag("모집게시판 API")
+                                                .description("모집게시판을 수정한다.")
+                                                .requestHeaders(
+                                                        headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                                                )
+                                                .pathParameters(
+                                                    parameterWithName("id").description("모집 게시글 아이디")
+                                                )
+                                                .requestFields(
+                                                    fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
+                                                    fieldWithPath("projectName").type(JsonFieldType.STRING).description("프로젝트 명"),
+                                                    fieldWithPath("content").type(JsonFieldType.STRING).description("내용"),
+                                                    fieldWithPath("tags").type(JsonFieldType.ARRAY).description("기술 태그")
+                                                ).build())
                 ));
     }
 
@@ -378,17 +391,21 @@ class RecruitBoardControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andDo(document("recruit-board/add-position",
-                        requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
-                        ),
-                        pathParameters(
-                                parameterWithName("id").description("모집 게시글 아이디")
-                        ),
-                        requestFields(
-                                fieldWithPath("positionType").type(JsonFieldType.STRING).description("포지션"),
-                                fieldWithPath("targetNumber").type(JsonFieldType.NUMBER).description("포지션 인원 목표 수")
-                        )
+                .andDo(MockMvcRestDocumentationWrapper.document("recruit-board/add-position",
+                                resource(
+                                        ResourceSnippetParameters.builder()
+                                                .tag("모집게시판 API")
+                                                .description("모집게시판에 포지션을 추가한다.")
+                                                .requestHeaders(
+                                                        headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                                                )
+                                                .pathParameters(
+                                                    parameterWithName("id").description("모집 게시글 아이디")
+                                                )
+                                                .requestFields(
+                                                    fieldWithPath("positionType").type(JsonFieldType.STRING).description("포지션"),
+                                                    fieldWithPath("targetNumber").type(JsonFieldType.NUMBER).description("포지션 인원 목표 수")
+                                                ).build())
                 ));
     }
 
@@ -416,13 +433,17 @@ class RecruitBoardControllerTest {
                         .with(csrf())
                         .header(HttpHeaders.AUTHORIZATION, "Bearer token"))
                 .andExpect(status().isOk())
-                .andDo(document("recruit-board/delete",
-                        requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
-                        ),
-                        pathParameters(
-                                parameterWithName("id").description("모집 게시글 아이디")
-                        )
+                .andDo(MockMvcRestDocumentationWrapper.document("recruit-board/delete",
+                                resource(
+                                        ResourceSnippetParameters.builder()
+                                                .tag("모집게시판 API")
+                                                .description("모집게시판을 삭제한다.")
+                                                .requestHeaders(
+                                                        headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                                                )
+                                                .pathParameters(
+                                                    parameterWithName("id").description("모집 게시글 아이디")
+                                                ).build())
                 ));
     }
 
@@ -453,18 +474,22 @@ class RecruitBoardControllerTest {
                 .andExpect(jsonPath("$.recruitBoardId").value(1))
                 .andExpect(jsonPath("$.userNickname").value("test1"))
                 .andExpect(jsonPath("$.message").value(LikeResult.LIKE.getMessage()))
-                .andDo(document("recruit-board/likes",
-                        requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
-                        ),
-                        pathParameters(
-                                parameterWithName("id").description("모집 게시글 아이디")
-                        ),
-                        responseFields(
-                                fieldWithPath("recruitBoardId").type(JsonFieldType.NUMBER).description("게시글 아이디"),
-                                fieldWithPath("userNickname").type(JsonFieldType.STRING).description("사용자 닉네임"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("메시지(추천 또는 취소에 따라 다릅니다)")
-                        )
+                .andDo(MockMvcRestDocumentationWrapper.document("recruit-board/likes",
+                                resource(
+                                        ResourceSnippetParameters.builder()
+                                                .tag("모집게시판 API")
+                                                .description("모집게시판에 좋아요를 누르거나 취소한다.")
+                                                .requestHeaders(
+                                                        headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                                                )
+                                                .pathParameters(
+                                                    parameterWithName("id").description("모집 게시글 아이디")
+                                                )
+                                                .responseFields(
+                                                    fieldWithPath("recruitBoardId").type(JsonFieldType.NUMBER).description("게시글 아이디"),
+                                                    fieldWithPath("userNickname").type(JsonFieldType.STRING).description("사용자 닉네임"),
+                                                    fieldWithPath("message").type(JsonFieldType.STRING).description("메시지(추천 또는 취소에 따라 다릅니다)")
+                                                ).build())
                 ));
     }
 
@@ -498,15 +523,19 @@ class RecruitBoardControllerTest {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer token")
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andDo(
-                        document("recruit-board/image-upload",
-                                requestHeaders(
-                                        headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
-                                ),
-                                pathParameters(
-                                        parameterWithName("id").description("모집 게시글 아이디")
-                                ),
-                                requestParts(partWithName("file").description("업로드 이미지"))
+                .andDo(MockMvcRestDocumentationWrapper.document("recruit-board/image-upload",
+                                resource(
+                                        ResourceSnippetParameters.builder()
+                                                .tag("모집게시판 API")
+                                                .description("모집게시판에 이미지를 업로드한다.")
+                                                .requestHeaders(
+                                                        headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
+                                                )
+                                                .pathParameters(
+                                                    parameterWithName("id").description("모집 게시글 아이디")
+                                                )
+//                                                .requestParts(partWithName("file").description("업로드 이미지"))
+                                .build())
                         ));
     }
 
