@@ -10,7 +10,7 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.SimpleType;
 import org.springframework.http.HttpHeaders;
 
-public class FreeBoardCommentDocsUtils {
+public final class FreeBoardCommentDocsUtils {
 
     public static ResourceSnippet getFreeBoardRegisterCommentDocs() {
         return resource(
