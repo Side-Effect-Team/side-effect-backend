@@ -4,10 +4,7 @@ import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.docume
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -17,18 +14,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.RestDocumentationContextProvider;
-import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
+import sideeffect.project.common.docs.ControllerTestDocument;
 import sideeffect.project.common.docs.freeBoard.FreeBoardCommentDocsUtils;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
@@ -42,31 +32,19 @@ import sideeffect.project.dto.comment.CommentResponse;
 import sideeffect.project.dto.comment.CommentUpdateRequest;
 import sideeffect.project.service.CommentService;
 
-@AutoConfigureMockMvc
-@AutoConfigureRestDocs
 @WebMvcTest(CommentController.class)
-@ExtendWith(RestDocumentationExtension.class)
-class CommentControllerTest {
+class CommentControllerTest extends ControllerTestDocument {
 
     @MockBean
     private CommentService commentService;
 
     private User user;
-    private MockMvc mvc;
     private Comment comment;
     private FreeBoard freeBoard;
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    void setUp(WebApplicationContext context, RestDocumentationContextProvider restDocumentationContextProvider) {
-        mvc = MockMvcBuilders.webAppContextSetup(context)
-            .apply(springSecurity())
-            .apply(documentationConfiguration(restDocumentationContextProvider)
-                .operationPreprocessors()
-                .withRequestDefaults(prettyPrint())
-                .withResponseDefaults(prettyPrint()))
-            .build();
-
+    void setUp() {
         user = User.builder()
             .id(1L)
             .email("test@naver.com")
