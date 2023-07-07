@@ -1,13 +1,12 @@
 package sideeffect.project.controller;
 
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -18,9 +17,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
+import sideeffect.project.common.docs.ControllerTestDocument;
+import sideeffect.project.common.docs.freeBoard.FreeBoardCommentDocsUtils;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.common.security.WithCustomUser;
@@ -34,23 +33,18 @@ import sideeffect.project.dto.comment.CommentUpdateRequest;
 import sideeffect.project.service.CommentService;
 
 @WebMvcTest(CommentController.class)
-class CommentControllerTest {
+class CommentControllerTest extends ControllerTestDocument {
 
     @MockBean
     private CommentService commentService;
 
     private User user;
-    private MockMvc mvc;
     private Comment comment;
     private FreeBoard freeBoard;
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    void setUp(WebApplicationContext context) {
-        mvc = MockMvcBuilders.webAppContextSetup(context)
-            .apply(springSecurity())
-            .build();
-
+    void setUp() {
         user = User.builder()
             .id(1L)
             .email("test@naver.com")
@@ -81,12 +75,14 @@ class CommentControllerTest {
             .boardId(freeBoard.getId()).content("좋은 프로젝트네요.").build();
         given(commentService.registerComment(any(), any())).willReturn(CommentResponse.of(comment));
 
-        mvc.perform(post("/api/comments")
+        mvc.perform(RestDocumentationRequestBuilders.post("/api/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
                 .with(csrf()))
             .andExpect(status().isOk())
-            .andDo(print());
+            .andDo(print())
+            .andDo(document("free-board/comment/register", FreeBoardCommentDocsUtils
+                .getFreeBoardRegisterCommentDocs()));
     }
 
     @DisplayName("요청을 보내 댓글을 수정한다.")
@@ -96,12 +92,14 @@ class CommentControllerTest {
         String content = "감사합니다.";
         CommentUpdateRequest request = new CommentUpdateRequest(content);
 
-        mvc.perform(patch("/api/comments/1")
+        mvc.perform(RestDocumentationRequestBuilders.patch("/api/comments/{id}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
                 .with(csrf()))
             .andExpect(status().isOk())
-            .andDo(print());
+            .andDo(print())
+            .andDo(document("free-board/comment/update", FreeBoardCommentDocsUtils
+                .getFreeBoardUpdateCommentDocs()));
     }
 
     @DisplayName("댓글의 주인이 아닌자가 수정 요청을 하면 예외가 발생")
@@ -123,10 +121,12 @@ class CommentControllerTest {
     @Test
     void deleteComment() throws Exception {
 
-        mvc.perform(delete("/api/comments/1")
+        mvc.perform(RestDocumentationRequestBuilders.delete("/api/comments/{id}", 1L)
                 .with(csrf()))
             .andExpect(status().isOk())
-            .andDo(print());
+            .andDo(print())
+            .andDo(document("free-board/comment/delete", FreeBoardCommentDocsUtils
+            .getFreeBoardDeleteCommentDocs()));
     }
 
     @DisplayName("댓글의 주인이 아닌자가 삭제 요청을 하면 예외가 발생")

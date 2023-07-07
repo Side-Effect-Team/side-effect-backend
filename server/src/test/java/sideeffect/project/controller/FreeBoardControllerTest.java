@@ -1,16 +1,17 @@
 package sideeffect.project.controller;
 
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,9 +28,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
+import sideeffect.project.common.docs.ControllerTestDocument;
+import sideeffect.project.common.docs.freeBoard.FreeBoardDocsUtils;
 import sideeffect.project.common.exception.AuthException;
 import sideeffect.project.common.exception.ErrorCode;
 import sideeffect.project.common.security.WithCustomUser;
@@ -48,22 +49,17 @@ import sideeffect.project.service.FreeBoardService;
 import java.util.List;
 
 @WebMvcTest(FreeBoardController.class)
-class FreeBoardControllerTest {
+class FreeBoardControllerTest extends ControllerTestDocument {
 
     @MockBean
     private FreeBoardService freeBoardService;
-
-    private MockMvc mvc;
 
     private FreeBoard freeBoard;
     private User user;
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    void setUp(WebApplicationContext context) {
-        mvc = MockMvcBuilders.webAppContextSetup(context)
-            .apply(springSecurity())
-            .build();
+    void setUp() {
 
         user = User.builder()
             .id(1L)
@@ -75,8 +71,10 @@ class FreeBoardControllerTest {
 
         freeBoard = FreeBoard.builder()
             .id(1L)
-            .title("게시판입니다.")
+            .title("강아지용 앱 프로젝트 입니다.")
             .projectUrl("url")
+            .projectName("멍멍이 앱")
+            .subTitle("우리집 강아지가 좋아해요!!!")
             .imgUrl("/test.jpg")
             .content("test")
             .build();
@@ -90,13 +88,13 @@ class FreeBoardControllerTest {
     @Test
     void findBoard() throws Exception {
         int recommendNumber = 20;
-        List<Comment> freeBoards = generateComments(1L, 10L);
-        freeBoards.forEach(comment -> comment.associate(user, freeBoard));
+        List<Comment> comments = generateComments(1L, 1L);
+        comments.forEach(comment -> comment.associate(user, freeBoard));
         like(recommendNumber, freeBoard);
         DetailedFreeBoardResponse response = DetailedFreeBoardResponse.of(freeBoard, false);
         given(freeBoardService.findBoard(any(), any())).willReturn(response);
 
-        mvc.perform(get("/api/free-boards/1")
+        mvc.perform(RestDocumentationRequestBuilders.get("/api/free-boards/{id}", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.title").value(response.getTitle()))
@@ -107,10 +105,11 @@ class FreeBoardControllerTest {
             .andExpect(jsonPath("$.content").value(response.getContent()))
             .andExpect(jsonPath("$.projectUrl").value(response.getProjectUrl()))
             .andExpect(jsonPath("$.imgUrl").value(response.getImgUrl()))
-            .andExpect(jsonPath("$.comments.size()").value(10))
+            .andExpect(jsonPath("$.comments.size()").value(1))
             .andExpect(jsonPath("$.likeNum").value(recommendNumber))
             .andExpect(jsonPath("$.like").value(false))
-            .andDo(print());
+            .andDo(print())
+            .andDo(document("free-board/find", FreeBoardDocsUtils.getFreeBoardFindDocs()));
         verify(freeBoardService).findBoard(any(), any());
     }
 
@@ -124,7 +123,7 @@ class FreeBoardControllerTest {
         FreeBoardScrollResponse scrollResponse = FreeBoardScrollResponse.of(responses, true);
         given(freeBoardService.findScroll(any(), any())).willReturn(scrollResponse);
 
-        mvc.perform(get("/api/free-boards/scroll")
+        mvc.perform(RestDocumentationRequestBuilders.get("/api/free-boards/scroll")
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("lastId", "101")
                 .param("size", "10"))
@@ -132,7 +131,8 @@ class FreeBoardControllerTest {
             .andExpect(jsonPath("$.projects.length()").value(10))
             .andExpect(jsonPath("$.hasNext").value(true))
             .andExpect(jsonPath("$.lastId").value(91))
-            .andDo(print());
+            .andDo(print())
+            .andDo(document("free-board/scroll", FreeBoardDocsUtils.getFreeBoardScrollDocs()));
         verify(freeBoardService).findScroll(any(), any());
     }
 
@@ -178,15 +178,25 @@ class FreeBoardControllerTest {
     @Test
     void registerBoard() throws Exception {
         FreeBoardRequest request = FreeBoardRequest.builder()
-            .projectUrl("http://1234test.co.kr").content("test").title("게시판 입니다").build();
+            .projectUrl("http://1234test.co.kr")
+            .content("test")
+            .title("게시판 입니다")
+            .projectName("게시판")
+            .subTitle("테스트 게시판")
+            .build();
         given(freeBoardService.register(any(), any())).willReturn(freeBoard);
-        mvc.perform(post("/api/free-boards")
+        mvc.perform(RestDocumentationRequestBuilders.post("/api/free-boards")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
                 .with(csrf()))
             .andExpect(status().isOk())
-            .andDo(print());
+            .andDo(print())
+            .andDo(document("free-board/register",
+                resource(FreeBoardDocsUtils
+                    .getFreeBoardRequestDocs()
+                    .description("게시판을 등록")
+                    .build())));
     }
 
     @DisplayName("게시판을 업데이트한다.")
@@ -194,12 +204,17 @@ class FreeBoardControllerTest {
     @Test
     void updateBoard() throws Exception {
         FreeBoardRequest request = FreeBoardRequest.builder().content("update").build();
-        mvc.perform(patch("/api/free-boards/1")
+        mvc.perform(RestDocumentationRequestBuilders.patch("/api/free-boards/{id}", 1L)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
                 .with(csrf()))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andDo(document("free-board/update",
+                resource(FreeBoardDocsUtils
+                    .getFreeBoardRequestDocs()
+                    .description("게시판을 업데이트")
+                    .build())));
     }
 
     @DisplayName("잘못된 유저가 게시판을 업데이트 한다.")
@@ -220,9 +235,14 @@ class FreeBoardControllerTest {
     @WithCustomUser
     @Test
     void deleteBoard() throws Exception {
-        mvc.perform(delete("/api/free-boards/1")
+        mvc.perform(RestDocumentationRequestBuilders.delete("/api/free-boards/{id}", 1L)
                 .with(csrf()))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andDo(document("free-board/delete",
+                resource(FreeBoardDocsUtils
+                    .getFreeBoardPathParametersDocs()
+                    .description("게시판 삭제")
+                    .build())));
     }
 
     @DisplayName("게시판 주인이 아닌 사람이 삭제")
@@ -242,10 +262,13 @@ class FreeBoardControllerTest {
     void uploadImage() throws Exception {
         MockMultipartFile multipartFile =
             new MockMultipartFile("file", "test.png", "image/png", "이미지".getBytes());
-        mvc.perform(multipart("/api/free-boards/image/1")
+        mvc.perform(RestDocumentationRequestBuilders.multipart("/api/free-boards/image/{id}", 1L)
                 .file(multipartFile)
                 .with(csrf()))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andDo(document("upload",
+                resource(FreeBoardDocsUtils.getFreeBoardPathParametersDocs().description("이미지 업로드").build()),
+                requestParts(partWithName("file").description("업로드할 이미지 파일").optional())));
     }
 
     private List<FreeBoard> generateLikeBoards() {
@@ -294,7 +317,13 @@ class FreeBoardControllerTest {
 
     private FreeBoard generateBoard(Long id) {
         User owner = User.builder().id(id).nickname("유저" + id).build();
-        FreeBoard board = FreeBoard.builder().id(id).title(id + "번째 게시판").content(id + "번째 입니다.").build();
+        FreeBoard board = FreeBoard.builder()
+            .id(id)
+            .title(id + "번째 게시판")
+            .imgUrl("DefaultProjectImg.jpg")
+            .content(id + "번째 입니다.")
+            .subTitle("게시판" + id)
+            .build();
         board.associateUser(owner);
         return board;
     }
