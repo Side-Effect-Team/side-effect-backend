@@ -17,7 +17,7 @@ public final class FreeBoardDocsUtils {
     public static ResourceSnippet getFreeBoardFindDocs() {
         return resource(
             ResourceSnippetParameters.builder()
-                .tag("자랑게시판")
+                .tag("자랑게시판 API")
                 .description("특정 게시판을 조회한다.")
                 .requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰").optional())
                 .pathParameters(parameterWithName("id").description("자랑게시판 id"))
@@ -46,7 +46,7 @@ public final class FreeBoardDocsUtils {
     public static ResourceSnippet getFreeBoardScrollDocs() {
         return resource(
             ResourceSnippetParameters.builder()
-                .tag("자랑게시판")
+                .tag("자랑게시판 API")
                 .description("자랑 게시판을 스크롤 조회한다.")
                 .requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰").optional())
                 .requestParameters(
@@ -73,7 +73,7 @@ public final class FreeBoardDocsUtils {
 
     public static ResourceSnippetParametersBuilder getFreeBoardRequestDocs() {
         return ResourceSnippetParameters.builder()
-                .tag("자랑게시판")
+                .tag("자랑게시판 API")
                 .requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰").optional())
                 .requestFields(
                     fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
@@ -85,7 +85,7 @@ public final class FreeBoardDocsUtils {
 
     public static ResourceSnippetParametersBuilder getFreeBoardPathParametersDocs() {
         return ResourceSnippetParameters.builder()
-            .tag("자랑게시판")
+            .tag("자랑게시판 API")
             .requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰").optional())
             .pathParameters(parameterWithName("id").description("자랑게시판 id"));
     }
