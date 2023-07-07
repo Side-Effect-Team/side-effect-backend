@@ -25,9 +25,7 @@ import sideeffect.project.domain.token.RefreshToken;
 import sideeffect.project.domain.user.ProviderType;
 import sideeffect.project.domain.user.User;
 import sideeffect.project.domain.user.UserRoleType;
-import sideeffect.project.dto.user.UserEditResponse;
-import sideeffect.project.dto.user.UserRequest;
-import sideeffect.project.dto.user.UserResponse;
+import sideeffect.project.dto.user.*;
 import sideeffect.project.security.RefreshTokenProvider;
 import sideeffect.project.service.UserService;
 
@@ -103,6 +101,7 @@ class UserControllerTest {
                 .career("junior")
                 .tags(List.of("JAVA", "SPRING"))
                 .providerType(ProviderType.GOOGLE)
+                .imgUrl("img.jpg")
                 .blogUrl("tistory/tlsrl6427")
                 .githubUrl("github/tlsrl6427")
                 .portfolioUrl("naver.com/tlsrl6427")
@@ -117,9 +116,13 @@ class UserControllerTest {
                 .position(PositionType.BACKEND)
                 .career("junior")
                 .tags(List.of("JAVA", "SPRING"))
+                .imgUrl("img.jpg")
                 .blogUrl("tistory/tlsrl6427")
                 .githubUrl("github/tlsrl6427")
                 .portfolioUrl("naver.com/tlsrl6427")
+                .likeBoards(LikeBoardResponse.listOf(user))
+                .uploadBoards(UploadBoardResponse.listOf(user))
+                .applyBoards(ApplyBoardResponse.listOf(user))
                 .isOwner(true)
                 .build();
     }
@@ -142,38 +145,34 @@ class UserControllerTest {
                         //.with(anonymous())
                         .content(objectMapper.writeValueAsBytes(userRequest)))
                 .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("userId").value(refreshToken.getUserId()))
                 .andDo(document("user/join",
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("User")
                                         .summary("회원가입")
                                         .description("신규 유저를 회원가입한다")
-                                        .requestHeaders(
-                                                headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
-                                        )
                                         .requestFields(
                                                 fieldWithPath("email").type(JsonFieldType.STRING).description("이메일"),
                                                 fieldWithPath("password").type(JsonFieldType.STRING).description("비밀번호"),
                                                 fieldWithPath("nickname").type(JsonFieldType.STRING).description("닉네임"),
                                                 fieldWithPath("introduction").type(JsonFieldType.STRING).description("자기소개"),
-                                                fieldWithPath("boards").type(JsonFieldType.STRING).description("보유 게시글 수"),
                                                 fieldWithPath("position").type(JsonFieldType.STRING).description("포지션"),
                                                 fieldWithPath("career").type(JsonFieldType.STRING).description("경력"),
                                                 fieldWithPath("tags").type(JsonFieldType.ARRAY).description("기술 태그"),
                                                 fieldWithPath("providerType").type(JsonFieldType.STRING).description("소셜 유형"),
+                                                fieldWithPath("imgUrl").type(JsonFieldType.STRING).description("이미지 URL"),
                                                 fieldWithPath("blogUrl").type(JsonFieldType.STRING).description("블로그 URL"),
                                                 fieldWithPath("githubUrl").type(JsonFieldType.STRING).description("깃허브 URL"),
-                                                fieldWithPath("portfolioUrl").type(JsonFieldType.STRING).description("포트폴리오 URL"),
-                                                fieldWithPath("isOwner").type(JsonFieldType.BOOLEAN).description("본인여부")
+                                                fieldWithPath("portfolioUrl").type(JsonFieldType.STRING).description("포트폴리오 URL")
                                         )
                                         .responseFields(
-                                                fieldWithPath("id").type(JsonFieldType.NUMBER).description("유저 아이디")
+                                                fieldWithPath("userId").type(JsonFieldType.NUMBER).description("유저 아이디")
                                         )
                                         .build()
                         )
-                ))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("userId").value(refreshToken.getUserId()));
+                ));
 
         assertAll(
                 () -> verify(userService).join(any()),
@@ -187,9 +186,9 @@ class UserControllerTest {
     @WithCustomUser
     void view() throws Exception {
         when(userService.findOne(any(), any())).thenReturn(userResponse);
-        mockMvc.perform(get("/api/user/mypage")
-                        .param("id", "1")
+        mockMvc.perform(get("/api/user/mypage/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer token")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("email").value(userResponse.getEmail()))
@@ -213,13 +212,18 @@ class UserControllerTest {
                                                 fieldWithPath("email").type(JsonFieldType.STRING).description("이메일"),
                                                 fieldWithPath("nickname").type(JsonFieldType.STRING).description("닉네임"),
                                                 fieldWithPath("introduction").type(JsonFieldType.STRING).description("자기소개"),
+                                                fieldWithPath("boards").type(JsonFieldType.NUMBER).description("게시글 수"),
                                                 fieldWithPath("position").type(JsonFieldType.STRING).description("포지션"),
                                                 fieldWithPath("career").type(JsonFieldType.STRING).description("경력"),
                                                 fieldWithPath("tags").type(JsonFieldType.ARRAY).description("기술 태그"),
-                                                fieldWithPath("providerType").type(JsonFieldType.STRING).description("소셜 유형"),
+                                                fieldWithPath("imgUrl").type(JsonFieldType.STRING).description("이미지 URL"),
                                                 fieldWithPath("blogUrl").type(JsonFieldType.STRING).description("블로그 URL"),
                                                 fieldWithPath("githubUrl").type(JsonFieldType.STRING).description("깃허브 URL"),
-                                                fieldWithPath("portfolioUrl").type(JsonFieldType.STRING).description("포트폴리오 URL")
+                                                fieldWithPath("portfolioUrl").type(JsonFieldType.STRING).description("포트폴리오 URL"),
+                                                fieldWithPath("likeBoards").type(JsonFieldType.ARRAY).description("좋아요한 게시글"),
+                                                fieldWithPath("uploadBoards").type(JsonFieldType.ARRAY).description("등록한 게시글"),
+                                                fieldWithPath("applyBoards").type(JsonFieldType.ARRAY).description("지원한 게시글"),
+                                                fieldWithPath("isOwner").type(JsonFieldType.BOOLEAN).description("Owner 여부")
                                         )
                                         .build()
                         )
@@ -235,19 +239,31 @@ class UserControllerTest {
         UserEditResponse userEditResponse = UserEditResponse.builder()
                 .nickname("ABC")
                 .introduction("안녕하세요")
+                .career("junior")
+                .position(PositionType.BACKEND)
+                .tags(List.of("JAVA", "SPRING"))
                 .blogUrl("tistory/tlsrl6427")
                 .githubUrl("github/tlsrl6427")
+                .portfolioUrl("naver.com/tlsrl6427")
+                .imgUrl("img.jpg")
                 .build();
+
         doReturn(userEditResponse).when(userService).findEditInfo(any());
 
         mockMvc.perform(get("/api/user/editpage")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer token")
                 .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("introduction").value(userEditResponse.getIntroduction()))
                 .andExpect(jsonPath("nickname").value(userEditResponse.getNickname()))
+                .andExpect(jsonPath("introduction").value(userEditResponse.getIntroduction()))
+                .andExpect(jsonPath("position").value(userEditResponse.getPosition().getValue().toUpperCase()))
+                .andExpect(jsonPath("career").value(userEditResponse.getCareer()))
+                .andExpect(jsonPath("tags.length()").value(userEditResponse.getTags().size()))
+                .andExpect(jsonPath("imgUrl").value(userEditResponse.getImgUrl()))
                 .andExpect(jsonPath("blogUrl").value(userEditResponse.getBlogUrl()))
                 .andExpect(jsonPath("githubUrl").value(userEditResponse.getGithubUrl()))
+                .andExpect(jsonPath("portfolioUrl").value(userEditResponse.getPortfolioUrl()))
                 .andDo(print())
                 .andDo(document("user/editpage",
                         resource(
@@ -280,8 +296,9 @@ class UserControllerTest {
     @Test
     @WithCustomUser
     void update() throws Exception {
-        mockMvc.perform(patch("/api/user/1")
+        mockMvc.perform(patch("/api/user/{id}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer token")
                 .with(csrf())
                 .content(objectMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isOk())
@@ -306,7 +323,8 @@ class UserControllerTest {
     @Test
     @WithCustomUser
     void deleteUser() throws Exception {
-        mockMvc.perform(delete("/api/user/1")
+        mockMvc.perform(delete("/api/user/{id}", 1L)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer token")
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andDo(document("user",
@@ -330,7 +348,7 @@ class UserControllerTest {
     @WithCustomUser
     void duplicate() throws Exception {
         doReturn(true).when(userService).duplicateNickname(any());
-        mockMvc.perform(get("/api/user/duple/zz")
+        mockMvc.perform(get("/api/user/duple/{nickname}", "zz")
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(content().string("true"))
@@ -356,6 +374,7 @@ class UserControllerTest {
                 new MockMultipartFile("file", "test.png", "image/png", "이미지".getBytes());
         mockMvc.perform(multipart("/api/user/image")
                         .file(multipartFile)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer token")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andDo(document("user/image",
@@ -367,17 +386,14 @@ class UserControllerTest {
                                         .requestHeaders(
                                                 headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰")
                                         )
-                                        .requestFields(
-                                                fieldWithPath("file").type(JsonFieldType.OBJECT).description("이미지")
-                                        )
                                         .build()
                         )));
     }
 
-    @DisplayName("이미지 다운로드")
+    /*@DisplayName("이미지 다운로드")
     @Test
     @WithCustomUser
     void downloadImage() throws Exception {
 
-    }
+    }*/
 }
