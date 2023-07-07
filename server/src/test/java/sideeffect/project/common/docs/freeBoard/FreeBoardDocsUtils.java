@@ -12,7 +12,7 @@ import com.epages.restdocs.apispec.SimpleType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.restdocs.payload.JsonFieldType;
 
-public class FreeBoardDocsUtils {
+public final class FreeBoardDocsUtils {
 
     public static ResourceSnippet getFreeBoardFindDocs() {
         return resource(
@@ -53,7 +53,9 @@ public class FreeBoardDocsUtils {
                     parameterWithName("lastId").type(SimpleType.NUMBER).description("이전스크롤 마미작 게시판 Id").optional(),
                     parameterWithName("size").type(SimpleType.INTEGER).description("스크롤 게시판 개수").optional(),
                     parameterWithName("keyword").type(SimpleType.STRING).description("검색 키워드").optional(),
-                    parameterWithName("filter").type(SimpleType.STRING).description("기준 정렬").optional())
+                    parameterWithName("filter").type(SimpleType.STRING)
+                        .description("기준 정렬 (comment : 댓글순, latest : 최신순, like : 좋아요 순, views : 조회순,"
+                            + " 입력이 없으면 최신순)").optional())
                 .responseFields(
                     fieldWithPath("projects[].id").type(JsonFieldType.NUMBER).description("아이디"),
                     fieldWithPath("projects[].imgUrl").type(JsonFieldType.STRING).description("게시판 이미지"),
