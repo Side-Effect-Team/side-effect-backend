@@ -84,8 +84,11 @@ test─|
 - 키워드에 따른 검색 조회 기능 구현
 - 댓글수, 조회수, 최신순, 좋아요수에 따른 무한 스크롤 기능 구현
 - 이미지 업로드 기능 구현
-### 로그인
-- 작성중
+### 유저
+- JWT(Access Token, Refresh Token) 구현
+- Spring Security를 통한 보안 설정
+- SNS 로그인 구현
+- 알림 기능 구현
 
 ## 📃 ERD
 ![사이드 이펙트 ERD](server/docs/images/erd.png)
