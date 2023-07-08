@@ -15,7 +15,7 @@ public final class FreeBoardLikeDocsUtils {
     public static ResourceSnippet getFreeBoardLikeToggleDocs() {
         return resource(
             ResourceSnippetParameters.builder()
-                .tag("자랑게시판 좋아요 API")
+                .tag("자랑게시판 API")
                 .description("자랑 게시판 좋아요를 토글한다.")
                 .requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰").optional())
                 .pathParameters(parameterWithName("id").description("자랑게시판 id"))
