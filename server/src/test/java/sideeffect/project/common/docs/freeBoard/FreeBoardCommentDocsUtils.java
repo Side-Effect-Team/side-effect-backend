@@ -15,7 +15,7 @@ public final class FreeBoardCommentDocsUtils {
     public static ResourceSnippet getFreeBoardRegisterCommentDocs() {
         return resource(
             ResourceSnippetParameters.builder()
-                .tag("자랑게시판 댓글 API")
+                .tag("자랑게시판 API")
                .description("자랑 게시판 댓글을 등록한다.")
                 .requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰").optional())
                 .requestFields(
@@ -27,7 +27,7 @@ public final class FreeBoardCommentDocsUtils {
     public static ResourceSnippet getFreeBoardUpdateCommentDocs() {
         return resource(
             ResourceSnippetParameters.builder()
-                .tag("자랑게시판 댓글 API")
+                .tag("자랑게시판 API")
                 .description("자랑 게시판 댓글을 수정한다.")
                 .requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰").optional())
                 .pathParameters(parameterWithName("id").description("자랑게시판 id"))
@@ -39,7 +39,7 @@ public final class FreeBoardCommentDocsUtils {
     public static ResourceSnippet getFreeBoardDeleteCommentDocs() {
         return resource(
             ResourceSnippetParameters.builder()
-                .tag("자랑게시판 댓글 API")
+                .tag("자랑게시판 API")
                 .description("자랑 게시판 댓글을 삭제한다.")
                 .requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer + 토큰").optional())
                 .pathParameters(parameterWithName("id").description("자랑게시판 id"))
